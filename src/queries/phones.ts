@@ -1,0 +1,202 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createClient } from '@/lib/supabase/server';
+import type { PhoneCardData, PhoneWithDetails } from '@/types/database';
+import type { FeatureCategory } from '@/lib/constants';
+
+const PHONE_CARD_SELECT = `
+  *,
+  brand:brands(id, name, slug),
+  specs:phone_specs(ram_gb, storage_gb, display_size, main_camera_mp, battery_mah, os, network_type),
+  images:phone_images(id, cloudinary_public_id, is_primary, sort_order)
+`;
+
+// phone_specs is a 1:1 relation but Supabase returns joined 1:1 tables as
+// an array when selected this way unless we tell it otherwise; this helper
+// normalizes the shape and picks the primary image.
+function normalizeCard(row: any): PhoneCardData {
+  const specsRaw = Array.isArray(row.specs) ? row.specs[0] : row.specs;
+  const images = row.images ?? [];
+  const primary = images.find((i: any) => i.is_primary) ?? images[0] ?? null;
+  return {
+    ...row,
+    specs: specsRaw ?? null,
+    primary_image: primary,
+  };
+}
+
+function normalizeDetails(row: any): PhoneWithDetails {
+  const specsRaw = Array.isArray(row.specs) ? row.specs[0] : row.specs;
+  return {
+    ...row,
+    specs: specsRaw ?? null,
+    images: (row.images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order),
+  };
+}
+
+export async function getPhoneBySlug(slug: string): Promise<PhoneWithDetails | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(`*, brand:brands(*), specs:phone_specs(*), images:phone_images(*)`)
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (error) throw new Error(`getPhoneBySlug: ${error.message}`);
+  return data ? normalizeDetails(data) : null;
+}
+
+export async function getAllPhoneSlugs(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('phones').select('slug');
+  if (error) throw new Error(`getAllPhoneSlugs: ${error.message}`);
+  return (data ?? []).map((p) => p.slug);
+}
+
+export async function getFeaturedPhones(limit = 8): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .eq('is_featured', true)
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getFeaturedPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function getLatestPhones(limit = 12): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .eq('status', 'available')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(`getLatestPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function getComingSoonPhones(limit = 12): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .eq('status', 'coming_soon')
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getComingSoonPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function getPhonesByBrandSlug(
+  brandSlug: string,
+  { limit = 60 }: { limit?: number } = {}
+): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .eq('brand.slug', brandSlug)
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getPhonesByBrandSlug: ${error.message}`);
+  // Supabase doesn't support filtering on a joined column directly in all
+  // versions, so we filter defensively in JS too.
+  return (data ?? [])
+    .filter((row: any) => row.brand?.slug === brandSlug)
+    .map(normalizeCard);
+}
+
+// Generic filter used by every /price /ram /screen /camera /os /mobiles page.
+export interface PhoneFilter {
+  priceMin?: number | null;
+  priceMax?: number | null;
+  ramMin?: number | null;
+  ramMax?: number | null;
+  displayMin?: number | null;
+  displayMax?: number | null;
+  cameraMin?: number | null;
+  cameraMax?: number | null;
+  cameraNone?: boolean; // "without-camera"
+  networkType?: string;
+  os?: string;
+  excludeOs?: string; // used by "all-smartphones" to exclude feature phones
+  feature?: FeatureCategory['column'];
+  limit?: number;
+  page?: number;
+}
+
+export async function filterPhones(
+  filter: PhoneFilter
+): Promise<{ phones: PhoneCardData[]; total: number }> {
+  const supabase = await createClient();
+  const limit = filter.limit ?? 24;
+  const page = filter.page ?? 1;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
+    .from('phones')
+    .select(
+      `*, brand:brands!inner(id, name, slug), specs:phone_specs!inner(ram_gb, storage_gb, display_size, main_camera_mp, battery_mah, os, network_type, bluetooth, wifi, dual_sim, fm_radio, memory_card, mp3, video_recording, has_camera), images:phone_images(id, cloudinary_public_id, is_primary, sort_order)`,
+      { count: 'exact' }
+    )
+    .eq('status', 'available');
+
+  if (filter.priceMin != null) query = query.gte('price_pkr', filter.priceMin);
+  if (filter.priceMax != null) query = query.lte('price_pkr', filter.priceMax);
+  if (filter.ramMin != null) query = query.gte('specs.ram_gb', filter.ramMin);
+  if (filter.ramMax != null) query = query.lte('specs.ram_gb', filter.ramMax);
+  if (filter.displayMin != null) query = query.gte('specs.display_size', filter.displayMin);
+  if (filter.displayMax != null) query = query.lte('specs.display_size', filter.displayMax);
+  if (filter.cameraMin != null) query = query.gte('specs.main_camera_mp', filter.cameraMin);
+  if (filter.cameraMax != null) query = query.lte('specs.main_camera_mp', filter.cameraMax);
+  if (filter.cameraNone) query = query.eq('specs.has_camera', false);
+  if (filter.networkType) query = query.eq('specs.network_type', filter.networkType);
+  if (filter.os) query = query.eq('specs.os', filter.os);
+  if (filter.excludeOs) query = query.neq('specs.os', filter.excludeOs);
+  if (filter.feature) query = query.eq(`specs.${filter.feature}`, true);
+
+  query = query.order('sort_order').range(from, to);
+
+  const { data, error, count } = await query;
+  if (error) throw new Error(`filterPhones: ${error.message}`);
+
+  return { phones: (data ?? []).map(normalizeCard), total: count ?? 0 };
+}
+
+export async function getRelatedPhones(
+  phoneId: string,
+  brandId: string,
+  limit = 6
+): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .eq('brand_id', brandId)
+    .neq('id', phoneId)
+    .eq('status', 'available')
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getRelatedPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function searchPhones(q: string, limit = 20): Promise<PhoneCardData[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .ilike('name', `%${q}%`)
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`searchPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
