@@ -80,3 +80,10 @@ export const NETWORK_TYPES = [
   { slug: '4g-phones', label: '4G Phones', value: '4G' },
   { slug: '5g-phones', label: '5G Phones', value: '5G' },
 ] as const;
+
+export function findPriceRangeForPrice(price: number | null): RangeCategory | undefined {
+  if (price == null) return undefined;
+  return PRICE_RANGES.find(
+    (r) => r.slug !== 'all-mobiles' && (r.min == null || price >= r.min) && (r.max == null || price <= r.max)
+  );
+}

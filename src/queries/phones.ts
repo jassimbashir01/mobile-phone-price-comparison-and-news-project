@@ -200,3 +200,27 @@ export async function searchPhones(q: string, limit = 20): Promise<PhoneCardData
   if (error) throw new Error(`searchPhones: ${error.message}`);
   return (data ?? []).map(normalizeCard);
 }
+
+export async function getSimilarPricedPhones(
+  phoneId: string,
+  price: number | null,
+  limit = 6
+): Promise<PhoneCardData[]> {
+  if (price == null) return [];
+  const supabase = await createClient();
+  const lower = Math.round(price * 0.7);
+  const upper = Math.round(price * 1.3);
+
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .neq('id', phoneId)
+    .eq('status', 'available')
+    .gte('price_pkr', lower)
+    .lte('price_pkr', upper)
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getSimilarPricedPhones: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
