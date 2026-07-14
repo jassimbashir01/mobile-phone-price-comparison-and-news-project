@@ -38,7 +38,6 @@ export async function Navbar() {
           <Link href="/compare" className="hover:text-primary">Compare Phone</Link>
           <Link href="/contact" className="hover:text-primary">Contact</Link>
         </nav>
-
         <MobileMenu />
       </div>
 

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { PhoneCard } from './PhoneCard';
-import type { PhoneCardData } from '@/types/database';
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PhoneCard } from "./PhoneCard";
+import type { PhoneCardData } from "@/types/database";
 
 export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
   const [index, setIndex] = useState(0);
@@ -13,7 +13,7 @@ export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
   if (phones.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-ink/50">
-        No featured phones yet — add some from /admin/featured.
+        No featured phones yet.
       </p>
     );
   }

@@ -42,7 +42,7 @@ export async function Sidebar() {
         📱 Stolen Phone Guide
       </Link>
 
-      <CategoryBlock title="Network" defaultOpen>
+      <CategoryBlock title="Network">
         {NETWORK_TYPES.map((n) => (
           <li key={n.slug}>
             <Link href={`/mobiles/${n.slug}`} className="hover:text-primary">{n.label}</Link>
@@ -50,7 +50,7 @@ export async function Sidebar() {
         ))}
       </CategoryBlock>
 
-      <CategoryBlock title="Brands">
+      <CategoryBlock title="Brands defaultOpen">
         {brands.map((b) => (
           <li key={b.id}>
             <Link href={`/brand/${b.slug}`} className="hover:text-primary">{b.name}</Link>
