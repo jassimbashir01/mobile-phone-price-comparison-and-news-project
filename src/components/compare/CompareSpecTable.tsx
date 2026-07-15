@@ -31,7 +31,7 @@ export function CompareSpecTable({
 
   return (
     <div className="mt-6 overflow-x-auto rounded-lg border border-border">
-      <table className="w-full min-w-[600px] border-collapse">
+      <table className="w-full min-w-150 border-collapse">
         <thead>
           <tr className="border-b border-border bg-primary-light">
             <th className="px-3 py-2 text-left text-xs font-semibold text-primary-dark">Spec</th>

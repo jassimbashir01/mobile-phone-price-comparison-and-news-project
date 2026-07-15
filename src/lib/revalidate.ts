@@ -1,11 +1,12 @@
+import { siteUrl } from '@/lib/site';
+
 export async function triggerRevalidate(paths: string[]) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   try {
     await fetch(`${siteUrl}/api/revalidate`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-revalidate-secret': process.env.REVALIDATE_SECRET!,
+        "Content-Type": "application/json",
+        "x-revalidate-secret": process.env.REVALIDATE_SECRET!,
       },
       body: JSON.stringify({ paths }),
     });
@@ -17,14 +18,13 @@ export async function triggerRevalidate(paths: string[]) {
 }
 
 export async function pingIndexNow(urls: string[]) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const key = process.env.INDEXNOW_KEY;
   if (!key) return;
 
   try {
-    await fetch('https://api.indexnow.org/indexnow', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         host: new URL(siteUrl).hostname,
         key,

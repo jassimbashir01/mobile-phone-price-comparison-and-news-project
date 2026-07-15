@@ -15,7 +15,7 @@ export function CompareSlot({
     return (
       <button
         onClick={onPick}
-        className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-white text-sm text-ink/50 hover:border-primary hover:text-primary"
+        className="flex aspect-4/3 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-white text-sm text-ink/50 hover:border-primary hover:text-primary"
       >
         <span className="text-2xl">+</span>
         Add a phone to compare

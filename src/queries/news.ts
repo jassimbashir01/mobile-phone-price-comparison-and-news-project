@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase/public';
 import type { News } from '@/types/database';
 
 const NEWS_LIST_SELECT = `id, title, slug, excerpt, cover_image_public_id, published_at, brand:brands(id, name, slug)`;
@@ -12,7 +12,6 @@ export async function getPublishedNews({
   news: any[];
   total: number;
 }> {
-  const supabase = await createClient();
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -36,7 +35,6 @@ export async function getPublishedNews({
 }
 
 export async function getNewsBySlug(slug: string): Promise<News | null> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('news')
     .select('*, brand:brands(id, name, slug)')
@@ -49,14 +47,12 @@ export async function getNewsBySlug(slug: string): Promise<News | null> {
 }
 
 export async function getAllNewsSlugs(): Promise<string[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase.from('news').select('slug').eq('is_published', true);
   if (error) throw new Error(`getAllNewsSlugs: ${error.message}`);
   return (data ?? []).map((n) => n.slug);
 }
 
 export async function getRelatedNews(newsId: string, brandId: string | null, limit = 4) {
-  const supabase = await createClient();
   let query = supabase
     .from('news')
     .select(NEWS_LIST_SELECT)

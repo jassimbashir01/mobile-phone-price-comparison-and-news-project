@@ -7,10 +7,11 @@ import { AdSlot } from '@/components/ads/AdSlot';
 import { AnchorAd } from '@/components/ads/AnchorAd';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildOrganizationJsonLd } from '@/lib/seo';
+import { siteUrl } from '@/lib/site';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'PKPhones — Mobile Prices & News in Pakistan',
     template: '%s | PKPhones',
@@ -33,7 +34,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pubId = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
   const adsenseReady = pubId && !pubId.includes('0000000000000000');
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase/public';
 import type { PhoneCardData, PhoneWithDetails } from '@/types/database';
 import type { FeatureCategory } from '@/lib/constants';
 
@@ -34,7 +34,6 @@ function normalizeDetails(row: any): PhoneWithDetails {
 }
 
 export async function getPhoneBySlug(slug: string): Promise<PhoneWithDetails | null> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(`*, brand:brands(*), specs:phone_specs(*), images:phone_images(*)`)
@@ -46,14 +45,12 @@ export async function getPhoneBySlug(slug: string): Promise<PhoneWithDetails | n
 }
 
 export async function getAllPhoneSlugs(): Promise<string[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase.from('phones').select('slug');
   if (error) throw new Error(`getAllPhoneSlugs: ${error.message}`);
   return (data ?? []).map((p) => p.slug);
 }
 
 export async function getFeaturedPhones(limit = 8): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -66,7 +63,6 @@ export async function getFeaturedPhones(limit = 8): Promise<PhoneCardData[]> {
 }
 
 export async function getLatestPhones(limit = 12): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -79,7 +75,6 @@ export async function getLatestPhones(limit = 12): Promise<PhoneCardData[]> {
 }
 
 export async function getComingSoonPhones(limit = 12): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -95,7 +90,6 @@ export async function getPhonesByBrandSlug(
   brandSlug: string,
   { limit = 60 }: { limit?: number } = {}
 ): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -133,7 +127,6 @@ export interface PhoneFilter {
 export async function filterPhones(
   filter: PhoneFilter
 ): Promise<{ phones: PhoneCardData[]; total: number }> {
-  const supabase = await createClient();
   const limit = filter.limit ?? 24;
   const page = filter.page ?? 1;
   const from = (page - 1) * limit;
@@ -174,7 +167,6 @@ export async function getRelatedPhones(
   brandId: string,
   limit = 6
 ): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -189,7 +181,6 @@ export async function getRelatedPhones(
 }
 
 export async function searchPhones(q: string, limit = 20): Promise<PhoneCardData[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
@@ -207,7 +198,6 @@ export async function getSimilarPricedPhones(
   limit = 6
 ): Promise<PhoneCardData[]> {
   if (price == null) return [];
-  const supabase = await createClient();
   const lower = Math.round(price * 0.7);
   const upper = Math.round(price * 1.3);
 

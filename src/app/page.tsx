@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { buildWebsiteJsonLd } from '@/lib/seo';
 import { getHomepageSectionPhones } from '@/queries/homepage';
 import { getPublishedNews } from '@/queries/news';
+import { siteUrl } from '@/lib/site';
 
 export const revalidate = 3600;
 
@@ -29,8 +30,6 @@ export default async function HomePage() {
     getHomepageSectionPhones('coming_soon'),
     getPublishedNews({ limit: 6 }),
   ]);
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return (
     <PageShell>

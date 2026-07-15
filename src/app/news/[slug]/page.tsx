@@ -12,6 +12,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd } from '@/lib/seo';
 import { getNewsBySlug, getAllNewsSlugs, getRelatedNews } from '@/queries/news';
 import { getPhonesByBrandSlug } from '@/queries/phones';
+import { siteUrl } from '@/lib/site';
 
 export const revalidate = 3600;
 
@@ -79,7 +80,6 @@ export default async function NewsArticlePage({
     brand ? getPhonesByBrandSlug(brand.slug, { limit: 6 }) : Promise.resolve([]),
   ]);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
     { label: 'News', href: '/news' },

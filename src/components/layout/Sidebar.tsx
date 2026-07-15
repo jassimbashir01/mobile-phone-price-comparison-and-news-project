@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { getActiveBrands } from '@/queries/brands';
+import Link from "next/link";
+import { getActiveBrands } from "@/queries/brands";
 import {
   PRICE_RANGES,
   RAM_OPTIONS,
@@ -8,7 +8,7 @@ import {
   FEATURE_TYPES,
   OS_TYPES,
   NETWORK_TYPES,
-} from '@/lib/constants';
+} from "@/lib/constants";
 
 function CategoryBlock({
   title,
@@ -45,15 +45,19 @@ export async function Sidebar() {
       <CategoryBlock title="Network">
         {NETWORK_TYPES.map((n) => (
           <li key={n.slug}>
-            <Link href={`/mobiles/${n.slug}`} className="hover:text-primary">{n.label}</Link>
+            <Link href={`/mobiles/${n.slug}`} className="hover:text-primary">
+              {n.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
 
-      <CategoryBlock title="Brands defaultOpen">
+      <CategoryBlock title="Brands" defaultOpen>
         {brands.map((b) => (
           <li key={b.id}>
-            <Link href={`/brand/${b.slug}`} className="hover:text-primary">{b.name}</Link>
+            <Link href={`/brand/${b.slug}`} className="hover:text-primary">
+              {b.name}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -61,7 +65,9 @@ export async function Sidebar() {
       <CategoryBlock title="Price">
         {PRICE_RANGES.map((p) => (
           <li key={p.slug}>
-            <Link href={`/price/${p.slug}`} className="hover:text-primary">{p.label}</Link>
+            <Link href={`/price/${p.slug}`} className="hover:text-primary">
+              {p.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -69,7 +75,9 @@ export async function Sidebar() {
       <CategoryBlock title="RAM">
         {RAM_OPTIONS.map((r) => (
           <li key={r.slug}>
-            <Link href={`/ram/${r.slug}`} className="hover:text-primary">{r.label}</Link>
+            <Link href={`/ram/${r.slug}`} className="hover:text-primary">
+              {r.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -77,7 +85,9 @@ export async function Sidebar() {
       <CategoryBlock title="Screen Size">
         {SCREEN_SIZES.map((s) => (
           <li key={s.slug}>
-            <Link href={`/screen/${s.slug}`} className="hover:text-primary">{s.label}</Link>
+            <Link href={`/screen/${s.slug}`} className="hover:text-primary">
+              {s.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -85,7 +95,9 @@ export async function Sidebar() {
       <CategoryBlock title="Camera">
         {CAMERA_OPTIONS.map((c) => (
           <li key={c.slug}>
-            <Link href={`/camera/${c.slug}`} className="hover:text-primary">{c.label}</Link>
+            <Link href={`/camera/${c.slug}`} className="hover:text-primary">
+              {c.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -93,7 +105,9 @@ export async function Sidebar() {
       <CategoryBlock title="Type">
         {FEATURE_TYPES.map((f) => (
           <li key={f.slug}>
-            <Link href={`/type/${f.slug}`} className="hover:text-primary">{f.label}</Link>
+            <Link href={`/type/${f.slug}`} className="hover:text-primary">
+              {f.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>
@@ -101,7 +115,9 @@ export async function Sidebar() {
       <CategoryBlock title="Operating System">
         {OS_TYPES.map((o) => (
           <li key={o.slug}>
-            <Link href={`/os/${o.slug}`} className="hover:text-primary">{o.label}</Link>
+            <Link href={`/os/${o.slug}`} className="hover:text-primary">
+              {o.label}
+            </Link>
           </li>
         ))}
       </CategoryBlock>

@@ -23,9 +23,16 @@ export async function generateMetadata({
   const { range: slug } = await params;
   const range = getRange(slug);
   if (!range) return {};
+
+  const isAll = range.slug === 'all-mobiles';
+
   return {
-    title: `Mobile Phones ${range.label} in Pakistan`,
-    description: `Browse mobile phones priced ${range.label} in Pakistan with full specifications and prices.`,
+    title: isAll
+      ? 'All Mobile Phones in Pakistan'
+      : `Mobile Phones ${range.label} in Pakistan`,
+    description: isAll
+      ? 'Browse all available mobile phones in Pakistan with prices and full specifications.'
+      : `Browse mobile phones priced ${range.label} in Pakistan with full specifications and prices.`,
     alternates: { canonical: `/price/${range.slug}` },
   };
 }
@@ -51,16 +58,28 @@ export default async function PricePage({
     limit,
   });
 
+  const isAll = range.slug === 'all-mobiles';
+
+  const breadcrumbItems = isAll
+    ? [{ label: 'Home', href: '/' }, { label: 'All Mobiles' }]
+    : [
+        { label: 'Home', href: '/' },
+        { label: 'Price', href: '/price/all-mobiles' },
+        { label: range.label },
+      ];
+
+  const title = isAll ? 'All Mobile Phones in Pakistan' : `Mobile Phones ${range.label} in Pakistan`;
+
+  const description = isAll
+    ? 'Browse every mobile phone available in Pakistan, with prices and full specifications.'
+    : `Compare mobile phones priced ${range.label.toLowerCase()} in Pakistan.`;
+
   return (
     <PageShell>
       <CategoryPageContent
-        breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Price', href: '/price/all-mobiles' },
-          { label: range.label },
-        ]}
-        title={`Mobile Phones ${range.label} in Pakistan`}
-        description={`Compare mobile phones priced ${range.label.toLowerCase()} in Pakistan.`}
+        breadcrumbItems={breadcrumbItems}
+        title={title}
+        description={description}
         phones={phones}
         total={total}
         page={page}

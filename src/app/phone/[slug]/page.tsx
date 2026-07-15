@@ -12,6 +12,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo';
 import { formatPKR, formatUSD } from '@/lib/utils';
 import { findPriceRangeForPrice } from '@/lib/constants';
+import { siteUrl } from '@/lib/site';
 import {
   getPhoneBySlug,
   getAllPhoneSlugs,
@@ -65,7 +66,6 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
     getPublishedNews({ brandSlug: phone.brand.slug, limit: 3 }),
   ]);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
   const priceRange = findPriceRangeForPrice(phone.price_pkr);
 

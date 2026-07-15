@@ -1,9 +1,8 @@
 import { cache } from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase/public';
 import type { Brand } from '@/types/database';
 
 export const getActiveBrands = cache(async (): Promise<Brand[]> => {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('brands')
     .select('*')
@@ -15,7 +14,6 @@ export const getActiveBrands = cache(async (): Promise<Brand[]> => {
 });
 
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from('brands')
     .select('*')
@@ -28,7 +26,6 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
 }
 
 export async function getAllBrandSlugs(): Promise<string[]> {
-  const supabase = await createClient();
   const { data, error } = await supabase.from('brands').select('slug').eq('is_active', true);
   if (error) throw new Error(`getAllBrandSlugs: ${error.message}`);
   return (data ?? []).map((b) => b.slug);

@@ -9,7 +9,7 @@ export function AnchorAd() {
   if (dismissed) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white p-1 shadow-lg md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white p-1 shadow-lg lg:hidden">
       <button
         onClick={() => setDismissed(true)}
         aria-label="Close ad"

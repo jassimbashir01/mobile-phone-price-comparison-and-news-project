@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase/public';
 import type { PhoneCardData } from '@/types/database';
 
 const PHONE_CARD_SELECT = `
@@ -20,7 +20,6 @@ export async function getHomepageSectionPhones(sectionKey: string): Promise<{
   title: string;
   phones: PhoneCardData[];
 } | null> {
-  const supabase = await createClient();
 
   const { data: section, error: sectionError } = await supabase
     .from('homepage_sections')

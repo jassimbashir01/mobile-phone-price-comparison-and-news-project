@@ -8,6 +8,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd } from '@/lib/seo';
 import { getBrandBySlug, getAllBrandSlugs } from '@/queries/brands';
 import { getPhonesByBrandSlug } from '@/queries/phones';
+import { siteUrl } from '@/lib/site';
 
 export const revalidate = 21600;
 
@@ -40,7 +41,6 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
 
   const phones = await getPhonesByBrandSlug(slug);
   const breadcrumbItems = [{ label: 'Home', href: '/' }, { label: brand.name }];
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return (
     <PageShell>

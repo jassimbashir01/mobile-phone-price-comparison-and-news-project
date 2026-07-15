@@ -4,6 +4,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd, buildItemListJsonLd } from '@/lib/seo';
 import type { PhoneCardData } from '@/types/database';
+import { siteUrl } from '@/lib/site';
 
 export function CategoryPageContent({
   breadcrumbItems,
@@ -25,7 +26,6 @@ export function CategoryPageContent({
   basePath: string;
 }) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return (
     <div>
