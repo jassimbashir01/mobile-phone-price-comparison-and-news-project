@@ -2,7 +2,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { CldImage } from 'next-cloudinary';
+import CloudinaryImage from '@/components/cloudinary-image';
 import { PageShell } from '@/components/layout/PageShell';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { NewsCard } from '@/components/news/NewsCard';
@@ -133,7 +133,7 @@ export default async function NewsArticlePage({
 
         {article.cover_image_public_id && (
           <div className="relative mb-6 aspect-video overflow-hidden rounded-lg border border-border bg-surface">
-            <CldImage
+            <CloudinaryImage
               src={article.cover_image_public_id}
               alt={article.title}
               fill

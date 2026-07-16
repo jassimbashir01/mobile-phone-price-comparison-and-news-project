@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { CldImage } from 'next-cloudinary';
-import { formatPKR } from '@/lib/utils';
-import type { PhoneWithDetails } from '@/types/database';
+import CloudinaryImage from "@/components/cloudinary-image";
+import { formatPKR } from "@/lib/utils";
+import type { PhoneWithDetails } from "@/types/database";
 
 export function CompareSlot({
   phone,
@@ -29,20 +29,28 @@ export function CompareSlot({
     <div className="rounded-lg border border-border bg-white p-4 text-center">
       <div className="relative mx-auto mb-2 aspect-square w-32">
         {primary ? (
-          <CldImage
+          <CloudinaryImage
             src={primary.cloudinary_public_id}
             alt={phone.name}
-            fill
+            width={256}
+            height={256}
             sizes="128px"
-            className="object-contain"
+            className="h-full w-full object-contain"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-ink/30">No image</div>
+          <div className="flex h-full items-center justify-center text-xs text-ink/30">
+            No image
+          </div>
         )}
       </div>
       <h2 className="text-sm font-semibold">{phone.name}</h2>
-      <p className="price-tag mt-1 inline-flex text-sm">{formatPKR(phone.price_pkr)}</p>
-      <button onClick={onPick} className="mt-2 block w-full text-xs text-primary hover:underline">
+      <p className="price-tag mt-1 inline-flex text-sm">
+        {formatPKR(phone.price_pkr)}
+      </p>
+      <button
+        onClick={onPick}
+        className="mt-2 block w-full text-xs text-primary hover:underline"
+      >
         Change phone
       </button>
     </div>

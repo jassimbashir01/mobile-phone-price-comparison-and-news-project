@@ -1,11 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { CldImage } from 'next-cloudinary';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { PhoneImage } from '@/types/database';
+import { useState } from "react";
+import CloudinaryImage from "@/components/cloudinary-image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { PhoneImage } from "@/types/database";
 
-export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phoneName: string }) {
+export function ImageGallery({
+  images,
+  phoneName,
+}: {
+  images: PhoneImage[];
+  phoneName: string;
+}) {
   const [active, setActive] = useState(0);
 
   if (images.length === 0) {
@@ -28,12 +34,13 @@ export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phon
   return (
     <div>
       <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
-        <CldImage
+        <CloudinaryImage
           src={current.cloudinary_public_id}
           alt={`${phoneName} image ${active + 1}`}
-          fill
+          width={800}
+          height={800}
           sizes="(max-width: 768px) 100vw, 480px"
-          className="object-contain p-4"
+          className="h-full w-full object-contain p-4"
         />
         {images.length > 1 && (
           <>
@@ -62,15 +69,16 @@ export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phon
               key={img.id}
               onClick={() => setActive(i)}
               className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border ${
-                i === active ? 'border-primary' : 'border-border'
+                i === active ? "border-primary" : "border-border"
               }`}
             >
-              <CldImage
+              <CloudinaryImage
                 src={img.cloudinary_public_id}
                 alt={`${phoneName} thumbnail ${i + 1}`}
-                fill
+                width={128}
+                height={128}
                 sizes="64px"
-                className="object-contain p-1"
+                className="h-full w-full object-contain p-1"
               />
             </button>
           ))}

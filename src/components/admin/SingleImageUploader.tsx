@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { CldImage } from 'next-cloudinary';
+import { useState } from "react";
+import CloudinaryImage from "@/components/cloudinary-image";
 
 export function SingleImageUploader({
   value,
@@ -17,8 +17,8 @@ export function SingleImageUploader({
     if (!file) return;
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
     const data = await res.json();
     setUploading(false);
     if (data.publicId) onChange(data.publicId);
@@ -28,7 +28,14 @@ export function SingleImageUploader({
     <div>
       {value ? (
         <div className="relative mb-2 aspect-video w-full max-w-xs overflow-hidden rounded-md border border-border">
-          <CldImage src={value} alt="Cover" fill sizes="320px" className="object-cover" />
+          <CloudinaryImage
+            src={value}
+            alt="Cover"
+            width={640}
+            height={360}
+            sizes="320px"
+            className="h-full w-full object-cover"
+          />
           <button
             type="button"
             onClick={() => onChange(null)}
@@ -40,7 +47,14 @@ export function SingleImageUploader({
       ) : (
         <p className="mb-2 text-xs text-ink/40">No cover image uploaded yet.</p>
       )}
-      <input id="cover-image-upload" type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="text-sm" />
+      <input
+        id="cover-image-upload"
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        disabled={uploading}
+        className="text-sm"
+      />
       {uploading && <p className="mt-1 text-xs text-ink/40">Uploading…</p>}
     </div>
   );

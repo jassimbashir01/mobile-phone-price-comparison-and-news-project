@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { CldImage } from 'next-cloudinary';
-import { formatPKR } from '@/lib/utils';
-import type { PhoneCardData } from '@/types/database';
+import Link from "next/link";
+import CloudinaryImage from "@/components/cloudinary-image";
+import { formatPKR } from "@/lib/utils";
+import type { PhoneCardData } from "@/types/database";
 
 export function PhoneCard({ phone }: { phone: PhoneCardData }) {
   const specLine = phone.specs
@@ -11,7 +11,7 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
         phone.specs.main_camera_mp && `${phone.specs.main_camera_mp}MP`,
       ]
         .filter(Boolean)
-        .join(' • ')
+        .join(" • ")
     : null;
 
   return (
@@ -21,12 +21,13 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
     >
       <div className="relative aspect-square bg-surface">
         {phone.primary_image ? (
-          <CldImage
+          <CloudinaryImage
             src={phone.primary_image.cloudinary_public_id}
             alt={`${phone.name} price in Pakistan`}
-            fill
+            width={400}
+            height={400}
             sizes="(max-width: 768px) 50vw, 25vw"
-            className="object-contain p-3"
+            className="h-full w-full object-contain p-3"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-ink/30">
@@ -45,7 +46,9 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
           {phone.name}
         </h3>
         <div className="mt-auto pt-1">
-          <span className="price-tag text-sm">{formatPKR(phone.price_pkr)}</span>
+          <span className="price-tag text-sm">
+            {formatPKR(phone.price_pkr)}
+          </span>
         </div>
         {specLine && <p className="text-[11px] text-ink/50">{specLine}</p>}
       </div>
