@@ -1,5 +1,5 @@
-export type PhoneStatus = 'available' | 'coming_soon' | 'discontinued';
-export type UserRole = 'admin' | 'editor';
+export type PhoneStatus = "available" | "coming_soon" | "discontinued";
+export type UserRole = "admin" | "editor";
 
 export interface Brand {
   id: string;
@@ -18,10 +18,11 @@ export interface Phone {
   slug: string;
   status: PhoneStatus;
   price_pkr: number | null;
-  price_usd: number | null;
   is_featured: boolean;
   sort_order: number;
   seo_description: string | null;
+  overview: string | null;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -100,10 +101,28 @@ export interface PhoneWithDetails extends Phone {
 }
 
 export interface PhoneCardData extends Phone {
-  brand: Pick<Brand, 'id' | 'name' | 'slug'>;
+  brand: Pick<Brand, "id" | "name" | "slug">;
   specs: Pick<
     PhoneSpecs,
-    'ram_gb' | 'storage_gb' | 'display_size' | 'main_camera_mp' | 'battery_mah' | 'os' | 'network_type'
+    | "ram_gb"
+    | "storage_gb"
+    | "display_size"
+    | "main_camera_mp"
+    | "battery_mah"
+    | "os"
+    | "network_type"
   > | null;
   primary_image: PhoneImage | null;
+}
+
+export interface SocialLink {
+  platform:
+    | "facebook"
+    | "instagram"
+    | "twitter"
+    | "youtube"
+    | "tiktok"
+    | "whatsapp";
+  url: string;
+  enabled: boolean;
 }
