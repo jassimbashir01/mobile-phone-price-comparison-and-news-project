@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import CloudinaryImage from "@/components/cloudinary-image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PhoneImage } from "@/types/database";
+import CloudinaryImage from "../cloudinary-image";
 
 export function ImageGallery({
   images,
@@ -16,7 +16,7 @@ export function ImageGallery({
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square items-center justify-center rounded-lg border border-border bg-surface text-sm text-ink/30">
+      <div className="mx-auto flex aspect-160/335 w-full max-w-40 items-center justify-center rounded-lg border border-border bg-surface text-sm text-ink/30">
         No images yet
       </div>
     );
@@ -33,14 +33,14 @@ export function ImageGallery({
 
   return (
     <div>
-      <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="relative mx-auto aspect-160/335 w-full max-w-40 overflow-hidden rounded-lg border border-border bg-surface">
         <CloudinaryImage
           src={current.cloudinary_public_id}
           alt={`${phoneName} image ${active + 1}`}
-          width={800}
-          height={800}
-          sizes="(max-width: 768px) 100vw, 480px"
-          className="h-full w-full object-contain p-4"
+          width={320}
+          height={670}
+          sizes="160px"
+          className="h-full w-full object-contain p-2"
         />
         {images.length > 1 && (
           <>
@@ -63,22 +63,22 @@ export function ImageGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto">
+        <div className="mt-3 flex justify-center gap-2 overflow-x-auto">
           {images.map((img, i) => (
             <button
               key={img.id}
               onClick={() => setActive(i)}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-md border ${
+              className={`relative aspect-45/100 w-9 shrink-0 overflow-hidden rounded-md border ${
                 i === active ? "border-primary" : "border-border"
               }`}
             >
               <CloudinaryImage
                 src={img.cloudinary_public_id}
                 alt={`${phoneName} thumbnail ${i + 1}`}
-                width={128}
-                height={128}
-                sizes="64px"
-                className="h-full w-full object-contain p-1"
+                width={72}
+                height={160}
+                sizes="36px"
+                className="h-full w-full object-contain p-0.5"
               />
             </button>
           ))}

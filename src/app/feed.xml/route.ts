@@ -1,8 +1,9 @@
 import { getPublishedNews } from '@/queries/news';
+import { siteUrl } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-config';
 
 export async function GET() {
   const { news } = await getPublishedNews({ limit: 20 });
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   const items = news
     .map(
@@ -20,9 +21,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>PKPhones News</title>
+    <title>${SITE_NAME} News</title>
     <link>${siteUrl}/news</link>
-    <description>Latest mobile phone news from PKPhones</description>
+    <description>Latest mobile phone news from ${SITE_NAME}</description>
     ${items}
   </channel>
 </rss>`;

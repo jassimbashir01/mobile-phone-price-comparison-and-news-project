@@ -14,13 +14,9 @@ const NAV = [
   { href: '/admin/brands', label: 'Brands' },
   { href: '/admin/news', label: 'News' },
   { href: '/admin/featured', label: 'Featured' },
-  { href: '/admin/sponsored', label: 'Sponsored' },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Second layer of protection beyond middleware: middleware only confirms
-  // the user is authenticated, not that they have a staff role. A logged-in
-  // regular user with no user_profiles row should still be locked out.
   const profile = await getCurrentUserProfile();
   if (!profile) {
     redirect('/login');
@@ -38,11 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
         <nav className="space-y-1 rounded-lg border border-border bg-white p-2 text-sm">
           {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block rounded-md px-3 py-2 hover:bg-primary-light"
-            >
+            <Link key={item.href} href={item.href} className="block rounded-md px-3 py-2 hover:bg-primary-light">
               {item.label}
             </Link>
           ))}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { SITE_NAME } from '@/lib/site-config';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -14,7 +15,7 @@ export default function PrivacyPolicyPage() {
       <h1 className="mb-4 text-xl font-bold">Privacy Policy</h1>
       <div className="space-y-4 text-sm leading-relaxed text-ink/80">
         <p>
-          PKPhones (&quot;we&quot;, &quot;us&quot;) respects your privacy. This page explains what
+          {SITE_NAME} (&quot;we&quot;, &quot;us&quot;) respects your privacy. This page explains what
           information we collect and how it&apos;s used.
         </p>
         <h2 className="text-base font-semibold text-ink">Information We Collect</h2>

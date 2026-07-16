@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getHomepageSectionPhones } from '@/queries/homepage';
-import { PRICE_RANGES, priceRangeSectionKey } from '@/lib/constants';
+import { HOMEPAGE_PRICE_RANGES, homepagePriceSectionKey } from '@/lib/constants';
 import type { Brand, News, PhoneWithDetails } from '@/types/database';
 
 export async function getAllBrandsAdmin(): Promise<Brand[]> {
@@ -95,7 +95,7 @@ export async function getDashboardCounts() {
 const SECTION_DISPLAY_ORDER = [
   'featured_slider',
   'latest_phones',
-  ...PRICE_RANGES.filter((r) => r.slug !== 'all-mobiles').map(priceRangeSectionKey),
+  ...HOMEPAGE_PRICE_RANGES.map(homepagePriceSectionKey),
   'coming_soon',
 ];
 
@@ -104,7 +104,7 @@ export async function getHomepageSectionsAdmin() {
   const { data: sections, error } = await supabase.from('homepage_sections').select('*');
   if (error) throw new Error(`getHomepageSectionsAdmin: ${error.message}`);
 
-  const priceBracketMap = new Map(PRICE_RANGES.map((r) => [priceRangeSectionKey(r), r]));
+  const priceBracketMap = new Map(HOMEPAGE_PRICE_RANGES.map((r) => [homepagePriceSectionKey(r), r]));
 
   const resolved = await Promise.all(
     (sections ?? []).map(async (s) => {

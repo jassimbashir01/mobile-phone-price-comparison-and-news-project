@@ -16,6 +16,18 @@ export const PRICE_RANGES: RangeCategory[] = [
   { slug: 'all-mobiles',   label: 'All Mobiles',                min: null,  max: null },
 ];
 
+// Separate, coarser brackets used ONLY for the homepage's editable price
+// sections and their own dedicated pages — deliberately distinct from
+// PRICE_RANGES above (sidebar/footer), which stays untouched.
+export const HOMEPAGE_PRICE_RANGES: RangeCategory[] = [
+  { slug: 'below-10k', label: 'Below Rs. 10,000',      min: null,  max: 9999 },
+  { slug: '10k-20k',   label: 'Rs. 10,000 - 20,000',    min: 10000, max: 20000 },
+  { slug: '20k-30k',   label: 'Rs. 20,000 - 30,000',    min: 20001, max: 30000 },
+  { slug: '30k-40k',   label: 'Rs. 30,000 - 40,000',    min: 30001, max: 40000 },
+  { slug: '40k-50k',   label: 'Rs. 40,000 - 50,000',    min: 40001, max: 50000 },
+  { slug: 'above-50k', label: 'Above Rs. 50,000',       min: 50001, max: null },
+];
+
 export const RAM_OPTIONS: RangeCategory[] = [
   { slug: '2gb',        label: '2GB RAM',        min: 2,  max: 2 },
   { slug: '3gb',        label: '3GB RAM',        min: 3,  max: 3 },
@@ -88,6 +100,6 @@ export function findPriceRangeForPrice(price: number | null): RangeCategory | un
   );
 }
 
-export function priceRangeSectionKey(range: RangeCategory): string {
-  return `price_${range.slug.replace(/-/g, '_')}`;
+export function homepagePriceSectionKey(range: RangeCategory): string {
+  return `home_price_${range.slug.replace(/-/g, '_')}`;
 }

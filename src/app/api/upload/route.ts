@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { requireRole } from '@/lib/auth';
+import { SITE_NAME } from '@/lib/site-config';
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     cloudinary.uploader
       .upload_stream(
         {
-          folder: 'pkphones',
+          folder: SITE_NAME,
           // Only shrinks images larger than 1600px on either side — smaller
           // images are untouched. Comfortably larger than any rendered size
           // on this site (the biggest display is the 480px phone gallery),

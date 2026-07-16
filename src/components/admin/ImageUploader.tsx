@@ -82,7 +82,7 @@ export function ImageUploader({
               />
             </div>
             {img.is_primary && (
-              <span className="absolute left-1 top-1 rounded bg-accent px-1 text-[9px] font-semibold">
+              <span className="absolute left-1 top-1 rounded bg-primary px-1 text-[9px] font-semibold">
                 Primary
               </span>
             )}
@@ -91,7 +91,7 @@ export function ImageUploader({
                 type="button"
                 onClick={() => setPrimary(i)}
                 title="Set as primary"
-                className="text-ink/50 hover:text-accent-dark"
+                className="text-ink/50 hover:text-primary"
               >
                 <Star
                   size={14}

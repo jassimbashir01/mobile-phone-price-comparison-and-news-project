@@ -1,8 +1,8 @@
 "use client";
 
-import CloudinaryImage from "@/components/cloudinary-image";
 import { formatPKR } from "@/lib/utils";
 import type { PhoneWithDetails } from "@/types/database";
+import CloudinaryImage from "../cloudinary-image";
 
 export function CompareSlot({
   phone,
@@ -27,14 +27,14 @@ export function CompareSlot({
 
   return (
     <div className="rounded-lg border border-border bg-white p-4 text-center">
-      <div className="relative mx-auto mb-2 aspect-square w-32">
+      <div className="relative mx-auto mb-2 aspect-45/100 w-16">
         {primary ? (
           <CloudinaryImage
             src={primary.cloudinary_public_id}
             alt={phone.name}
-            width={256}
-            height={256}
-            sizes="128px"
+            width={90}
+            height={200}
+            sizes="64px"
             className="h-full w-full object-contain"
           />
         ) : (
@@ -44,7 +44,7 @@ export function CompareSlot({
         )}
       </div>
       <h2 className="text-sm font-semibold">{phone.name}</h2>
-      <p className="price-tag mt-1 inline-flex text-sm">
+      <p className="mt-1 text-sm font-semibold text-primary">
         {formatPKR(phone.price_pkr)}
       </p>
       <button

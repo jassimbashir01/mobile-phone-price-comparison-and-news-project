@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import { PageShell } from '@/components/layout/PageShell';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { ContactForm } from '@/components/contact/ContactForm';
+import { SITE_NAME } from '@/lib/site-config';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
-  description: 'Get in touch with the PKPhones team.',
+  description: `Get in touch with the ${SITE_NAME} team.`,
   alternates: { canonical: '/contact' },
 };
 

@@ -1,12 +1,12 @@
 import { getHomepageSectionsAdmin } from '@/queries/admin';
 import { FeaturedSectionEditor } from '@/components/admin/FeaturedSectionEditor';
-import { PRICE_RANGES, priceRangeSectionKey } from '@/lib/constants';
+import { HOMEPAGE_PRICE_RANGES, homepagePriceSectionKey } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminFeaturedPage() {
   const sections = await getHomepageSectionsAdmin();
-  const priceSectionKeys = new Set(PRICE_RANGES.map(priceRangeSectionKey));
+  const priceSectionKeys = new Set(HOMEPAGE_PRICE_RANGES.map(homepagePriceSectionKey));
 
   return (
     <div>

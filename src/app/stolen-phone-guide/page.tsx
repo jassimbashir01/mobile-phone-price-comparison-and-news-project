@@ -114,7 +114,7 @@ export default function StolenPhoneGuidePage() {
         <Link href="/news" className="text-primary hover:underline">
           phone news
         </Link>{' '}
-        on PKPhones.
+        on MobileWala.
       </p>
     </PageShell>
   );

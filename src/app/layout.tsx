@@ -8,26 +8,27 @@ import { AnchorAd } from '@/components/ads/AnchorAd';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildOrganizationJsonLd } from '@/lib/seo';
 import { siteUrl } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-config';
 import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'PKPhones — Mobile Prices & News in Pakistan',
-    template: '%s | PKPhones',
+    default: `${SITE_NAME} — Mobile Prices & News in Pakistan`,
+    template: `%s | ${SITE_NAME}`,
   },
   description:
     'Compare mobile phone prices in Pakistan, browse full specifications, and read the latest phone news.',
   openGraph: {
     type: 'website',
-    siteName: 'PKPhones',
+    siteName: SITE_NAME,
     locale: 'en_PK',
   },
   twitter: {
     card: 'summary_large_image',
   },
   alternates: {
-    types: { 'application/rss+xml': '/feed.xml' }, // feed built in Phase 16
+    types: { 'application/rss+xml': '/feed.xml' },
   },
 };
 

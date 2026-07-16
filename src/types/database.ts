@@ -20,7 +20,6 @@ export interface Phone {
   price_pkr: number | null;
   price_usd: number | null;
   is_featured: boolean;
-  is_sponsored: boolean;
   sort_order: number;
   seo_description: string | null;
   created_at: string;
@@ -94,14 +93,12 @@ export interface ContactMessage {
   created_at: string;
 }
 
-// Composite type used throughout the UI — a phone with its brand, specs and images joined.
 export interface PhoneWithDetails extends Phone {
   brand: Brand;
   specs: PhoneSpecs | null;
   images: PhoneImage[];
 }
 
-// Lightweight version for cards/listings where we don't need every image.
 export interface PhoneCardData extends Phone {
   brand: Pick<Brand, 'id' | 'name' | 'slug'>;
   specs: Pick<
