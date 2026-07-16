@@ -26,11 +26,11 @@ export const RAM_OPTIONS: RangeCategory[] = [
 ];
 
 export const SCREEN_SIZES: RangeCategory[] = [
-  { slug: 'below-3-inch',    label: 'Below 3 Inches',     min: null, max: 2.99 },
-  { slug: '3-4-inch',        label: '3.0 Inch - 4.0 Inch', min: 3,    max: 4 },
-  { slug: '4-1-4-9-inch',    label: '4.1 Inch - 4.9 Inch', min: 4.1,  max: 4.9 },
-  { slug: '5-6-9-inch',      label: '5.0 Inch - 6.9 Inch', min: 5,    max: 6.9 },
-  { slug: '7-8-9-inch',      label: '7.0 Inch - 8.9 Inch', min: 7,    max: 8.9 },
+  { slug: 'below-3-inch',    label: 'Below 3 Inch',      min: null, max: 2.99 },
+  { slug: '3-4-inch',        label: '3 - 4 Inch',        min: 3,    max: 4 },
+  { slug: '4-1-4-9-inch',    label: '4.1 - 4.9 Inch',    min: 4.1,  max: 4.9 },
+  { slug: '5-6-9-inch',      label: '5 - 6.9 Inch',      min: 5,    max: 6.9 },
+  { slug: '7-8-9-inch',      label: '7 - 8.9 Inch',      min: 7,    max: 8.9 },
 ];
 
 export const CAMERA_OPTIONS: RangeCategory[] = [
@@ -86,4 +86,8 @@ export function findPriceRangeForPrice(price: number | null): RangeCategory | un
   return PRICE_RANGES.find(
     (r) => r.slug !== 'all-mobiles' && (r.min == null || price >= r.min) && (r.max == null || price <= r.max)
   );
+}
+
+export function priceRangeSectionKey(range: RangeCategory): string {
+  return `price_${range.slug.replace(/-/g, '_')}`;
 }

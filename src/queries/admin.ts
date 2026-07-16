@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getHomepageSectionPhones } from '@/queries/homepage';
+import { PRICE_RANGES, priceRangeSectionKey } from '@/lib/constants';
 import type { Brand, News, PhoneWithDetails } from '@/types/database';
 
 export async function getAllBrandsAdmin(): Promise<Brand[]> {
@@ -90,23 +92,33 @@ export async function getDashboardCounts() {
   };
 }
 
+const SECTION_DISPLAY_ORDER = [
+  'featured_slider',
+  'latest_phones',
+  ...PRICE_RANGES.filter((r) => r.slug !== 'all-mobiles').map(priceRangeSectionKey),
+  'coming_soon',
+];
+
 export async function getHomepageSectionsAdmin() {
   const supabase = createAdminClient();
-  const { data: sections, error } = await supabase.from('homepage_sections').select('*').order('section_key');
+  const { data: sections, error } = await supabase.from('homepage_sections').select('*');
   if (error) throw new Error(`getHomepageSectionsAdmin: ${error.message}`);
 
-  const allPhoneIds = Array.from(new Set((sections ?? []).flatMap((s) => s.phone_ids)));
-  let phoneMap = new Map<string, any>();
-  if (allPhoneIds.length > 0) {
-    const { data: phones } = await supabase
-      .from('phones')
-      .select('id, name, slug, price_pkr, is_sponsored')
-      .in('id', allPhoneIds);
-    phoneMap = new Map((phones ?? []).map((p) => [p.id, p]));
-  }
+  const priceBracketMap = new Map(PRICE_RANGES.map((r) => [priceRangeSectionKey(r), r]));
 
-  return (sections ?? []).map((s) => ({
-    ...s,
-    phones: s.phone_ids.map((id: string) => phoneMap.get(id)).filter(Boolean),
-  }));
+  const resolved = await Promise.all(
+    (sections ?? []).map(async (s) => {
+      const bracket = priceBracketMap.get(s.section_key);
+      const result = await getHomepageSectionPhones(s.section_key, {
+        fallback: bracket ? { priceMin: bracket.min, priceMax: bracket.max } : undefined,
+      });
+      return { ...s, phones: result?.phones ?? [] };
+    })
+  );
+
+  resolved.sort(
+    (a, b) => SECTION_DISPLAY_ORDER.indexOf(a.section_key) - SECTION_DISPLAY_ORDER.indexOf(b.section_key)
+  );
+
+  return resolved;
 }
