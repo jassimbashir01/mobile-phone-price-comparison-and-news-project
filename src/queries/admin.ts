@@ -122,3 +122,17 @@ export async function getHomepageSectionsAdmin() {
 
   return resolved;
 }
+
+export async function getAllOffersAdmin(): Promise<import('@/types/database').Offer[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from('offers').select('*').order('created_at', { ascending: false });
+  if (error) throw new Error(`getAllOffersAdmin: ${error.message}`);
+  return data ?? [];
+}
+
+export async function getOfferByIdAdmin(id: string): Promise<import('@/types/database').Offer | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from('offers').select('*').eq('id', id).maybeSingle();
+  if (error) throw new Error(`getOfferByIdAdmin: ${error.message}`);
+  return data;
+}

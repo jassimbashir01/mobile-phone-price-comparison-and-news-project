@@ -14,9 +14,9 @@ export const metadata: Metadata = {
 const PLACEMENTS = [
   { title: 'Homepage Banner', description: 'A prominent banner near the top of the homepage, seen by every visitor before they browse.' },
   { title: 'Sidebar Banner', description: 'Displayed in the sidebar across every category and phone page — sitewide, sticky visibility.' },
-  { title: 'Featured Phone Slot', description: "Your phone pinned in one of the homepage's featured sections, above the automatic listings." },
-  { title: 'Featured Price Range Section', description: "Pin your phone at the top of a specific price-range section on the homepage." },
-  { title: 'Brand Showcase', description: 'Prominent placement for your brand across relevant category and brand pages.' },
+  { title: 'Featured Phone Slot', description: 'Your phone pinned in one of the homepage\'s featured sections, above the automatic listings — managed the same way as our regular featured picks.' },
+  { title: 'Featured Price Range Section', description: 'Pin your phone at the top of a specific price-range section on the homepage.' },
+  { title: 'Brand Showcase', description: 'Your brand featured in the homepage\'s dedicated brand showcase row.' },
 ];
 
 export default function AdvertisePage() {

@@ -141,3 +141,34 @@ export interface HomepageBannerSetting {
   alt_text: string;
   enabled: boolean;
 }
+
+export interface SidebarBannerSetting {
+  cloudinary_public_id: string;
+  link_url: string;
+  alt_text: string;
+  enabled: boolean;
+}
+
+export interface BrandShowcaseSetting {
+  brand_ids: string[];
+  enabled: boolean;
+}
+
+export type OfferType = 'affiliate' | 'local_deal';
+
+export interface Offer {
+  id: string;
+  offer_type: OfferType;
+  title: string;
+  description: string | null;
+  image_public_id: string | null;
+  destination_url: string;
+  price_pkr: number | null;
+  original_price_pkr: number | null;
+  shop_name: string | null;
+  shop_location: string | null;
+  is_active: boolean;
+  sort_order: number;
+  expires_at: string | null;
+  created_at: string;
+}

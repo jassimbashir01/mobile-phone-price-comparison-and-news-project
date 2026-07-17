@@ -69,6 +69,11 @@ export async function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/offers" className="hover:text-primary">
+                Deals & Offers
+              </Link>
+            </li>
+            <li>
               <Link href="/media-kit" className="hover:text-primary">
                 Media Kit
               </Link>
@@ -78,11 +83,11 @@ export async function Footer() {
                 Privacy Policy
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/stolen-phone-guide" className="hover:text-primary">
                 Stolen Phone Guide
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link href="/news" className="hover:text-primary">
                 Latest News

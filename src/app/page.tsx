@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { HomeSection } from "@/components/home/HomeSection";
 import { HomepageBanner } from "@/components/home/HomepageBanner";
+import { BrandShowcase } from "@/components/home/BrandShowcase";
 import { FeaturedSlider } from "@/components/phone/FeaturedSlider";
 import { NewsCard } from "@/components/news/NewsCard";
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -15,7 +16,7 @@ import {
 } from "@/lib/constants";
 import { getHomepageSectionPhones } from "@/queries/homepage";
 import { getPublishedNews } from "@/queries/news";
-import { getHomepageBanner } from "@/queries/settings";
+import { getHomepageBanner, getBrandShowcase } from "@/queries/settings";
 
 export const revalidate = 3600;
 
@@ -27,21 +28,29 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [featured, latest, priceSections, comingSoon, newsResult, banner] =
-    await Promise.all([
-      getHomepageSectionPhones("featured_slider"),
-      getHomepageSectionPhones("latest_phones"),
-      Promise.all(
-        HOMEPAGE_PRICE_RANGES.map((range) =>
-          getHomepageSectionPhones(homepagePriceSectionKey(range), {
-            fallback: { priceMin: range.min, priceMax: range.max },
-          }),
-        ),
+  const [
+    featured,
+    latest,
+    priceSections,
+    comingSoon,
+    newsResult,
+    banner,
+    brandShowcase,
+  ] = await Promise.all([
+    getHomepageSectionPhones("featured_slider"),
+    getHomepageSectionPhones("latest_phones"),
+    Promise.all(
+      HOMEPAGE_PRICE_RANGES.map((range) =>
+        getHomepageSectionPhones(homepagePriceSectionKey(range), {
+          fallback: { priceMin: range.min, priceMax: range.max },
+        }),
       ),
-      getHomepageSectionPhones("coming_soon"),
-      getPublishedNews({ limit: 6 }),
-      getHomepageBanner(),
-    ]);
+    ),
+    getHomepageSectionPhones("coming_soon"),
+    getPublishedNews({ limit: 6 }),
+    getHomepageBanner(),
+    getBrandShowcase(),
+  ]);
 
   return (
     <PageShell>
@@ -56,6 +65,8 @@ export default async function HomePage() {
         <FeaturedSlider phones={featured?.phones ?? []} />
       </section>
 
+      <BrandShowcase brands={brandShowcase.brands} />
+
       <HomeSection
         title={latest?.title ?? "Latest Phones"}
         phones={latest?.phones ?? []}
@@ -66,19 +77,20 @@ export default async function HomePage() {
         <AdSlot slot="homepage-between-sections" />
       </div>
 
-      {HOMEPAGE_PRICE_RANGES.map((range, i) => ({
-        range,
-        section: priceSections[i],
-      }))
-        .reverse()
-        .map(({ range, section }) => (
+      {HOMEPAGE_PRICE_RANGES.map((_, i) => {
+        const index = HOMEPAGE_PRICE_RANGES.length - 1 - i;
+        const range = HOMEPAGE_PRICE_RANGES[index];
+        const section = priceSections[index];
+
+        return (
           <HomeSection
             key={range.slug}
             title={section?.title ?? range.label}
             phones={section?.phones ?? []}
             viewAllHref={`/price-range/${range.slug}`}
           />
-        ))}
+        );
+      })}
 
       <HomeSection
         title={comingSoon?.title ?? "Coming Soon"}

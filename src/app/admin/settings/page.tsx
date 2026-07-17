@@ -1,15 +1,27 @@
 import { SettingsForm } from '@/components/admin/SettingsForm';
-import { getExchangeRate, getSocialLinks, getMediaKitStats, getHomepageBanner } from '@/queries/settings';
+import { getAllBrandsAdmin } from '@/queries/admin';
+import {
+  getExchangeRate,
+  getSocialLinks,
+  getMediaKitStats,
+  getHomepageBanner,
+  getSidebarBanner,
+  getBrandShowcase,
+} from '@/queries/settings';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSettingsPage() {
-  const [rate, socialLinks, mediaKitStats, homepageBanner] = await Promise.all([
-    getExchangeRate(),
-    getSocialLinks(),
-    getMediaKitStats(),
-    getHomepageBanner(),
-  ]);
+  const [rate, socialLinks, mediaKitStats, homepageBanner, sidebarBanner, brandShowcase, allBrands] =
+    await Promise.all([
+      getExchangeRate(),
+      getSocialLinks(),
+      getMediaKitStats(),
+      getHomepageBanner(),
+      getSidebarBanner(),
+      getBrandShowcase(),
+      getAllBrandsAdmin(),
+    ]);
 
   return (
     <div>
@@ -19,6 +31,9 @@ export default async function AdminSettingsPage() {
         initialSocialLinks={socialLinks}
         initialMediaKitStats={mediaKitStats}
         initialHomepageBanner={homepageBanner}
+        initialSidebarBanner={sidebarBanner}
+        initialBrandShowcase={brandShowcase.setting}
+        allBrands={allBrands}
       />
     </div>
   );

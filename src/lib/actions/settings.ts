@@ -80,3 +80,41 @@ export async function updateHomepageBanner(banner: HomepageBannerSetting) {
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/']);
 }
+
+const bannerSettingSchema = z.object({
+  cloudinary_public_id: z.string(),
+  link_url: z.string().url().or(z.literal('')),
+  alt_text: z.string().max(200),
+  enabled: z.boolean(),
+});
+
+export async function updateSidebarBanner(banner: import('@/types/database').SidebarBannerSetting) {
+  await requireRole(['admin', 'editor']);
+  const parsed = bannerSettingSchema.parse(banner);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ key: 'sidebar_banner', value: parsed }, { onConflict: 'key' });
+
+  if (error) throw new Error(error.message);
+  await triggerRevalidate(['/']);
+}
+
+const brandShowcaseSchema = z.object({
+  brand_ids: z.array(z.string().uuid()),
+  enabled: z.boolean(),
+});
+
+export async function updateBrandShowcase(showcase: import('@/types/database').BrandShowcaseSetting) {
+  await requireRole(['admin', 'editor']);
+  const parsed = brandShowcaseSchema.parse(showcase);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ key: 'brand_showcase', value: parsed }, { onConflict: 'key' });
+
+  if (error) throw new Error(error.message);
+  await triggerRevalidate(['/']);
+}
