@@ -111,7 +111,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
 
       <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr]">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[320px_1fr]">
         <ImageGallery images={phone.images} phoneName={phone.name} />
 
         <div className="flex flex-col gap-3">

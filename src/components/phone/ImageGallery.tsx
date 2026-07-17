@@ -1,22 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { PhoneImage } from "@/types/database";
-import CloudinaryImage from "../cloudinary-image";
+import { useState } from 'react';
+import CloudinaryImage from '@/components/cloudinary-image';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { PhoneImage } from '@/types/database';
 
-export function ImageGallery({
-  images,
-  phoneName,
-}: {
-  images: PhoneImage[];
-  phoneName: string;
-}) {
+export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phoneName: string }) {
   const [active, setActive] = useState(0);
 
   if (images.length === 0) {
     return (
-      <div className="mx-auto flex aspect-160/335 w-full max-w-40 items-center justify-center rounded-lg border border-border bg-surface text-sm text-ink/30">
+      <div className="mx-auto flex aspect-[195/365] w-full max-w-[320px] items-center justify-center rounded-lg border border-border bg-surface text-sm text-ink/30">
         No images yet
       </div>
     );
@@ -33,14 +27,14 @@ export function ImageGallery({
 
   return (
     <div>
-      <div className="relative mx-auto aspect-160/335 w-full max-w-40 overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="relative mx-auto aspect-[195/365] w-full max-w-[320px] overflow-hidden rounded-lg border border-border bg-surface">
         <CloudinaryImage
           src={current.cloudinary_public_id}
           alt={`${phoneName} image ${active + 1}`}
-          width={320}
-          height={670}
-          sizes="160px"
-          className="h-full w-full object-contain p-2"
+          width={390}
+          height={730}
+          sizes="320px"
+          className="h-full w-full object-contain p-3"
         />
         {images.length > 1 && (
           <>
@@ -68,16 +62,16 @@ export function ImageGallery({
             <button
               key={img.id}
               onClick={() => setActive(i)}
-              className={`relative aspect-45/100 w-9 shrink-0 overflow-hidden rounded-md border ${
-                i === active ? "border-primary" : "border-border"
+              className={`relative aspect-[85/155] w-11 shrink-0 overflow-hidden rounded-md border ${
+                i === active ? 'border-primary' : 'border-border'
               }`}
             >
               <CloudinaryImage
                 src={img.cloudinary_public_id}
                 alt={`${phoneName} thumbnail ${i + 1}`}
-                width={72}
-                height={160}
-                sizes="36px"
+                width={85}
+                height={155}
+                sizes="44px"
                 className="h-full w-full object-contain p-0.5"
               />
             </button>

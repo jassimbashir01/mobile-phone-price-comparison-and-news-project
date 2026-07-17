@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PhoneCard } from "./PhoneCard";
-import type { PhoneCardData } from "@/types/database";
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { PhoneCard } from './PhoneCard';
+import type { PhoneCardData } from '@/types/database';
 
 export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
   const [index, setIndex] = useState(0);
-  const perView = 4;
+  const perView = 6;
   const maxIndex = Math.max(0, phones.length - perView);
 
   if (phones.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-ink/50">
-        No featured phones yet.
+        No featured phones yet — add some from /admin/featured.
       </p>
     );
   }
@@ -22,11 +22,11 @@ export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
     <div className="relative">
       <div className="overflow-hidden">
         <div
-          className="flex gap-4 transition-transform duration-300"
+          className="flex gap-3 transition-transform duration-300"
           style={{ transform: `translateX(-${index * (100 / perView)}%)` }}
         >
           {phones.map((p) => (
-            <div key={p.id} className="w-1/2 shrink-0 sm:w-1/3 lg:w-1/4">
+            <div key={p.id} className="w-1/3 shrink-0 sm:w-1/4 lg:w-1/6">
               <PhoneCard phone={p} />
             </div>
           ))}
