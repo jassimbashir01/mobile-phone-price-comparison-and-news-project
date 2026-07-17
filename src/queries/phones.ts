@@ -214,3 +214,73 @@ export async function getSimilarPricedPhones(
   if (error) throw new Error(`getSimilarPricedPhones: ${error.message}`);
   return (data ?? []).map(normalizeCard);
 }
+
+export async function getBetterAlternatives(
+  phoneId: string,
+  price: number | null,
+  limit = 4
+): Promise<PhoneCardData[]> {
+  if (price == null) return [];
+  const upperBound = Math.round(price * 1.6);
+
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .neq('id', phoneId)
+    .eq('status', 'available')
+    .gt('price_pkr', price)
+    .lte('price_pkr', upperBound)
+    .order('price_pkr', { ascending: true }) // closest "step up" first
+    .limit(limit);
+
+  if (error) throw new Error(`getBetterAlternatives: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function getCheaperAlternatives(
+  phoneId: string,
+  price: number | null,
+  limit = 4
+): Promise<PhoneCardData[]> {
+  if (price == null) return [];
+  const lowerBound = Math.round(price * 0.5);
+
+  const { data, error } = await supabase
+    .from('phones')
+    .select(PHONE_CARD_SELECT)
+    .neq('id', phoneId)
+    .eq('status', 'available')
+    .gte('price_pkr', lowerBound)
+    .lt('price_pkr', price)
+    .order('price_pkr', { ascending: false }) // closest "step down" first
+    .limit(limit);
+
+  if (error) throw new Error(`getCheaperAlternatives: ${error.message}`);
+  return (data ?? []).map(normalizeCard);
+}
+
+export async function getSameChipsetPhones(
+  phoneId: string,
+  processor: string | null,
+  limit = 4
+): Promise<PhoneCardData[]> {
+  if (!processor) return [];
+
+  const { data, error } = await supabase
+    .from('phones')
+    .select(
+      `*, brand:brands(id, name, slug), specs:phone_specs!inner(ram_gb, storage_gb, display_size, main_camera_mp, battery_mah, os, network_type, processor), images:phone_images(id, cloudinary_public_id, is_primary, sort_order)`
+    )
+    .neq('id', phoneId)
+    .eq('status', 'available')
+    .ilike('specs.processor', `%${processor}%`)
+    .order('sort_order')
+    .limit(limit);
+
+  if (error) throw new Error(`getSameChipsetPhones: ${error.message}`);
+  // Same defensive JS-level filter noted back in Phase 5 for joined-column
+  // filters — belt-and-suspenders against PostgREST's join-filter quirks.
+  return (data ?? [])
+    .filter((row: any) => row.specs?.some?.((s: any) => s.processor?.toLowerCase().includes(processor.toLowerCase())) ?? true)
+    .map(normalizeCard);
+}

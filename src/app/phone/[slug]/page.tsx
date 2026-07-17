@@ -3,23 +3,29 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { PageShell } from '@/components/layout/PageShell';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { SocialLinksRow } from '@/components/layout/SocialLinksRow';
 import { ImageGallery } from '@/components/phone/ImageGallery';
 import { ShareButtons } from '@/components/phone/ShareButtons';
 import { SpecTable } from '@/components/phone/SpecTable';
+import { PriceDisplay } from '@/components/phone/PriceDisplay';
+import { RichContent } from '@/components/phone/RichContent';
 import { PhoneGrid } from '@/components/phone/PhoneGrid';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo';
-import { formatPKR, formatUSD } from '@/lib/utils';
-import { findPriceRangeForPrice } from '@/lib/constants';
 import { siteUrl } from '@/lib/site';
+import { findPriceRangeForPrice } from '@/lib/constants';
 import {
   getPhoneBySlug,
   getAllPhoneSlugs,
   getRelatedPhones,
   getSimilarPricedPhones,
+  getBetterAlternatives,
+  getCheaperAlternatives,
+  getSameChipsetPhones,
 } from '@/queries/phones';
 import { getPublishedNews } from '@/queries/news';
+import { getExchangeRate, getSocialLinks } from '@/queries/settings';
 
 export const revalidate = 86400;
 
@@ -60,20 +66,37 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
   const phone = await getPhoneBySlug(slug);
   if (!phone) notFound();
 
-  const [relatedFromBrand, similarPriced, brandNews] = await Promise.all([
+  const [
+    relatedFromBrand,
+    similarPriced,
+    betterAlternatives,
+    cheaperAlternatives,
+    sameChipset,
+    brandNews,
+    exchangeRate,
+    socialLinks,
+  ] = await Promise.all([
     getRelatedPhones(phone.id, phone.brand_id, 6),
     getSimilarPricedPhones(phone.id, phone.price_pkr, 6),
+    getBetterAlternatives(phone.id, phone.price_pkr, 4),
+    getCheaperAlternatives(phone.id, phone.price_pkr, 4),
+    getSameChipsetPhones(phone.id, phone.specs?.processor ?? null, 4),
     getPublishedNews({ brandSlug: phone.brand.slug, limit: 3 }),
+    getExchangeRate(),
+    getSocialLinks(),
   ]);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
   const priceRange = findPriceRangeForPrice(phone.price_pkr);
+  const phoneUrl = `${siteUrl}/phone/${phone.slug}`;
 
   const breadcrumbItems = [
     { label: 'Home', href: '/' },
     { label: phone.brand.name, href: `/brand/${phone.brand.slug}` },
     { label: phone.name },
   ];
+
+  const compareCandidates = similarPriced.slice(0, 3);
 
   return (
     <PageShell>
@@ -82,12 +105,14 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
 
       <Breadcrumb items={breadcrumbItems} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
+
+      {/* Image + price, side by side, per the requested layout */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr]">
         <ImageGallery images={phone.images} phoneName={phone.name} />
 
-        <div>
-          <h1 className="mb-1 text-2xl font-bold">{phone.name}</h1>
-          <p className="mb-3 text-sm text-ink/60">
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-ink/60">
             by{' '}
             <Link href={`/brand/${phone.brand.slug}`} className="text-primary hover:underline">
               {phone.brand.name}
@@ -104,15 +129,10 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
             )}
           </p>
 
-          <div className="mb-4 flex items-baseline gap-3 rounded-lg border border-border bg-white p-4">
-            <span className="price-tag text-2xl">{formatPKR(phone.price_pkr)}</span>
-            {phone.price_usd != null && (
-              <span className="text-sm text-ink/50">≈ {formatUSD(phone.price_usd)}</span>
-            )}
-          </div>
+          <PriceDisplay pricePkr={phone.price_pkr} exchangeRate={exchangeRate} />
 
           {priceRange && (
-            <p className="mb-4 text-xs text-ink/50">
+            <p className="text-xs text-ink/50">
               See more phones in{' '}
               <Link href={`/price/${priceRange.slug}`} className="text-primary hover:underline">
                 {priceRange.label}
@@ -120,33 +140,88 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
             </p>
           )}
 
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <Link
-              href={`/compare?a=${phone.slug}`}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
-            >
-              Compare This Phone
-            </Link>
-            <ShareButtons url={`${siteUrl}/phone/${phone.slug}`} title={phone.name} />
-          </div>
+          <ShareButtons url={phoneUrl} title={phone.name} />
 
-          {phone.seo_description && <p className="text-sm text-ink/70">{phone.seo_description}</p>}
+          <Link
+            href={`/compare?a=${phone.slug}`}
+            className="inline-block w-fit rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            Compare This Phone
+          </Link>
+
+          <SocialLinksRow links={socialLinks} />
         </div>
       </div>
 
-      <section className="mt-8">
-        <h2 className="mb-3 text-lg font-bold">Full Specifications</h2>
-        <SpecTable specs={phone.specs} />
-      </section>
+      {phone.overview && (
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-bold">Overview</h2>
+          <RichContent html={phone.overview} />
+        </section>
+      )}
 
       <div className="my-8">
         <AdSlot slot="phone-detail-incontent-1" />
       </div>
 
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-bold">Full Specifications</h2>
+        <SpecTable specs={phone.specs} />
+      </section>
+
+      {phone.description && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold">Description</h2>
+          <RichContent html={phone.description} />
+        </section>
+      )}
+
+      <div className="mb-8">
+        <AdSlot slot="phone-detail-incontent-2" />
+      </div>
+
       {similarPriced.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-lg font-bold">Similarly Priced Phones</h2>
+          <h2 className="mb-3 text-lg font-bold">Similar Phones</h2>
           <PhoneGrid phones={similarPriced} />
+        </section>
+      )}
+
+      {betterAlternatives.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold">Better Alternatives</h2>
+          <PhoneGrid phones={betterAlternatives} />
+        </section>
+      )}
+
+      {cheaperAlternatives.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold">Cheaper Alternatives</h2>
+          <PhoneGrid phones={cheaperAlternatives} />
+        </section>
+      )}
+
+      {sameChipset.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold">Same Chipset</h2>
+          <PhoneGrid phones={sameChipset} />
+        </section>
+      )}
+
+      {compareCandidates.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold">Compare With</h2>
+          <div className="flex flex-wrap gap-2">
+            {compareCandidates.map((c) => (
+              <Link
+                key={c.id}
+                href={`/compare?a=${phone.slug}&b=${c.slug}`}
+                className="rounded-md border border-border bg-white px-3 py-2 text-sm hover:border-primary hover:text-primary"
+              >
+                vs {c.name}
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
@@ -157,13 +232,9 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
         </section>
       )}
 
-      <div className="mb-8">
-        <AdSlot slot="phone-detail-incontent-2" />
-      </div>
-
       {brandNews.news.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-lg font-bold">{phone.brand.name} News</h2>
+          <h2 className="mb-3 text-lg font-bold">Related Articles</h2>
           <ul className="space-y-2">
             {brandNews.news.map((n) => (
               <li key={n.id}>
