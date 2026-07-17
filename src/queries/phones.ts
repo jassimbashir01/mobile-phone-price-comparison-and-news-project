@@ -284,3 +284,33 @@ export async function getSameChipsetPhones(
     .filter((row: any) => row.specs?.some?.((s: any) => s.processor?.toLowerCase().includes(processor.toLowerCase())) ?? true)
     .map(normalizeCard);
 }
+
+export async function getAdjacentPhones(
+  phoneId: string,
+  brandId: string
+): Promise<{
+  prev: { name: string; slug: string } | null;
+  next: { name: string; slug: string } | null;
+}> {
+  const { data, error } = await supabase
+    .from('phones')
+    .select('id, name, slug')
+    .eq('brand_id', brandId)
+    .eq('status', 'available')
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true });
+
+  if (error) throw new Error(`getAdjacentPhones: ${error.message}`);
+  const list = data ?? [];
+  const index = list.findIndex((p) => p.id === phoneId);
+  if (index === -1 || list.length <= 1) return { prev: null, next: null };
+
+  // Wraps around — the last phone's "next" is the first, and vice versa,
+  // so browsing never dead-ends. Every click is a real page navigation
+  // (not client-side scroll-loading), which is also what lets vignette
+  // ads' default trigger — same-site link clicks — actually fire.
+  const prevIndex = index === 0 ? list.length - 1 : index - 1;
+  const nextIndex = index === list.length - 1 ? 0 : index + 1;
+
+  return { prev: list[prevIndex], next: list[nextIndex] };
+}

@@ -8,12 +8,20 @@ const SLOT_IDS: Record<string, string> = {
   'sidebar-bottom': 'REPLACE_WITH_SIDEBAR_BOTTOM_UNIT_ID',
   'phone-detail-incontent-1': 'REPLACE_WITH_PHONE_DETAIL_UNIT_ID',
   'phone-detail-incontent-2': 'REPLACE_WITH_PHONE_DETAIL_UNIT_ID_2',
+  'phone-detail-multiplex': 'REPLACE_WITH_PHONE_DETAIL_MULTIPLEX_UNIT_ID',
   'news-article-incontent-1': 'REPLACE_WITH_NEWS_ARTICLE_UNIT_ID',
+  'news-article-multiplex': 'REPLACE_WITH_NEWS_ARTICLE_MULTIPLEX_UNIT_ID',
   'homepage-between-sections': 'REPLACE_WITH_HOMEPAGE_SECTION_UNIT_ID',
   'category-mid-grid': 'REPLACE_WITH_CATEGORY_MID_GRID_UNIT_ID',
   'before-footer': 'REPLACE_WITH_BEFORE_FOOTER_UNIT_ID',
   'anchor-mobile': 'REPLACE_WITH_ANCHOR_UNIT_ID',
 };
+
+// Multiplex units use AdSense's "autorelaxed" format — a native grid of
+// related-content-style cards, distinct from the "auto" display format
+// used everywhere else. Listing here rather than passing a prop from every
+// call site keeps each usage a one-liner: <AdSlot slot="..." />.
+const MULTIPLEX_SLOTS = new Set(['phone-detail-multiplex', 'news-article-multiplex']);
 
 export function AdSlot({ slot }: { slot: keyof typeof SLOT_IDS }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +37,7 @@ export function AdSlot({ slot }: { slot: keyof typeof SLOT_IDS }) {
           observer.disconnect();
         }
       },
-      { rootMargin: '200px' } // start loading slightly before it scrolls into view
+      { rootMargin: '200px' }
     );
     observer.observe(containerRef.current);
     return () => observer.disconnect();
@@ -48,16 +56,17 @@ export function AdSlot({ slot }: { slot: keyof typeof SLOT_IDS }) {
 
   const pubId = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
   const unitId = SLOT_IDS[slot];
+  const isMultiplex = MULTIPLEX_SLOTS.has(slot);
 
   return (
-    <div ref={containerRef} style={{ minHeight: 90 }} data-testid={`ad-${slot}`}>
+    <div ref={containerRef} style={{ minHeight: isMultiplex ? 250 : 90 }} data-testid={`ad-${slot}`}>
       {visible && (
         <ins
           className="adsbygoogle block w-full"
-          style={{ display: 'block', minHeight: 90 }}
+          style={{ display: 'block', minHeight: isMultiplex ? 250 : 90 }}
           data-ad-client={pubId}
           data-ad-slot={unitId}
-          data-ad-format="auto"
+          data-ad-format={isMultiplex ? 'autorelaxed' : 'auto'}
           data-full-width-responsive="true"
         />
       )}

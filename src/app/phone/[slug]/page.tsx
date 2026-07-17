@@ -10,6 +10,7 @@ import { SpecTable } from '@/components/phone/SpecTable';
 import { PriceDisplay } from '@/components/phone/PriceDisplay';
 import { RichContent } from '@/components/phone/RichContent';
 import { PhoneGrid } from '@/components/phone/PhoneGrid';
+import { NextPrevNav } from '@/components/phone/NextPrevNav';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo';
@@ -23,6 +24,7 @@ import {
   getBetterAlternatives,
   getCheaperAlternatives,
   getSameChipsetPhones,
+  getAdjacentPhones,
 } from '@/queries/phones';
 import { getPublishedNews } from '@/queries/news';
 import { getExchangeRate, getSocialLinks } from '@/queries/settings';
@@ -75,6 +77,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
     brandNews,
     exchangeRate,
     socialLinks,
+    adjacent,
   ] = await Promise.all([
     getRelatedPhones(phone.id, phone.brand_id, 6),
     getSimilarPricedPhones(phone.id, phone.price_pkr, 6),
@@ -84,6 +87,7 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
     getPublishedNews({ brandSlug: phone.brand.slug, limit: 3 }),
     getExchangeRate(),
     getSocialLinks(),
+    getAdjacentPhones(phone.id, phone.brand_id),
   ]);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
@@ -107,7 +111,6 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
 
       <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
 
-      {/* Image + price, side by side, per the requested layout */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_1fr]">
         <ImageGallery images={phone.images} phoneName={phone.name} />
 
@@ -225,6 +228,10 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
         </section>
       )}
 
+      <div className="mb-8">
+        <AdSlot slot="phone-detail-multiplex" />
+      </div>
+
       {relatedFromBrand.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-bold">More from {phone.brand.name}</h2>
@@ -246,6 +253,8 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
           </ul>
         </section>
       )}
+
+      <NextPrevNav prev={adjacent.prev} next={adjacent.next} brandName={phone.brand.name} />
     </PageShell>
   );
 }

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { requireRole } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { triggerRevalidate } from '@/lib/revalidate';
-import type { SocialLink } from '@/types/database';
+import type { SocialLink, MediaKitStats, HomepageBannerSetting } from '@/types/database';
 
 const rateSchema = z.object({ rate: z.coerce.number().positive() });
 
@@ -35,6 +35,47 @@ export async function updateSocialLinks(links: SocialLink[]) {
   const { error } = await supabase
     .from('site_settings')
     .upsert({ key: 'social_links', value: parsed }, { onConflict: 'key' });
+
+  if (error) throw new Error(error.message);
+  await triggerRevalidate(['/']);
+}
+
+const mediaKitSchema = z.object({
+  monthly_visitors: z.string().max(100),
+  monthly_pageviews: z.string().max(100),
+  avg_session_duration: z.string().max(100),
+  top_regions: z.string().max(200),
+  audience_description: z.string().max(500),
+});
+
+export async function updateMediaKitStats(stats: MediaKitStats) {
+  await requireRole(['admin', 'editor']);
+  const parsed = mediaKitSchema.parse(stats);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ key: 'media_kit_stats', value: parsed }, { onConflict: 'key' });
+
+  if (error) throw new Error(error.message);
+  await triggerRevalidate(['/media-kit']);
+}
+
+const homepageBannerSchema = z.object({
+  cloudinary_public_id: z.string(),
+  link_url: z.string().url().or(z.literal('')),
+  alt_text: z.string().max(200),
+  enabled: z.boolean(),
+});
+
+export async function updateHomepageBanner(banner: HomepageBannerSetting) {
+  await requireRole(['admin', 'editor']);
+  const parsed = homepageBannerSchema.parse(banner);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from('site_settings')
+    .upsert({ key: 'homepage_banner', value: parsed }, { onConflict: 'key' });
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/']);

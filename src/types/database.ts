@@ -126,3 +126,18 @@ export interface SocialLink {
   url: string;
   enabled: boolean;
 }
+
+export interface MediaKitStats {
+  monthly_visitors: string;
+  monthly_pageviews: string;
+  avg_session_duration: string;
+  top_regions: string;
+  audience_description: string;
+}
+
+export interface HomepageBannerSetting {
+  cloudinary_public_id: string;
+  link_url: string;
+  alt_text: string;
+  enabled: boolean;
+}

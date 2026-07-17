@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/public';
-import type { SocialLink } from '@/types/database';
+import type { SocialLink, MediaKitStats, HomepageBannerSetting } from '@/types/database';
 
 export async function getExchangeRate(): Promise<number> {
   const { data, error } = await supabase
@@ -10,8 +10,6 @@ export async function getExchangeRate(): Promise<number> {
 
   if (error) throw new Error(`getExchangeRate: ${error.message}`);
   const rate = (data?.value as { rate?: number } | null)?.rate;
-  // Sane fallback if this row is ever somehow missing — never lets a
-  // display break, just falls back to a reasonable placeholder rate.
   return typeof rate === 'number' && rate > 0 ? rate : 280;
 }
 
@@ -24,4 +22,41 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
 
   if (error) throw new Error(`getSocialLinks: ${error.message}`);
   return (data?.value as SocialLink[] | null) ?? [];
+}
+
+const DEFAULT_MEDIA_KIT_STATS: MediaKitStats = {
+  monthly_visitors: 'Add your traffic number in Admin → Settings',
+  monthly_pageviews: 'Add your pageview number in Admin → Settings',
+  avg_session_duration: 'Add your average session duration',
+  top_regions: 'Add your top regions',
+  audience_description: 'Add a short description of your typical visitor',
+};
+
+export async function getMediaKitStats(): Promise<MediaKitStats> {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'media_kit_stats')
+    .maybeSingle();
+
+  if (error) throw new Error(`getMediaKitStats: ${error.message}`);
+  return (data?.value as MediaKitStats | null) ?? DEFAULT_MEDIA_KIT_STATS;
+}
+
+const DEFAULT_HOMEPAGE_BANNER: HomepageBannerSetting = {
+  cloudinary_public_id: '',
+  link_url: '',
+  alt_text: '',
+  enabled: false,
+};
+
+export async function getHomepageBanner(): Promise<HomepageBannerSetting> {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'homepage_banner')
+    .maybeSingle();
+
+  if (error) throw new Error(`getHomepageBanner: ${error.message}`);
+  return (data?.value as HomepageBannerSetting | null) ?? DEFAULT_HOMEPAGE_BANNER;
 }
