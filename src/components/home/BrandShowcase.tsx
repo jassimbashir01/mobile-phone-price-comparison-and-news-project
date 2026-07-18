@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import type { Brand } from '@/types/database';
+import CloudinaryImage from '../cloudinary-image';
 
 export function BrandShowcase({ brands }: { brands: Brand[] }) {
   if (brands.length === 0) return null;
@@ -16,7 +17,7 @@ export function BrandShowcase({ brands }: { brands: Brand[] }) {
             className="flex flex-col items-center gap-2 rounded-lg border border-border bg-white p-4 hover:border-primary"
           >
             {b.logo_url ? (
-              <img src={b.logo_url} alt={`${b.name} logo`} className="h-10 w-10 object-contain" />
+              <CloudinaryImage src={b.logo_url} alt={`${b.name} logo`} width={40} height={40} sizes="40px" className="h-10 w-10 object-contain" />
             ) : (
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light text-sm font-bold text-primary-dark">
                 {b.name.charAt(0)}

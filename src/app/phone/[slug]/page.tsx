@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { NewsCard } from "@/components/news/NewsCard";
 import { PageShell } from "@/components/layout/PageShell";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { SocialLinksRow } from "@/components/layout/SocialLinksRow";
@@ -89,10 +90,10 @@ export default async function PhonePage({
   ] = await Promise.all([
     getRelatedPhones(phone.id, phone.brand_id, 6),
     getSimilarPricedPhones(phone.id, phone.price_pkr, 6),
-    getBetterAlternatives(phone.id, phone.price_pkr, 4),
-    getCheaperAlternatives(phone.id, phone.price_pkr, 4),
-    getSameChipsetPhones(phone.id, phone.specs?.processor ?? null, 4),
-    getPublishedNews({ brandSlug: phone.brand.slug, limit: 3 }),
+    getBetterAlternatives(phone.id, phone.price_pkr, 6),
+    getCheaperAlternatives(phone.id, phone.price_pkr, 6),
+    getSameChipsetPhones(phone.id, phone.specs?.processor ?? null, 6),
+    getPublishedNews({ brandSlug: phone.brand.slug, limit: 6 }),
     getExchangeRate(),
     getSocialLinks(),
     getAdjacentPhones(phone.id, phone.brand_id),
@@ -261,18 +262,11 @@ export default async function PhonePage({
       {brandNews.news.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-3 text-lg font-bold">Related Articles</h2>
-          <ul className="space-y-2">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {brandNews.news.map((n) => (
-              <li key={n.id}>
-                <Link
-                  href={`/news/${n.slug}`}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {n.title}
-                </Link>
-              </li>
+              <NewsCard key={n.id} item={n} />
             ))}
-          </ul>
+          </div>
         </section>
       )}
 

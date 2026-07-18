@@ -12,7 +12,11 @@ export const PRICE_RANGES: RangeCategory[] = [
   { slug: '15000-25000',   label: 'Rs. 15,000 - 25,000',       min: 15001, max: 25000 },
   { slug: '25000-35000',   label: 'Rs. 25,000 - 35,000',       min: 25001, max: 35000 },
   { slug: '35000-45000',   label: 'Rs. 35,000 - 45,000',       min: 35001, max: 45000 },
-  { slug: 'above-45000',   label: 'Above Rs. 45,000',          min: 45001, max: null },
+  { slug: '45000-55000',   label: 'Rs. 45,000 - 55,000',       min: 45001, max: 55000 },
+  { slug: '55000-105000',  label: 'Rs. 55,000 - 105,000',      min: 55001, max: 105000 },
+  { slug: '105000-155000', label: 'Rs. 105,000 - 155,000',     min: 105001, max: 155000 },
+  { slug: '155000-205000', label: 'Rs. 155,000 - 205,000',     min: 155001, max: 205000 },
+  { slug: 'above-205000',  label: 'Above Rs. 205,000',         min: 205001, max: null },
   { slug: 'all-mobiles',   label: 'All Mobiles',                min: null,  max: null },
 ];
 
@@ -20,12 +24,12 @@ export const PRICE_RANGES: RangeCategory[] = [
 // sections and their own dedicated pages — deliberately distinct from
 // PRICE_RANGES above (sidebar/footer), which stays untouched.
 export const HOMEPAGE_PRICE_RANGES: RangeCategory[] = [
-  { slug: 'below-10k', label: 'Below Rs. 10,000',      min: null,  max: 9999 },
-  { slug: '10k-20k',   label: 'Rs. 10,000 - 20,000',    min: 10000, max: 20000 },
-  { slug: '20k-30k',   label: 'Rs. 20,000 - 30,000',    min: 20001, max: 30000 },
-  { slug: '30k-40k',   label: 'Rs. 30,000 - 40,000',    min: 30001, max: 40000 },
-  { slug: '40k-50k',   label: 'Rs. 40,000 - 50,000',    min: 40001, max: 50000 },
-  { slug: 'above-50k', label: 'Above Rs. 50,000',       min: 50001, max: null },
+  { slug: 'below-20k',   label: 'Below Rs. 20,000',       min: null,  max: 19999 },
+  { slug: '20k-30k',     label: 'Rs. 20,000 - 30,000',     min: 20000, max: 30000 },
+  { slug: '30k-40k',     label: 'Rs. 30,000 - 40,000',     min: 30001, max: 40000 },
+  { slug: '40k-50k',     label: 'Rs. 40,000 - 50,000',     min: 40001, max: 50000 },
+  { slug: '50k-100k',    label: 'Rs. 50,000 - 100,000',    min: 50001, max: 100000 },
+  { slug: 'above-100k',  label: 'Above Rs. 100,000',       min: 100001, max: null },
 ];
 
 export const RAM_OPTIONS: RangeCategory[] = [
@@ -38,11 +42,11 @@ export const RAM_OPTIONS: RangeCategory[] = [
 ];
 
 export const SCREEN_SIZES: RangeCategory[] = [
-  { slug: 'below-3-inch',    label: 'Below 3 Inch',      min: null, max: 2.99 },
-  { slug: '3-4-inch',        label: '3 - 4 Inch',        min: 3,    max: 4 },
-  { slug: '4-1-4-9-inch',    label: '4.1 - 4.9 Inch',    min: 4.1,  max: 4.9 },
-  { slug: '5-6-9-inch',      label: '5 - 6.9 Inch',      min: 5,    max: 6.9 },
-  { slug: '7-8-9-inch',      label: '7 - 8.9 Inch',      min: 7,    max: 8.9 },
+  { slug: 'below-3-inch', label: 'Less Than 3 Inches', min: null, max: 2.9 },
+  { slug: '3-4-inch',     label: '3.0 - 4.0 Inch',      min: 3,   max: 4 },
+  { slug: '4-1-4-9-inch', label: '4.1 - 4.9 Inch',      min: 4.1, max: 4.9 },
+  { slug: '5-6-9-inch',   label: '5.0 - 6.9 Inch',      min: 5,   max: 6.9 },
+  { slug: '7-8-9-inch',   label: '7.0 - 8.9 Inch',      min: 7,   max: 8.9 },
 ];
 
 export const CAMERA_OPTIONS: RangeCategory[] = [

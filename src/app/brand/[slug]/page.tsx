@@ -9,6 +9,7 @@ import { buildBreadcrumbJsonLd } from '@/lib/seo';
 import { getBrandBySlug, getAllBrandSlugs } from '@/queries/brands';
 import { getPhonesByBrandSlug } from '@/queries/phones';
 import { siteUrl } from '@/lib/site';
+import CloudinaryImage from '@/components/cloudinary-image';
 
 export const revalidate = 21600;
 
@@ -50,7 +51,7 @@ export default async function BrandPage({ params }: { params: Promise<{ slug: st
         {brand.logo_url && (
           // Brand logos are admin-uploaded URLs, not necessarily Cloudinary
           // public IDs, so we use a plain <img> here rather than CldImage.
-          <img src={brand.logo_url} alt={`${brand.name} logo`} className="h-10 w-10 object-contain" />
+          <CloudinaryImage src={brand.logo_url} alt={`${brand.name} logo`} width={40} height={40} sizes="40px" className="h-10 w-10 object-contain" />
         )}
         <h1 className="text-xl font-bold">{brand.name} Mobile Prices in Pakistan</h1>
       </div>

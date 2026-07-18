@@ -30,7 +30,8 @@ export async function Footer() {
             Popular Price Ranges
           </h3>
           <ul className="space-y-1.5 text-ink/70">
-            {PRICE_RANGES.slice(0, 6).map((p) => (
+          {/* TODO: change price ranges according to the brand lengths */}
+            {PRICE_RANGES.slice(0, 9).map((p) => (
               <li key={p.slug}>
                 <Link href={`/price/${p.slug}`} className="hover:text-primary">
                   {p.label}
