@@ -6,6 +6,6 @@ export async function GET(req: NextRequest) {
   if (q.length < 2) {
     return NextResponse.json({ phones: [] });
   }
-  const phones = await searchPhones(q, 10);
+  const phones = await searchPhones(q, 8);
   return NextResponse.json({ phones });
 }

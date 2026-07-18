@@ -1,21 +1,21 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { PageShell } from '@/components/layout/PageShell';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { SocialLinksRow } from '@/components/layout/SocialLinksRow';
-import { ImageGallery } from '@/components/phone/ImageGallery';
-import { ShareButtons } from '@/components/phone/ShareButtons';
-import { SpecTable } from '@/components/phone/SpecTable';
-import { PriceDisplay } from '@/components/phone/PriceDisplay';
-import { RichContent } from '@/components/phone/RichContent';
-import { PhoneGrid } from '@/components/phone/PhoneGrid';
-import { NextPrevNav } from '@/components/phone/NextPrevNav';
-import { AdSlot } from '@/components/ads/AdSlot';
-import { JsonLd } from '@/components/seo/JsonLd';
-import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo';
-import { siteUrl } from '@/lib/site';
-import { findPriceRangeForPrice } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { PageShell } from "@/components/layout/PageShell";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { SocialLinksRow } from "@/components/layout/SocialLinksRow";
+import { ImageGallery } from "@/components/phone/ImageGallery";
+import { ShareButtons } from "@/components/phone/ShareButtons";
+import { SpecTable } from "@/components/phone/SpecTable";
+import { PriceDisplay } from "@/components/phone/PriceDisplay";
+import { RichContent } from "@/components/phone/RichContent";
+import { PhoneGrid } from "@/components/phone/PhoneGrid";
+import { NextPrevNav } from "@/components/phone/NextPrevNav";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
+import { findPriceRangeForPrice } from "@/lib/constants";
 import {
   getPhoneBySlug,
   getAllPhoneSlugs,
@@ -25,9 +25,9 @@ import {
   getCheaperAlternatives,
   getSameChipsetPhones,
   getAdjacentPhones,
-} from '@/queries/phones';
-import { getPublishedNews } from '@/queries/news';
-import { getExchangeRate, getSocialLinks } from '@/queries/settings';
+} from "@/queries/phones";
+import { getPublishedNews } from "@/queries/news";
+import { getExchangeRate, getSocialLinks } from "@/queries/settings";
 
 export const revalidate = 86400;
 
@@ -53,17 +53,25 @@ export async function generateMetadata({
 
   return {
     title: `${phone.name} Price in Pakistan & Specifications`,
-    description: phone.seo_description ?? `${phone.name} price in Pakistan, full specifications, and images.`,
+    description:
+      phone.seo_description ??
+      `${phone.name} price in Pakistan, full specifications, and images.`,
     alternates: { canonical: `/phone/${phone.slug}` },
     openGraph: {
       title: `${phone.name} Price in Pakistan`,
       description: phone.seo_description ?? undefined,
-      images: ogImage ? [{ url: ogImage, width: 800, height: 800, alt: phone.name }] : undefined,
+      images: ogImage
+        ? [{ url: ogImage, width: 800, height: 800, alt: phone.name }]
+        : undefined,
     },
   };
 }
 
-export default async function PhonePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function PhonePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const phone = await getPhoneBySlug(slug);
   if (!phone) notFound();
@@ -90,12 +98,12 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
     getAdjacentPhones(phone.id, phone.brand_id),
   ]);
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
   const priceRange = findPriceRangeForPrice(phone.price_pkr);
   const phoneUrl = `${siteUrl}/phone/${phone.slug}`;
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
+    { label: "Home", href: "/" },
     { label: phone.brand.name, href: `/brand/${phone.brand.slug}` },
     { label: phone.name },
   ];
@@ -111,33 +119,42 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
 
       <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[320px_1fr]">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-[320px_1fr] sm:items-center">
         <ImageGallery images={phone.images} phoneName={phone.name} />
 
         <div className="flex flex-col gap-3">
           <p className="text-sm text-ink/60">
-            by{' '}
-            <Link href={`/brand/${phone.brand.slug}`} className="text-primary hover:underline">
+            by{" "}
+            <Link
+              href={`/brand/${phone.brand.slug}`}
+              className="text-primary hover:underline"
+            >
               {phone.brand.name}
             </Link>
-            {phone.status === 'coming_soon' && (
+            {phone.status === "coming_soon" && (
               <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold">
                 Coming Soon
               </span>
             )}
-            {phone.status === 'discontinued' && (
+            {phone.status === "discontinued" && (
               <span className="ml-2 rounded bg-ink/10 px-1.5 py-0.5 text-[10px] font-semibold text-ink/60">
                 Discontinued
               </span>
             )}
           </p>
 
-          <PriceDisplay pricePkr={phone.price_pkr} exchangeRate={exchangeRate} />
+          <PriceDisplay
+            pricePkr={phone.price_pkr}
+            exchangeRate={exchangeRate}
+          />
 
           {priceRange && (
             <p className="text-xs text-ink/50">
-              See more phones in{' '}
-              <Link href={`/price/${priceRange.slug}`} className="text-primary hover:underline">
+              See more phones in{" "}
+              <Link
+                href={`/price/${priceRange.slug}`}
+                className="text-primary hover:underline"
+              >
                 {priceRange.label}
               </Link>
             </p>
@@ -234,7 +251,9 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
 
       {relatedFromBrand.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-lg font-bold">More from {phone.brand.name}</h2>
+          <h2 className="mb-3 text-lg font-bold">
+            More from {phone.brand.name}
+          </h2>
           <PhoneGrid phones={relatedFromBrand} />
         </section>
       )}
@@ -245,7 +264,10 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
           <ul className="space-y-2">
             {brandNews.news.map((n) => (
               <li key={n.id}>
-                <Link href={`/news/${n.slug}`} className="text-sm text-primary hover:underline">
+                <Link
+                  href={`/news/${n.slug}`}
+                  className="text-sm text-primary hover:underline"
+                >
                   {n.title}
                 </Link>
               </li>
@@ -254,7 +276,11 @@ export default async function PhonePage({ params }: { params: Promise<{ slug: st
         </section>
       )}
 
-      <NextPrevNav prev={adjacent.prev} next={adjacent.next} brandName={phone.brand.name} />
+      <NextPrevNav
+        prev={adjacent.prev}
+        next={adjacent.next}
+        brandName={phone.brand.name}
+      />
     </PageShell>
   );
 }

@@ -15,7 +15,7 @@ export function CompareSlot({
     return (
       <button
         onClick={onPick}
-        className="flex aspect-4/3 flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-white text-sm text-ink/50 hover:border-primary hover:text-primary"
+        className="flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-white text-sm text-ink/50 hover:border-primary hover:text-primary"
       >
         <span className="text-2xl">+</span>
         Add a phone to compare
@@ -27,7 +27,7 @@ export function CompareSlot({
 
   return (
     <div className="rounded-lg border border-border bg-white p-4 text-center">
-      <div className="relative mx-auto mb-2 aspect-45/100 w-16">
+      <div className="relative mx-auto mb-2 aspect-[45/100] w-16">
         {primary ? (
           <CloudinaryImage
             src={primary.cloudinary_public_id}

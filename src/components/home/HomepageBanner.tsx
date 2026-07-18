@@ -14,7 +14,7 @@ export function HomepageBanner({ banner }: { banner: HomepageBannerSetting }) {
       rel={isExternal ? 'noopener noreferrer sponsored' : undefined}
       className="mb-6 block overflow-hidden rounded-lg border border-border"
     >
-      <div className="relative aspect-6/1 w-full bg-surface">
+      <div className="relative aspect-[6/1] w-full bg-surface">
         <CldImage
           src={banner.cloudinary_public_id}
           alt={banner.alt_text || 'Sponsored'}

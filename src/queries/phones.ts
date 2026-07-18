@@ -181,15 +181,29 @@ export async function getRelatedPhones(
 }
 
 export async function searchPhones(q: string, limit = 20): Promise<PhoneCardData[]> {
+  const trimmed = q.trim();
+  if (!trimmed) return [];
+
+  const { data: matchedPhones, error: rpcError } = await supabase.rpc('search_phones', {
+    search_query: trimmed,
+    result_limit: limit,
+  });
+
+  if (rpcError) throw new Error(`searchPhones: ${rpcError.message}`);
+  if (!matchedPhones || matchedPhones.length === 0) return [];
+
+  // The RPC returns bare phones rows (no joins) — fetch the full card data
+  // for just those matched IDs, preserving the RPC's relevance order.
+  const ids = matchedPhones.map((p: any) => p.id);
   const { data, error } = await supabase
     .from('phones')
     .select(PHONE_CARD_SELECT)
-    .ilike('name', `%${q}%`)
-    .order('sort_order')
-    .limit(limit);
+    .in('id', ids);
 
   if (error) throw new Error(`searchPhones: ${error.message}`);
-  return (data ?? []).map(normalizeCard);
+
+  const byId = new Map((data ?? []).map((p: any) => [p.id, p]));
+  return ids.map((id: string) => byId.get(id)).filter(Boolean).map(normalizeCard);
 }
 
 export async function getSimilarPricedPhones(
