@@ -136,3 +136,17 @@ export async function getOfferByIdAdmin(id: string): Promise<import('@/types/dat
   if (error) throw new Error(`getOfferByIdAdmin: ${error.message}`);
   return data;
 }
+
+export async function getPhoneExtendedSpecsAdmin(
+  phoneId: string
+): Promise<import('@/types/database').PhoneExtendedSpecs | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('phone_extended_specs')
+    .select('*')
+    .eq('phone_id', phoneId)
+    .maybeSingle();
+
+  if (error) throw new Error(`getPhoneExtendedSpecsAdmin: ${error.message}`);
+  return data;
+}

@@ -328,3 +328,16 @@ export async function getAdjacentPhones(
 
   return { prev: list[prevIndex], next: list[nextIndex] };
 }
+
+export async function getPhoneExtendedSpecs(
+  phoneId: string
+): Promise<import('@/types/database').PhoneExtendedSpecs | null> {
+  const { data, error } = await supabase
+    .from('phone_extended_specs')
+    .select('*')
+    .eq('phone_id', phoneId)
+    .maybeSingle();
+
+  if (error) throw new Error(`getPhoneExtendedSpecs: ${error.message}`);
+  return data;
+}

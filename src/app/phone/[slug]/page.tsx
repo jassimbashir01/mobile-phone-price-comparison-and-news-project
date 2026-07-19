@@ -7,7 +7,6 @@ import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { SocialLinksRow } from "@/components/layout/SocialLinksRow";
 import { ImageGallery } from "@/components/phone/ImageGallery";
 import { ShareButtons } from "@/components/phone/ShareButtons";
-import { SpecTable } from "@/components/phone/SpecTable";
 import { PriceDisplay } from "@/components/phone/PriceDisplay";
 import { RichContent } from "@/components/phone/RichContent";
 import { PhoneGrid } from "@/components/phone/PhoneGrid";
@@ -17,6 +16,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 import { findPriceRangeForPrice } from "@/lib/constants";
+import { ExtendedSpecTable } from "@/components/phone/ExtendedSpecTable";
+import { SpecDisclaimer } from "@/components/phone/SpecDisclaimer";
 import {
   getPhoneBySlug,
   getAllPhoneSlugs,
@@ -26,6 +27,7 @@ import {
   getCheaperAlternatives,
   getSameChipsetPhones,
   getAdjacentPhones,
+  getPhoneExtendedSpecs,
 } from "@/queries/phones";
 import { getPublishedNews } from "@/queries/news";
 import { getExchangeRate, getSocialLinks } from "@/queries/settings";
@@ -87,6 +89,7 @@ export default async function PhonePage({
     exchangeRate,
     socialLinks,
     adjacent,
+    extendedSpecs,
   ] = await Promise.all([
     getRelatedPhones(phone.id, phone.brand_id, 6),
     getSimilarPricedPhones(phone.id, phone.price_pkr, 6),
@@ -97,6 +100,7 @@ export default async function PhonePage({
     getExchangeRate(),
     getSocialLinks(),
     getAdjacentPhones(phone.id, phone.brand_id),
+    getPhoneExtendedSpecs(phone.id),
   ]);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
@@ -187,7 +191,12 @@ export default async function PhonePage({
 
       <section className="mb-8">
         <h2 className="mb-3 text-lg font-bold">Full Specifications</h2>
-        <SpecTable specs={phone.specs} />
+        <ExtendedSpecTable
+          specs={extendedSpecs}
+          pricePkr={phone.price_pkr}
+          exchangeRate={exchangeRate}
+        />
+        <SpecDisclaimer phoneName={phone.name} />
       </section>
 
       {phone.description && (

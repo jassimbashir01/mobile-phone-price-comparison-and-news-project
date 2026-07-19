@@ -172,3 +172,55 @@ export interface Offer {
   expires_at: string | null;
   created_at: string;
 }
+
+export interface PhoneExtendedSpecs {
+  id: string;
+  phone_id: string;
+  build_os: string | null;
+  build_ui: string | null;
+  build_dimensions: string | null;
+  build_weight: string | null;
+  build_sim: string | null;
+  build_colors: string | null;
+  build_extra: string | null;
+  freq_2g: string | null;
+  freq_3g: string | null;
+  freq_4g: string | null;
+  freq_5g: string | null;
+  freq_extra: string | null;
+  proc_cpu: string | null;
+  proc_chipset: string | null;
+  proc_gpu: string | null;
+  proc_extra: string | null;
+  display_technology: string | null;
+  display_size: string | null;
+  display_resolution: string | null;
+  display_protection: string | null;
+  display_extra_features: string | null;
+  display_extra: string | null;
+  memory_built_in: string | null;
+  memory_card: string | null;
+  memory_extra: string | null;
+  camera_main: string | null;
+  camera_features: string | null;
+  camera_front: string | null;
+  camera_extra: string | null;
+  conn_wlan: string | null;
+  conn_bluetooth: string | null;
+  conn_gps: string | null;
+  conn_radio: string | null;
+  conn_usb: string | null;
+  conn_nfc: string | null;
+  conn_infrared: string | null;
+  conn_data: string | null;
+  conn_extra: string | null;
+  feat_sensors: string | null;
+  feat_audio: string | null;
+  feat_browser: string | null;
+  feat_messaging: string | null;
+  feat_games: string | null;
+  feat_torch: string | null;
+  feat_extra: string | null;
+  battery_charging: string | null;
+  battery_extra: string | null;
+}
