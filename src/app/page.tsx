@@ -3,7 +3,6 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { HomeSection } from "@/components/home/HomeSection";
 import { HomepageBanner } from "@/components/home/HomepageBanner";
-import { BrandShowcase } from "@/components/home/BrandShowcase";
 import { FeaturedSlider } from "@/components/phone/FeaturedSlider";
 import { NewsCard } from "@/components/news/NewsCard";
 import { AdSlot } from "@/components/ads/AdSlot";
@@ -16,7 +15,7 @@ import {
 } from "@/lib/constants";
 import { getHomepageSectionPhones } from "@/queries/homepage";
 import { getPublishedNews } from "@/queries/news";
-import { getHomepageBanner, getBrandShowcase } from "@/queries/settings";
+import { getHomepageBanner} from "@/queries/settings";
 
 export const revalidate = 3600;
 
@@ -35,7 +34,6 @@ export default async function HomePage() {
     comingSoon,
     newsResult,
     banner,
-    brandShowcase,
   ] = await Promise.all([
     getHomepageSectionPhones("featured_slider"),
     getHomepageSectionPhones("latest_phones"),
@@ -49,7 +47,6 @@ export default async function HomePage() {
     getHomepageSectionPhones("coming_soon"),
     getPublishedNews({ limit: 6 }),
     getHomepageBanner(),
-    getBrandShowcase(),
   ]);
 
   return (
@@ -64,8 +61,6 @@ export default async function HomePage() {
         </h1>
         <FeaturedSlider phones={featured?.phones ?? []} />
       </section>
-
-      <BrandShowcase brands={brandShowcase.brands} />
 
       <HomeSection
         title={latest?.title ?? "Latest Phones"}

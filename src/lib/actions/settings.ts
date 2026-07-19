@@ -100,21 +100,3 @@ export async function updateSidebarBanner(banner: import('@/types/database').Sid
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/']);
 }
-
-const brandShowcaseSchema = z.object({
-  brand_ids: z.array(z.string().uuid()),
-  enabled: z.boolean(),
-});
-
-export async function updateBrandShowcase(showcase: import('@/types/database').BrandShowcaseSetting) {
-  await requireRole(['admin', 'editor']);
-  const parsed = brandShowcaseSchema.parse(showcase);
-
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert({ key: 'brand_showcase', value: parsed }, { onConflict: 'key' });
-
-  if (error) throw new Error(error.message);
-  await triggerRevalidate(['/']);
-}

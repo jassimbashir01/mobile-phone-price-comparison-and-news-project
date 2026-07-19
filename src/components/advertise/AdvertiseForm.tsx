@@ -11,7 +11,6 @@ const PLACEMENT_LABELS: Record<AdvertiseInquiryValues['placement'], string> = {
   'sidebar-banner': 'Sidebar Banner',
   'featured-phone': 'Featured Phone Slot',
   'featured-price-range': 'Featured Price Range Section',
-  'brand-showcase': 'Brand Showcase',
   other: 'Something else',
 };
 

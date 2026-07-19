@@ -8,7 +8,6 @@ import {
   updateMediaKitStats,
   updateHomepageBanner,
   updateSidebarBanner,
-  updateBrandShowcase,
 } from "@/lib/actions/settings";
 import { SingleImageUploader } from "@/components/admin/SingleImageUploader";
 import type {
@@ -16,7 +15,6 @@ import type {
   MediaKitStats,
   HomepageBannerSetting,
   Brand,
-  BrandShowcaseSetting,
   SidebarBannerSetting,
 } from "@/types/database";
 
@@ -35,16 +33,12 @@ export function SettingsForm({
   initialMediaKitStats,
   initialHomepageBanner,
   initialSidebarBanner,
-  initialBrandShowcase,
-  allBrands,
 }: {
   initialRate: number;
   initialSocialLinks: SocialLink[];
   initialMediaKitStats: MediaKitStats;
   initialHomepageBanner: HomepageBannerSetting;
   initialSidebarBanner: SidebarBannerSetting;
-  initialBrandShowcase: BrandShowcaseSetting;
-  allBrands: Brand[];
 }) {
   const router = useRouter();
 
@@ -167,29 +161,6 @@ export function SettingsForm({
       );
     } finally {
       setSidebarBannerSaving(false);
-    }
-  }
-
-  const [brandShowcase, setBrandShowcase] =
-    useState<BrandShowcaseSetting>(initialBrandShowcase);
-  const [brandShowcaseSaving, setBrandShowcaseSaving] = useState(false);
-  const [brandShowcaseSaved, setBrandShowcaseSaved] = useState(false);
-  const [brandShowcaseError, setBrandShowcaseError] = useState("");
-
-  async function handleSaveBrandShowcase() {
-    setBrandShowcaseError("");
-    setBrandShowcaseSaving(true);
-    try {
-      await updateBrandShowcase(brandShowcase);
-      setBrandShowcaseSaved(true);
-      router.refresh();
-      setTimeout(() => setBrandShowcaseSaved(false), 2000);
-    } catch (err) {
-      setBrandShowcaseError(
-        err instanceof Error ? err.message : "Failed to save",
-      );
-    } finally {
-      setBrandShowcaseSaving(false);
     }
   }
 
@@ -522,61 +493,6 @@ export function SettingsForm({
         </button>
         {sidebarBannerError && (
           <p className="mt-2 text-xs text-red-600">{sidebarBannerError}</p>
-        )}
-      </section>
-
-      <section className="rounded-lg border border-border bg-white p-4">
-        <h2 className="mb-1 text-sm font-bold">
-          Brand Showcase (sold placement)
-        </h2>
-        <p className="mb-3 text-xs text-ink/50">
-          Pick which brands appear in the homepage showcase row.
-        </p>
-        <div className="mb-3 max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
-          {allBrands.map((b) => (
-            <label key={b.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={brandShowcase.brand_ids.includes(b.id)}
-                onChange={(e) => {
-                  setBrandShowcase((prev) => ({
-                    ...prev,
-                    brand_ids: e.target.checked
-                      ? [...prev.brand_ids, b.id]
-                      : prev.brand_ids.filter((id) => id !== b.id),
-                  }));
-                }}
-              />
-              {b.name}
-            </label>
-          ))}
-        </div>
-        <label className="mb-3 flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={brandShowcase.enabled}
-            onChange={(e) =>
-              setBrandShowcase((prev) => ({
-                ...prev,
-                enabled: e.target.checked,
-              }))
-            }
-          />
-          Enabled
-        </label>
-        <button
-          onClick={handleSaveBrandShowcase}
-          disabled={brandShowcaseSaving}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
-        >
-          {brandShowcaseSaving
-            ? "Saving…"
-            : brandShowcaseSaved
-              ? "Saved ✓"
-              : "Save Brand Showcase"}
-        </button>
-        {brandShowcaseError && (
-          <p className="mt-2 text-xs text-red-600">{brandShowcaseError}</p>
         )}
       </section>
     </div>

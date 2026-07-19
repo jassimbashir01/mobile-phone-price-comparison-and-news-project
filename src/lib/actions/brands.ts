@@ -18,7 +18,6 @@ export async function createBrand(values: BrandFormValues) {
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/', `/brand/${parsed.slug}`]);
-  await pingIndexNow(['/', `/phone/${parsed.slug}`]);
   return data;
 }
 

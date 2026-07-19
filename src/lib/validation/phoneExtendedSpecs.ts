@@ -1,7 +1,5 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-// Every field is optional rich-HTML text — blank stays blank, which is
-// exactly what makes the public table hide that row.
 const richText = z.string().optional();
 
 export const phoneExtendedSpecsSchema = z.object({
@@ -29,7 +27,6 @@ export const phoneExtendedSpecsSchema = z.object({
   display_resolution: richText,
   display_protection: richText,
   display_extra_features: richText,
-  display_extra: richText,
 
   memory_built_in: richText,
   memory_card: richText,
@@ -62,102 +59,103 @@ export const phoneExtendedSpecsSchema = z.object({
   battery_extra: richText,
 });
 
-export type PhoneExtendedSpecsFormValues = z.input<typeof phoneExtendedSpecsSchema>;
+export type PhoneExtendedSpecsFormValues = z.input<
+  typeof phoneExtendedSpecsSchema
+>;
 
-// Field metadata drives both the admin form layout and — by generating
-// this list once — guarantees the form and the public table can never
-// drift out of sync about which fields exist in which group/order.
 export const EXTENDED_SPEC_GROUPS = [
   {
-    label: 'Build',
+    label: "Build",
     fields: [
-      { key: 'build_os', label: 'OS' },
-      { key: 'build_ui', label: 'UI' },
-      { key: 'build_dimensions', label: 'Dimensions' },
-      { key: 'build_weight', label: 'Weight' },
-      { key: 'build_sim', label: 'SIM' },
-      { key: 'build_colors', label: 'Colors' },
-      { key: 'build_extra', label: 'Extra' },
+      { key: "build_os", label: "OS" },
+      { key: "build_ui", label: "UI" },
+      { key: "build_dimensions", label: "Dimensions" },
+      { key: "build_weight", label: "Weight" },
+      { key: "build_sim", label: "SIM" },
+      { key: "build_colors", label: "Colors" },
+      { key: "build_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Frequency',
+    label: "Frequency",
     fields: [
-      { key: 'freq_2g', label: '2G Band' },
-      { key: 'freq_3g', label: '3G Band' },
-      { key: 'freq_4g', label: '4G Band' },
-      { key: 'freq_5g', label: '5G Band' },
-      { key: 'freq_extra', label: 'Extra' },
+      { key: "freq_2g", label: "2G Band" },
+      { key: "freq_3g", label: "3G Band" },
+      { key: "freq_4g", label: "4G Band" },
+      { key: "freq_5g", label: "5G Band" },
+      { key: "freq_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Processor',
+    label: "Processor",
     fields: [
-      { key: 'proc_cpu', label: 'CPU' },
-      { key: 'proc_chipset', label: 'Chipset' },
-      { key: 'proc_gpu', label: 'GPU' },
-      { key: 'proc_extra', label: 'Extra' },
+      { key: "proc_cpu", label: "CPU" },
+      { key: "proc_chipset", label: "Chipset" },
+      { key: "proc_gpu", label: "GPU" },
+      { key: "proc_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Display',
+    label: "Display",
     fields: [
-      { key: 'display_technology', label: 'Technology' },
-      { key: 'display_size', label: 'Size' },
-      { key: 'display_resolution', label: 'Resolution' },
-      { key: 'display_protection', label: 'Protection' },
-      { key: 'display_extra_features', label: 'Extra Features' },
-      { key: 'display_extra', label: 'Extra' },
+      { key: "display_technology", label: "Technology" },
+      { key: "display_size", label: "Size" },
+      { key: "display_resolution", label: "Resolution" },
+      { key: "display_protection", label: "Protection" },
+      { key: "display_extra_features", label: "Extra Features" },
     ],
   },
   {
-    label: 'Memory',
+    label: "Memory",
     fields: [
-      { key: 'memory_built_in', label: 'Built-in' },
-      { key: 'memory_card', label: 'Card' },
-      { key: 'memory_extra', label: 'Extra' },
+      { key: "memory_built_in", label: "Built-in" },
+      { key: "memory_card", label: "Card" },
+      { key: "memory_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Camera',
+    label: "Camera",
     fields: [
-      { key: 'camera_main', label: 'Main' },
-      { key: 'camera_features', label: 'Features' },
-      { key: 'camera_front', label: 'Front' },
-      { key: 'camera_extra', label: 'Extra' },
+      { key: "camera_main", label: "Main" },
+      { key: "camera_features", label: "Features" },
+      { key: "camera_front", label: "Front" },
+      { key: "camera_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Connectivity',
+    label: "Connectivity",
     fields: [
-      { key: 'conn_wlan', label: 'WLAN' },
-      { key: 'conn_bluetooth', label: 'Bluetooth' },
-      { key: 'conn_gps', label: 'GPS' },
-      { key: 'conn_radio', label: 'Radio' },
-      { key: 'conn_usb', label: 'USB' },
-      { key: 'conn_nfc', label: 'NFC' },
-      { key: 'conn_infrared', label: 'Infrared' },
-      { key: 'conn_data', label: 'Data' },
-      { key: 'conn_extra', label: 'Extra' },
+      { key: "conn_wlan", label: "WLAN" },
+      { key: "conn_bluetooth", label: "Bluetooth" },
+      { key: "conn_gps", label: "GPS" },
+      { key: "conn_radio", label: "Radio" },
+      { key: "conn_usb", label: "USB" },
+      { key: "conn_nfc", label: "NFC" },
+      { key: "conn_infrared", label: "Infrared" },
+      { key: "conn_data", label: "Data" },
+      { key: "conn_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Features',
+    label: "Features",
     fields: [
-      { key: 'feat_sensors', label: 'Sensors' },
-      { key: 'feat_audio', label: 'Audio' },
-      { key: 'feat_browser', label: 'Browser' },
-      { key: 'feat_messaging', label: 'Messaging' },
-      { key: 'feat_games', label: 'Games' },
-      { key: 'feat_torch', label: 'Torch' },
-      { key: 'feat_extra', label: 'Extra' },
+      { key: "feat_sensors", label: "Sensors" },
+      { key: "feat_audio", label: "Audio" },
+      { key: "feat_browser", label: "Browser" },
+      { key: "feat_messaging", label: "Messaging" },
+      { key: "feat_games", label: "Games" },
+      { key: "feat_torch", label: "Torch" },
+      { key: "feat_extra", label: "Extra" },
     ],
   },
   {
-    label: 'Battery',
+    label: "Battery",
     fields: [
-      { key: 'battery_charging', label: 'Charging' },
-      { key: 'battery_extra', label: 'Extra' },
+      { key: "battery_charging", label: "Charging" },
+      { key: "battery_extra", label: "Extra" },
     ],
   },
-] as const satisfies readonly { label: string; fields: readonly { key: keyof PhoneExtendedSpecsFormValues; label: string }[] }[];
+] as const satisfies readonly {
+  label: string;
+  fields: readonly { key: keyof PhoneExtendedSpecsFormValues; label: string }[];
+}[];

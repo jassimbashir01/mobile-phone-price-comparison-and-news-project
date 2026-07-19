@@ -4,8 +4,6 @@ import type {
   MediaKitStats,
   HomepageBannerSetting,
   SidebarBannerSetting,
-  BrandShowcaseSetting,
-  Brand,
 } from '@/types/database';
 
 export async function getExchangeRate(): Promise<number> {
@@ -72,33 +70,4 @@ export async function getSidebarBanner(): Promise<SidebarBannerSetting> {
 
   if (error) throw new Error(`getSidebarBanner: ${error.message}`);
   return (data?.value as SidebarBannerSetting | null) ?? DEFAULT_BANNER;
-}
-
-export async function getBrandShowcase(): Promise<{ setting: BrandShowcaseSetting; brands: Brand[] }> {
-  const { data, error } = await supabase
-    .from('site_settings')
-    .select('value')
-    .eq('key', 'brand_showcase')
-    .maybeSingle();
-
-  if (error) throw new Error(`getBrandShowcase: ${error.message}`);
-  const setting = (data?.value as BrandShowcaseSetting | null) ?? { brand_ids: [], enabled: false };
-
-  if (!setting.enabled || setting.brand_ids.length === 0) {
-    return { setting, brands: [] };
-  }
-
-  const { data: brands, error: brandsError } = await supabase
-    .from('brands')
-    .select('*')
-    .in('id', setting.brand_ids)
-    .eq('is_active', true);
-
-  if (brandsError) throw new Error(`getBrandShowcase: ${brandsError.message}`);
-
-  const ordered = setting.brand_ids
-    .map((id) => brands?.find((b) => b.id === id))
-    .filter((b): b is Brand => !!b);
-
-  return { setting, brands: ordered };
 }

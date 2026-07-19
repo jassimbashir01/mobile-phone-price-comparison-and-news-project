@@ -1,7 +1,7 @@
-import { EXTENDED_SPEC_GROUPS } from '@/lib/validation/phoneExtendedSpecs';
-import { sanitizeRichText } from '@/lib/sanitize';
-import { formatPKR, formatUSDFromPKR } from '@/lib/utils';
-import type { PhoneExtendedSpecs } from '@/types/database';
+import { EXTENDED_SPEC_GROUPS } from "@/lib/validation/phoneExtendedSpecs";
+import { sanitizeRichText } from "@/lib/sanitize";
+import { formatPKR, formatUSDFromPKR } from "@/lib/utils";
+import type { PhoneExtendedSpecs } from "@/types/database";
 
 interface Row {
   label: string;
@@ -22,33 +22,37 @@ export function ExtendedSpecTable({
   pricePkr: number | null;
   exchangeRate: number;
 }) {
-  // Build each group's row list from the same EXTENDED_SPEC_GROUPS
-  // metadata the admin form uses, filtering out any field with no value —
-  // this is what makes a blank admin field simply not appear as a row.
-  const groups: Group[] = EXTENDED_SPEC_GROUPS.map((group) => ({
-    label: group.label,
-    rows: group.fields
-      .map((field) => {
-        const raw = specs?.[field.key as keyof PhoneExtendedSpecs] as string | null;
-        return raw ? { label: field.label, html: raw } : null;
-      })
-      .filter((r): r is Row => r !== null),
-  })).filter((group) => group.rows.length > 0);
+  const groups: Group[] = EXTENDED_SPEC_GROUPS.map((group) => {
+    const rows: Row[] = [];
+    for (const field of group.fields) {
+      const raw = specs?.[field.key as keyof PhoneExtendedSpecs] as
+        | string
+        | null;
+      if (raw) {
+        // Explicitly widened to `string` here — field.label is otherwise
+        // inferred as a narrow string-literal union from EXTENDED_SPEC_GROUPS,
+        // which doesn't match Row's `label: string` and breaks both the
+        // array's type and the later `r is Row` predicate.
+        rows.push({ label: field.label as string, html: raw });
+      }
+    }
+    return { label: group.label as string, rows };
+  }).filter((group) => group.rows.length > 0);
 
-  // Price group is assembled separately from the real price_pkr column —
-  // one source of truth, shown here and at the top of the page.
   const priceRows: Row[] = [];
   if (pricePkr != null) {
-    priceRows.push({ label: 'Price in Pakistan', html: formatPKR(pricePkr) });
+    priceRows.push({ label: "Price in Pakistan", html: formatPKR(pricePkr) });
     const usd = formatUSDFromPKR(pricePkr, exchangeRate);
-    if (usd) priceRows.push({ label: 'Price in USD', html: usd });
+    if (usd) priceRows.push({ label: "Price in USD", html: usd });
   }
   if (priceRows.length > 0) {
-    groups.push({ label: 'Price', rows: priceRows });
+    groups.push({ label: "Price", rows: priceRows });
   }
 
   if (groups.length === 0) {
-    return <p className="text-sm text-ink/50">Full specifications coming soon.</p>;
+    return (
+      <p className="text-sm text-ink/50">Full specifications coming soon.</p>
+    );
   }
 
   return (
@@ -57,7 +61,10 @@ export function ExtendedSpecTable({
         <tbody>
           {groups.map((group) =>
             group.rows.map((row, i) => (
-              <tr key={`${group.label}-${row.label}`} className="border-b border-border last:border-0">
+              <tr
+                key={`${group.label}-${row.label}`}
+                className="border-b border-border last:border-0"
+              >
                 {i === 0 && (
                   <th
                     rowSpan={group.rows.length}
@@ -72,17 +79,15 @@ export function ExtendedSpecTable({
                 </td>
                 <td
                   className="rich-content w-4/6 px-3 py-2 text-ink"
-                  // Price rows are plain formatted strings, not stored
-                  // HTML — safe as-is. Everything else comes from the
-                  // admin's rich text editor and is re-sanitized here at
-                  // render time, same defense-in-depth pattern already
-                  // used by RichContent elsewhere on this page.
                   dangerouslySetInnerHTML={{
-                    __html: group.label === 'Price' ? row.html : sanitizeRichText(row.html),
+                    __html:
+                      group.label === "Price"
+                        ? row.html
+                        : sanitizeRichText(row.html),
                   }}
                 />
               </tr>
-            ))
+            )),
           )}
         </tbody>
       </table>

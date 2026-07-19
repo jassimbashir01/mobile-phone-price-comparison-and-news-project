@@ -9,7 +9,6 @@ export const advertiseInquirySchema = z.object({
     'sidebar-banner',
     'featured-phone',
     'featured-price-range',
-    'brand-showcase',
     'other',
   ]),
   message: z.string().min(10, "Please add a few details about what you're looking for").max(2000),

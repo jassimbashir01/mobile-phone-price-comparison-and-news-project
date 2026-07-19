@@ -1,4 +1,4 @@
-import { PhoneForm } from '@/components/admin/PhoneForm';
+import { PhoneWizard } from '@/components/admin/PhoneWizard';
 import { getActiveBrands } from '@/queries/brands';
 
 export default async function NewPhonePage() {
@@ -6,7 +6,7 @@ export default async function NewPhonePage() {
   return (
     <div>
       <h1 className="mb-4 text-xl font-bold">New Phone</h1>
-      <PhoneForm brands={brands} />
+      <PhoneWizard brands={brands} />
     </div>
   );
 }

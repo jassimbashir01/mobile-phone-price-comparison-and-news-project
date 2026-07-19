@@ -91,6 +91,8 @@ export interface ContactMessage {
   name: string;
   email: string;
   message: string;
+  inquiry_type: string;
+  is_read: boolean;
   created_at: string;
 }
 
@@ -149,11 +151,6 @@ export interface SidebarBannerSetting {
   enabled: boolean;
 }
 
-export interface BrandShowcaseSetting {
-  brand_ids: string[];
-  enabled: boolean;
-}
-
 export type OfferType = 'affiliate' | 'local_deal';
 
 export interface Offer {
@@ -197,7 +194,6 @@ export interface PhoneExtendedSpecs {
   display_resolution: string | null;
   display_protection: string | null;
   display_extra_features: string | null;
-  display_extra: string | null;
   memory_built_in: string | null;
   memory_card: string | null;
   memory_extra: string | null;

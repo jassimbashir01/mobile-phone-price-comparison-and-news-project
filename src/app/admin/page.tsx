@@ -1,16 +1,20 @@
-import Link from 'next/link';
-import { getDashboardCounts } from '@/queries/admin';
+import Link from "next/link";
+import { getDashboardCounts } from "@/queries/admin";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const counts = await getDashboardCounts();
 
   const cards = [
-    { label: 'Phones', value: counts.phones, href: '/admin/phones' },
-    { label: 'Brands', value: counts.brands, href: '/admin/brands' },
-    { label: 'News Articles', value: counts.news, href: '/admin/news' },
-    { label: 'Contact Messages', value: counts.messages, href: '#' },
+    { label: "Phones", value: counts.phones, href: "/admin/phones" },
+    { label: "Brands", value: counts.brands, href: "/admin/brands" },
+    { label: "News Articles", value: counts.news, href: "/admin/news" },
+    {
+      label: "Contact Messages",
+      value: counts.messages,
+      href: "/admin/messages",
+    },
   ];
 
   return (
@@ -35,13 +39,22 @@ export default async function AdminDashboardPage() {
         >
           + Add Phone
         </Link>
-        <Link href="/admin/news/new" className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary">
+        <Link
+          href="/admin/news/new"
+          className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary"
+        >
           + Add News Article
         </Link>
-        <Link href="/admin/brands/new" className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary">
+        <Link
+          href="/admin/brands/new"
+          className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary"
+        >
           + Add Brand
         </Link>
-        <Link href="/admin/featured" className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary">
+        <Link
+          href="/admin/featured"
+          className="rounded-md border border-border px-4 py-2 text-sm hover:border-primary"
+        >
           Manage Featured Sections
         </Link>
       </div>

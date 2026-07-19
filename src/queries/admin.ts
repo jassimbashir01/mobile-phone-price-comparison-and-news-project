@@ -150,3 +150,13 @@ export async function getPhoneExtendedSpecsAdmin(
   if (error) throw new Error(`getPhoneExtendedSpecsAdmin: ${error.message}`);
   return data;
 }
+
+export async function getAllContactMessagesAdmin(): Promise<import('@/types/database').ContactMessage[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('contact_messages')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error(`getAllContactMessagesAdmin: ${error.message}`);
+  return data ?? [];
+}
