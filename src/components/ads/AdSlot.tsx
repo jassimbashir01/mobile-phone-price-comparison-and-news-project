@@ -15,6 +15,8 @@ const SLOT_IDS: Record<string, string> = {
   'category-mid-grid': 'REPLACE_WITH_CATEGORY_MID_GRID_UNIT_ID',
   'before-footer': 'REPLACE_WITH_BEFORE_FOOTER_UNIT_ID',
   'anchor-mobile': 'REPLACE_WITH_ANCHOR_UNIT_ID',
+  'compare-below-table': 'REPLACE_WITH_COMPARE_UNIT_ID',
+  'offers-mid-grid': 'REPLACE_WITH_OFFERS_MID_GRID_UNIT_ID',
 };
 
 // Multiplex units use AdSense's "autorelaxed" format — a native grid of

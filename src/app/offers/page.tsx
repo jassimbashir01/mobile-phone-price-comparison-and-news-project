@@ -1,15 +1,18 @@
-import type { Metadata } from 'next';
-import { PageShell } from '@/components/layout/PageShell';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { OfferCard } from '@/components/offers/OfferCard';
-import { getActiveOffers } from '@/queries/offers';
+import type { Metadata } from "next";
+import { PageShell } from "@/components/layout/PageShell";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { OfferCard } from "@/components/offers/OfferCard";
+import { getActiveOffers } from "@/queries/offers";
+import Link from "next/link";
+import { AdSlot } from "@/components/ads/AdSlot";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Deals & Offers',
-  description: 'Affiliate deals and local shop offers on mobile phones and accessories.',
-  alternates: { canonical: '/offers' },
+  title: "Deals & Offers",
+  description:
+    "Affiliate deals and local shop offers on mobile phones and accessories.",
+  alternates: { canonical: "/offers" },
 };
 
 export default async function OffersPage() {
@@ -17,9 +20,11 @@ export default async function OffersPage() {
 
   return (
     <PageShell>
-      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Deals & Offers' }]} />
+      <Breadcrumb
+        items={[{ label: "Home", href: "/" }, { label: "Deals & Offers" }]}
+      />
       <h1 className="mb-2 text-xl font-bold">Deals & Offers</h1>
-      <p className="mb-6 text-sm text-ink/60">
+      <p className="mb-4 text-sm text-ink/60">
         Affiliate deals and offers from local shops. Links may earn us a
         commission at no extra cost to you.
       </p>
@@ -28,12 +33,44 @@ export default async function OffersPage() {
           No active offers right now — check back soon.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {offers.map((o) => (
-            <OfferCard key={o.id} offer={o} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {offers.slice(0, 8).map((o) => (
+              <OfferCard key={o.id} offer={o} />
+            ))}
+          </div>
+          {offers.length > 8 && (
+            <div className="my-6">
+              <AdSlot slot="offers-mid-grid" />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {offers.slice(8).map((o) => (
+              <OfferCard key={o.id} offer={o} />
+            ))}
+          </div>
+        </>
       )}
+      <div className="mb-6 mt-6 rounded-lg border border-border bg-primary-light/40 p-4 text-sm">
+        <p className="text-ink/80">
+          Run a mobile shop or represent a mobile brand? Want your own deals
+          listed here?{" "}
+          <Link
+            href="/advertise"
+            className="font-semibold text-primary hover:underline"
+          >
+            Advertise with us
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/contact"
+            className="font-semibold text-primary hover:underline"
+          >
+            Get in touch
+          </Link>{" "}
+          to get featured.
+        </p>
+      </div>
     </PageShell>
   );
 }

@@ -7,6 +7,7 @@ import { CompareSlot } from "./CompareSlot";
 import { CompareSpecTable } from "./CompareSpecTable";
 import { SwapModal } from "./SwapModal";
 import type { PhoneWithDetails } from "@/types/database";
+import { AdSlot } from "../ads/AdSlot";
 
 export function CompareClient() {
   const router = useRouter();
@@ -84,7 +85,12 @@ export function CompareClient() {
       )}
 
       {!loading && phoneA && phoneB && (
-        <CompareSpecTable phoneA={phoneA} phoneB={phoneB} />
+        <>
+          <CompareSpecTable phoneA={phoneA} phoneB={phoneB} />
+          <div className="my-6">
+            <AdSlot slot="compare-below-table" />
+          </div>
+        </>
       )}
 
       {!loading && (!phoneA || !phoneB) && (

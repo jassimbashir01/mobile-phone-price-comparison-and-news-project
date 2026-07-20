@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { WordCounter } from "./WordCounter";
 import { phoneSchema, type PhoneFormValues } from "@/lib/validation/phone";
 import {
   createPhone,
@@ -202,11 +203,19 @@ export function PhoneForm({
             name="overview"
             control={control}
             render={({ field }) => (
-              <RichTextEditor
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                placeholder="A short overview shown right after the price and share buttons…"
-              />
+              <>
+                <RichTextEditor
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="A short overview shown right after the price and share buttons…"
+                />
+                <div className="mt-1 flex justify-end">
+                  <WordCounter
+                    text={field.value ?? ""}
+                    target="150–300 words"
+                  />
+                </div>
+              </>
             )}
           />
         </div>
@@ -219,11 +228,19 @@ export function PhoneForm({
             name="description"
             control={control}
             render={({ field }) => (
-              <RichTextEditor
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                placeholder="The full write-up, shown after the spec table — as long and detailed as you want…"
-              />
+              <>
+                <RichTextEditor
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="The full write-up, shown after the spec table — as long and detailed as you want…"
+                />
+                <div className="mt-1 flex justify-end">
+                  <WordCounter
+                    text={field.value ?? ""}
+                    target="300–600 words"
+                  />
+                </div>
+              </>
             )}
           />
         </div>

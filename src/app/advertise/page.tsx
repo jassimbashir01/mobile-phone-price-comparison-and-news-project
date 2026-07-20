@@ -16,6 +16,8 @@ const PLACEMENTS = [
   { title: 'Sidebar Banner', description: 'Displayed in the sidebar across every category and phone page — sitewide, sticky visibility.' },
   { title: 'Featured Phone Slot', description: 'Your phone pinned in one of the homepage\'s featured sections, above the automatic listings — managed the same way as our regular featured picks.' },
   { title: 'Featured Price Range Section', description: 'Pin your phone at the top of a specific price-range section on the homepage.' },
+  { title: 'Deals & Offers Listing', description: 'List your shop\'s deal or discount on our dedicated Deals & Offers page, seen by buyers actively looking for a good price.' },
+  { title: 'Sponsored News Article', description: 'A dedicated article covering your product or launch, published in our News section.' },
 ];
 
 export default function AdvertisePage() {

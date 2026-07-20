@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { createNews, updateNews } from "@/lib/actions/news";
 import { SingleImageUploader } from "./SingleImageUploader";
 import type { Brand, News } from "@/types/database";
 import { AdminSuccessScreen } from "./AdminSuccessScreen";
+import { WordCounter } from "./WordCounter";
 
 export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
   const router = useRouter();
@@ -23,6 +24,7 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<NewsFormValues>({
     resolver: zodResolver(newsSchema),
@@ -38,6 +40,7 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
         }
       : { is_published: false },
   });
+  const bodyValue = useWatch({ control, name: "body" }) ?? "";
 
   async function onSubmit(values: NewsFormValues) {
     setServerError("");
@@ -125,9 +128,10 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
         />
       </div>
       <div>
-        <label htmlFor="body" className="mb-1 block text-sm font-medium">
+        <label htmlFor="body" className="block text-sm font-medium">
           Body
         </label>
+        <WordCounter text={bodyValue} target="600–1,000 words" />
         <textarea
           id="body"
           rows={10}

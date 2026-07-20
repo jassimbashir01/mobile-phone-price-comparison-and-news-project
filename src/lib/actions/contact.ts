@@ -39,6 +39,7 @@ export async function submitContactForm(
     name: parsed.data.name,
     email: parsed.data.email,
     message: parsed.data.message,
+    inquiry_type: parsed.data.inquiry_type,
   });
 
   if (error) {
