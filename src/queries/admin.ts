@@ -1,19 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createAdminClient } from '@/lib/supabase/admin';
-import { getHomepageSectionPhones } from '@/queries/homepage';
-import { HOMEPAGE_PRICE_RANGES, homepagePriceSectionKey } from '@/lib/constants';
-import type { Brand, News, PhoneWithDetails } from '@/types/database';
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getHomepageSectionPhones } from "@/queries/homepage";
+import {
+  HOMEPAGE_PRICE_RANGES,
+  homepagePriceSectionKey,
+} from "@/lib/constants";
+import type { Brand, News, PhoneWithDetails } from "@/types/database";
 
 export async function getAllBrandsAdmin(): Promise<Brand[]> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from('brands').select('*').order('name');
+  const { data, error } = await supabase
+    .from("brands")
+    .select("*")
+    .order("name");
   if (error) throw new Error(`getAllBrandsAdmin: ${error.message}`);
   return data ?? [];
 }
 
 export async function getBrandByIdAdmin(id: string): Promise<Brand | null> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from('brands').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase
+    .from("brands")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(`getBrandByIdAdmin: ${error.message}`);
   return data;
 }
@@ -28,61 +38,77 @@ export async function getAllPhonesAdmin({
   const to = from + limit - 1;
 
   let query = supabase
-    .from('phones')
-    .select('*, brand:brands(id, name, slug)', { count: 'exact' })
-    .order('created_at', { ascending: false })
+    .from("phones")
+    .select("*, brand:brands(id, name, slug)", { count: "exact" })
+    .order("created_at", { ascending: false })
     .range(from, to);
 
-  if (search) query = query.ilike('name', `%${search}%`);
+  if (search) query = query.ilike("name", `%${search}%`);
 
   const { data, error, count } = await query;
   if (error) throw new Error(`getAllPhonesAdmin: ${error.message}`);
   return { phones: data ?? [], total: count ?? 0 };
 }
 
-export async function getPhoneByIdAdmin(id: string): Promise<PhoneWithDetails | null> {
+export async function getPhoneByIdAdmin(
+  id: string,
+): Promise<PhoneWithDetails | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from('phones')
-    .select('*, brand:brands(*), specs:phone_specs(*), images:phone_images(*)')
-    .eq('id', id)
+    .from("phones")
+    .select("*, brand:brands(*), specs:phone_specs(*), images:phone_images(*)")
+    .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`getPhoneByIdAdmin: ${error.message}`);
   if (!data) return null;
-  const specsRaw = Array.isArray((data as any).specs) ? (data as any).specs[0] : (data as any).specs;
+  const specsRaw = Array.isArray((data as any).specs)
+    ? (data as any).specs[0]
+    : (data as any).specs;
   return {
     ...(data as any),
     specs: specsRaw ?? null,
-    images: ((data as any).images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order),
+    images: ((data as any).images ?? []).sort(
+      (a: any, b: any) => a.sort_order - b.sort_order,
+    ),
   };
 }
 
 export async function getAllNewsAdmin(): Promise<News[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from('news')
-    .select('*, brand:brands(id, name, slug)')
-    .order('published_at', { ascending: false, nullsFirst: false });
+    .from("news")
+    .select("*, brand:brands(id, name, slug)")
+    .order("published_at", { ascending: false, nullsFirst: false });
   if (error) throw new Error(`getAllNewsAdmin: ${error.message}`);
   return data ?? [];
 }
 
 export async function getNewsByIdAdmin(id: string): Promise<News | null> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from('news').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase
+    .from("news")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(`getNewsByIdAdmin: ${error.message}`);
   return data;
 }
 
 export async function getDashboardCounts() {
   const supabase = createAdminClient();
-  const [{ count: phoneCount }, { count: brandCount }, { count: newsCount }, { count: messageCount }] =
-    await Promise.all([
-      supabase.from('phones').select('*', { count: 'exact', head: true }),
-      supabase.from('brands').select('*', { count: 'exact', head: true }),
-      supabase.from('news').select('*', { count: 'exact', head: true }),
-      supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
-    ]);
+  const [
+    { count: phoneCount },
+    { count: brandCount },
+    { count: newsCount },
+    { count: messageCount },
+  ] = await Promise.all([
+    supabase.from("phones").select("*", { count: "exact", head: true }),
+    supabase.from("brands").select("*", { count: "exact", head: true }),
+    supabase.from("news").select("*", { count: "exact", head: true }),
+    supabase
+      .from("contact_messages")
+      .select("*", { count: "exact", head: true }),
+  ]);
 
   return {
     phones: phoneCount ?? 0,
@@ -93,70 +119,92 @@ export async function getDashboardCounts() {
 }
 
 const SECTION_DISPLAY_ORDER = [
-  'featured_slider',
-  'latest_phones',
+  "featured_slider",
+  "latest_phones",
   ...HOMEPAGE_PRICE_RANGES.map(homepagePriceSectionKey),
-  'coming_soon',
+  "coming_soon",
 ];
 
 export async function getHomepageSectionsAdmin() {
   const supabase = createAdminClient();
-  const { data: sections, error } = await supabase.from('homepage_sections').select('*');
+  const { data: sections, error } = await supabase
+    .from("homepage_sections")
+    .select("*");
   if (error) throw new Error(`getHomepageSectionsAdmin: ${error.message}`);
 
-  const priceBracketMap = new Map(HOMEPAGE_PRICE_RANGES.map((r) => [homepagePriceSectionKey(r), r]));
+  const priceBracketMap = new Map(
+    HOMEPAGE_PRICE_RANGES.map((r) => [homepagePriceSectionKey(r), r]),
+  );
 
   const resolved = await Promise.all(
     (sections ?? []).map(async (s) => {
       const bracket = priceBracketMap.get(s.section_key);
       const result = await getHomepageSectionPhones(s.section_key, {
-        fallback: bracket ? { priceMin: bracket.min, priceMax: bracket.max } : undefined,
+        fallback: bracket
+          ? { priceMin: bracket.min, priceMax: bracket.max }
+          : undefined,
       });
       return { ...s, phones: result?.phones ?? [] };
-    })
+    }),
   );
 
   resolved.sort(
-    (a, b) => SECTION_DISPLAY_ORDER.indexOf(a.section_key) - SECTION_DISPLAY_ORDER.indexOf(b.section_key)
+    (a, b) =>
+      SECTION_DISPLAY_ORDER.indexOf(a.section_key) -
+      SECTION_DISPLAY_ORDER.indexOf(b.section_key),
   );
 
   return resolved;
 }
 
-export async function getAllOffersAdmin(): Promise<import('@/types/database').Offer[]> {
+export async function getAllOffersAdmin(): Promise<
+  import("@/types/database").Offer[]
+> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from('offers').select('*').order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from("offers")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) throw new Error(`getAllOffersAdmin: ${error.message}`);
   return data ?? [];
 }
 
-export async function getOfferByIdAdmin(id: string): Promise<import('@/types/database').Offer | null> {
+export async function getOfferByIdAdmin(
+  id: string,
+): Promise<import("@/types/database").Offer | null> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from('offers').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await supabase
+    .from("offers")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(`getOfferByIdAdmin: ${error.message}`);
   return data;
 }
 
 export async function getPhoneExtendedSpecsAdmin(
-  phoneId: string
-): Promise<import('@/types/database').PhoneExtendedSpecs | null> {
+  phoneId: string,
+): Promise<import("@/types/database").PhoneExtendedSpecs | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from('phone_extended_specs')
-    .select('*')
-    .eq('phone_id', phoneId)
+    .from("phone_extended_specs")
+    .select("*")
+    .eq("phone_id", phoneId)
     .maybeSingle();
 
   if (error) throw new Error(`getPhoneExtendedSpecsAdmin: ${error.message}`);
   return data;
 }
 
-export async function getAllContactMessagesAdmin(): Promise<import('@/types/database').ContactMessage[]> {
+export async function getAllContactMessagesAdmin(
+  limit = 100,
+): Promise<import("@/types/database").ContactMessage[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from('contact_messages')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("contact_messages")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
   if (error) throw new Error(`getAllContactMessagesAdmin: ${error.message}`);
   return data ?? [];
 }
