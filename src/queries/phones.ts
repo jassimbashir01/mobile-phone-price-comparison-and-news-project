@@ -88,21 +88,25 @@ export async function getComingSoonPhones(limit = 12): Promise<PhoneCardData[]> 
 
 export async function getPhonesByBrandSlug(
   brandSlug: string,
-  { limit = 60 }: { limit?: number } = {}
-): Promise<PhoneCardData[]> {
-  const { data, error } = await supabase
+  { page = 1, limit = 24 }: { page?: number; limit?: number } = {}
+): Promise<{ phones: PhoneCardData[]; total: number }> {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
     .from('phones')
-    .select(PHONE_CARD_SELECT)
+    .select(
+      `*, brand:brands!inner(id, name, slug), specs:phone_specs(ram_gb, storage_gb, display_size, main_camera_mp, battery_mah, os, network_type), images:phone_images(id, cloudinary_public_id, is_primary, sort_order)`,
+      { count: 'exact' }
+    )
     .eq('brand.slug', brandSlug)
     .order('sort_order')
-    .limit(limit);
+    .range(from, to);
 
   if (error) throw new Error(`getPhonesByBrandSlug: ${error.message}`);
-  // Supabase doesn't support filtering on a joined column directly in all
-  // versions, so we filter defensively in JS too.
-  return (data ?? [])
-    .filter((row: any) => row.brand?.slug === brandSlug)
-    .map(normalizeCard);
+
+  const filtered = (data ?? []).filter((row: any) => row.brand?.slug === brandSlug);
+  return { phones: filtered.map(normalizeCard), total: count ?? filtered.length };
 }
 
 // Generic filter used by every /price /ram /screen /camera /os /mobiles page.
@@ -180,30 +184,34 @@ export async function getRelatedPhones(
   return (data ?? []).map(normalizeCard);
 }
 
-export async function searchPhones(q: string, limit = 20): Promise<PhoneCardData[]> {
+export async function searchPhones(
+  q: string,
+  page = 1,
+  limit = 20
+): Promise<{ phones: PhoneCardData[]; total: number }> {
   const trimmed = q.trim();
-  if (!trimmed) return [];
+  if (!trimmed) return { phones: [], total: 0 };
 
-  const { data: matchedPhones, error: rpcError } = await supabase.rpc('search_phones', {
+  const offset = (page - 1) * limit;
+  const { data: matched, error: rpcError } = await supabase.rpc('search_phones', {
     search_query: trimmed,
     result_limit: limit,
+    result_offset: offset,
   });
 
   if (rpcError) throw new Error(`searchPhones: ${rpcError.message}`);
-  if (!matchedPhones || matchedPhones.length === 0) return [];
+  if (!matched || matched.length === 0) return { phones: [], total: 0 };
 
-  // The RPC returns bare phones rows (no joins) — fetch the full card data
-  // for just those matched IDs, preserving the RPC's relevance order.
-  const ids = matchedPhones.map((p: any) => p.id);
-  const { data, error } = await supabase
-    .from('phones')
-    .select(PHONE_CARD_SELECT)
-    .in('id', ids);
+  const total = Number(matched[0]?.total_count ?? 0);
+  const ids = matched.map((p: any) => p.id);
 
+  const { data, error } = await supabase.from('phones').select(PHONE_CARD_SELECT).in('id', ids);
   if (error) throw new Error(`searchPhones: ${error.message}`);
 
   const byId = new Map((data ?? []).map((p: any) => [p.id, p]));
-  return ids.map((id: string) => byId.get(id)).filter(Boolean).map(normalizeCard);
+  const phones = ids.map((id: string) => byId.get(id)).filter(Boolean).map(normalizeCard);
+
+  return { phones, total };
 }
 
 export async function getSimilarPricedPhones(

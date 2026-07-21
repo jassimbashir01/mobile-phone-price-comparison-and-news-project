@@ -1,17 +1,30 @@
 import Link from 'next/link';
-import { getAllBrandsAdmin } from '@/queries/admin';
+import { getAllBrandsAdminPaginated } from '@/queries/admin';
 import { getCurrentUserProfile } from '@/lib/auth';
 import { BrandDeleteButton } from '@/components/admin/BrandDeleteButton';
+import { AdminPagination } from '@/components/admin/AdminPagination';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminBrandsPage() {
-  const [brands, profile] = await Promise.all([getAllBrandsAdmin(), getCurrentUserProfile()]);
+export default async function AdminBrandsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = Number(pageParam ?? '1') || 1;
+  const limit = 20;
+
+  const [{ brands, total }, profile] = await Promise.all([
+    getAllBrandsAdminPaginated(page, limit),
+    getCurrentUserProfile(),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Brands</h1>
+        <h1 className="text-xl font-bold">Brands ({total})</h1>
         <Link href="/admin/brands/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
           + New Brand
         </Link>
@@ -43,6 +56,7 @@ export default async function AdminBrandsPage() {
           </tbody>
         </table>
       </div>
+      <AdminPagination basePath="/admin/brands" currentPage={page} totalPages={totalPages} />
     </div>
   );
 }

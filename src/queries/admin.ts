@@ -73,14 +73,22 @@ export async function getPhoneByIdAdmin(
   };
 }
 
-export async function getAllNewsAdmin(): Promise<News[]> {
+export async function getAllNewsAdmin(
+  page = 1,
+  limit = 20,
+): Promise<{ news: News[]; total: number }> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
     .from("news")
-    .select("*, brand:brands(id, name, slug)")
-    .order("published_at", { ascending: false, nullsFirst: false });
+    .select("*, brand:brands(id, name, slug)", { count: "exact" })
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .range(from, to);
+
   if (error) throw new Error(`getAllNewsAdmin: ${error.message}`);
-  return data ?? [];
+  return { news: data ?? [], total: count ?? 0 };
 }
 
 export async function getNewsByIdAdmin(id: string): Promise<News | null> {
@@ -157,16 +165,40 @@ export async function getHomepageSectionsAdmin() {
   return resolved;
 }
 
-export async function getAllOffersAdmin(): Promise<
-  import("@/types/database").Offer[]
-> {
+export async function getAllBrandsAdminPaginated(
+  page = 1,
+  limit = 20,
+): Promise<{ brands: Brand[]; total: number }> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
+    .from("brands")
+    .select("*", { count: "exact" })
+    .order("name")
+    .range(from, to);
+
+  if (error) throw new Error(`getAllBrandsAdminPaginated: ${error.message}`);
+  return { brands: data ?? [], total: count ?? 0 };
+}
+
+export async function getAllOffersAdmin(
+  page = 1,
+  limit = 20,
+): Promise<{ offers: import("@/types/database").Offer[]; total: number }> {
+  const supabase = createAdminClient();
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
     .from("offers")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
   if (error) throw new Error(`getAllOffersAdmin: ${error.message}`);
-  return data ?? [];
+  return { offers: data ?? [], total: count ?? 0 };
 }
 
 export async function getOfferByIdAdmin(
@@ -197,14 +229,22 @@ export async function getPhoneExtendedSpecsAdmin(
 }
 
 export async function getAllContactMessagesAdmin(
-  limit = 100,
-): Promise<import("@/types/database").ContactMessage[]> {
+  page = 1,
+  limit = 20,
+): Promise<{
+  messages: import("@/types/database").ContactMessage[];
+  total: number;
+}> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
     .from("contact_messages")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(limit);
+    .range(from, to);
+
   if (error) throw new Error(`getAllContactMessagesAdmin: ${error.message}`);
-  return data ?? [];
+  return { messages: data ?? [], total: count ?? 0 };
 }

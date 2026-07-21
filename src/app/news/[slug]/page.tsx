@@ -81,12 +81,11 @@ export default async function NewsArticlePage({
     slug: string;
   } | null;
 
-  const [relatedNews, brandPhones] = await Promise.all([
-    getRelatedNews(article.id, article.brand_id, 4),
-    brand
-      ? getPhonesByBrandSlug(brand.slug, { limit: 6 })
-      : Promise.resolve([]),
-  ]);
+  const [relatedNews, brandPhonesResult] = await Promise.all([
+  getRelatedNews(article.id, article.brand_id, 4),
+  brand ? getPhonesByBrandSlug(brand.slug, { limit: 6 }) : Promise.resolve({ phones: [], total: 0 }),
+]);
+const brandPhones = brandPhonesResult.phones;
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
