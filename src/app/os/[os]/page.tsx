@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { OS_TYPES } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { OS_TYPES } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -42,17 +42,17 @@ export default async function OsPage({
   const opt = getOption(os);
   if (!opt) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
 
   const filter =
-    opt.slug === 'android'
-      ? { os: 'Android' as const }
-      : opt.slug === 'windows'
-      ? { os: 'Windows' as const }
-      : opt.slug === 'feature-phones'
-      ? { os: 'Feature Phone' as const }
-      : { excludeOs: 'Feature Phone' as const }; // all-smartphones
+    opt.slug === "android"
+      ? { os: "Android" as const }
+      : opt.slug === "windows"
+        ? { os: "Windows" as const }
+        : opt.slug === "feature-phones"
+          ? { os: "Feature Phone" as const }
+          : { excludeOs: "Feature Phone" as const }; // all-smartphones
 
   const { phones, total } = await filterPhones({ ...filter, page, limit });
 
@@ -60,11 +60,12 @@ export default async function OsPage({
     <PageShell>
       <CategoryPageContent
         breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Operating System' },
+          { label: "Home", href: "/" },
+          { label: "Operating System" },
           { label: opt.label },
         ]}
-        title={opt.label}
+        title={`${opt.label} in Pakistan`}
+        description={`Compare ${opt.label.toLowerCase()} available in Pakistan, with prices and full specifications.`}
         phones={phones}
         total={total}
         page={page}

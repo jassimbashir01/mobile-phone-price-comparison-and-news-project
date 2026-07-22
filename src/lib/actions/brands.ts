@@ -1,45 +1,46 @@
-'use server';
+"use server";
 
-import { requireRole } from '@/lib/auth';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { pingIndexNow, triggerRevalidate } from '@/lib/revalidate';
-import { brandSchema, type BrandFormValues } from '@/lib/validation/brand';
+import { requireRole } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { pingIndexNow, triggerRevalidate } from "@/lib/revalidate";
+import { brandSchema, type BrandFormValues } from "@/lib/validation/brand";
 
 export async function createBrand(values: BrandFormValues) {
-  await requireRole(['admin', 'editor']);
+  await requireRole(["admin", "editor"]);
   const parsed = brandSchema.parse(values);
 
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from('brands')
+    .from("brands")
     .insert({ ...parsed, logo_url: parsed.logo_url || null })
     .select()
     .single();
 
   if (error) throw new Error(error.message);
-  await triggerRevalidate(['/', `/brand/${parsed.slug}`]);
+  await triggerRevalidate(["/", `/brand/${parsed.slug}`]);
+  await pingIndexNow(["/", `/brand/${parsed.slug}`]);
   return data;
 }
 
 export async function updateBrand(id: string, values: BrandFormValues) {
-  await requireRole(['admin', 'editor']);
+  await requireRole(["admin", "editor"]);
   const parsed = brandSchema.parse(values);
 
   const supabase = createAdminClient();
   const { error } = await supabase
-    .from('brands')
+    .from("brands")
     .update({ ...parsed, logo_url: parsed.logo_url || null })
-    .eq('id', id);
+    .eq("id", id);
 
   if (error) throw new Error(error.message);
-  await triggerRevalidate(['/', `/brand/${parsed.slug}`]);
-  await pingIndexNow(['/', `/phone/${parsed.slug}`]);
+  await triggerRevalidate(["/", `/brand/${parsed.slug}`]);
+  await pingIndexNow(["/", `/brand/${parsed.slug}`]);
 }
 
 export async function deleteBrand(id: string, slug: string) {
-  await requireRole(['admin']); // editors cannot delete
+  await requireRole(["admin"]); // editors cannot delete
   const supabase = createAdminClient();
-  const { error } = await supabase.from('brands').delete().eq('id', id);
+  const { error } = await supabase.from("brands").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  await triggerRevalidate(['/', `/brand/${slug}`]);
+  await triggerRevalidate(["/", `/brand/${slug}`]);
 }

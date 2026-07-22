@@ -3,7 +3,7 @@ import { getActiveBrands } from "@/queries/brands";
 import { SearchBar } from "./SearchBar";
 import { MobileMenu } from "./MobileMenu";
 import { Sidebar } from "./Sidebar";
-import { ChevronDown } from "lucide-react";
+import { BrandsDropdown } from "./BrandsDropdown";
 import {
   SITE_NAME_PRIMARY_PART,
   SITE_NAME_ACCENT_PART,
@@ -26,22 +26,7 @@ export async function Navbar() {
           <Link href="/" className="hover:text-primary">
             Home
           </Link>
-          <div className="group relative">
-            <button className="flex items-center gap-1 hover:text-primary">
-              Brands <ChevronDown size={14} />
-            </button>
-            <div className="invisible absolute left-0 top-full z-40 w-48 rounded-md border border-border bg-white py-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
-              {brands.map((b) => (
-                <Link
-                  key={b.id}
-                  href={`/brand/${b.slug}`}
-                  className="block px-4 py-1.5 text-sm hover:bg-primary-light"
-                >
-                  {b.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+          <BrandsDropdown brands={brands} />
           <Link href="/news" className="hover:text-primary">
             News
           </Link>

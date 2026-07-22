@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -100,6 +100,9 @@ export function PhoneForm({
       : { status: "available", is_featured: false, sort_order: 0 },
   });
 
+  const seoDescriptionValue =
+    useWatch({ control, name: "seo_description" }) ?? "";
+
   async function onSubmit(values: PhoneFormValues) {
     setServerError("");
     try {
@@ -185,17 +188,23 @@ export function PhoneForm({
           <input type="checkbox" {...register("is_featured")} /> Featured
         </label>
 
-        <Field
-          id="seo_description"
-          label="SEO Meta Description (plain text, shown in search results)"
-        >
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <label
+              htmlFor="seo_description"
+              className="block text-sm font-medium"
+            >
+              SEO Meta Description (plain text, shown in search results)
+            </label>
+            <WordCounter text={seoDescriptionValue} target="20–30 words" />
+          </div>
           <textarea
             id="seo_description"
             rows={3}
             {...register("seo_description")}
             className={inputClass}
           />
-        </Field>
+        </div>
 
         <div>
           <label className="mb-1 block text-sm font-medium">Overview</label>
@@ -345,7 +354,7 @@ export function PhoneForm({
                 className="flex items-center gap-2 text-sm capitalize"
               >
                 <input type="checkbox" {...register(field)} />{" "}
-                {field.replace("_", " ")}
+                {field.replace(/_/g, " ")}
               </label>
             ))}
           </div>

@@ -27,7 +27,7 @@ export async function createNews(values: NewsFormValues, coverImagePublicId: str
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/', '/news', `/news/${parsed.slug}`]);
-  await pingIndexNow(['/', `/phone/${parsed.slug}`]);
+  await pingIndexNow(['/', `/news/${parsed.slug}`]);
   return data;
 }
 
@@ -52,7 +52,7 @@ export async function updateNews(id: string, values: NewsFormValues, coverImageP
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/', '/news', `/news/${parsed.slug}`]);
-  await pingIndexNow(['/', `/phone/${parsed.slug}`]);
+  await pingIndexNow(['/', `/news/${parsed.slug}`]);
 }
 
 export async function deleteNews(id: string, slug: string) {

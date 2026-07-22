@@ -1,5 +1,5 @@
-import Link from "next/link";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Link from 'next/link';
+import CloudinaryImage from '@/components/cloudinary-image';
 
 interface NewsCardItem {
   id: string;
@@ -8,6 +8,7 @@ interface NewsCardItem {
   excerpt: string | null;
   cover_image_public_id: string | null;
   published_at: string | null;
+  brand?: { name: string } | null;
 }
 
 export function NewsCard({ item }: { item: NewsCardItem }) {
@@ -33,6 +34,7 @@ export function NewsCard({ item }: { item: NewsCardItem }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
+        {item.brand && <span className="text-[10px] text-ink/50">{item.brand.name}</span>}
         <h3 className="line-clamp-2 text-sm font-semibold group-hover:text-primary">
           {item.title}
         </h3>
@@ -41,10 +43,10 @@ export function NewsCard({ item }: { item: NewsCardItem }) {
         )}
         {item.published_at && (
           <p className="mt-auto pt-1 text-[11px] text-ink/40">
-            {new Date(item.published_at).toLocaleDateString("en-PK", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
+            {new Date(item.published_at).toLocaleDateString('en-PK', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
             })}
           </p>
         )}

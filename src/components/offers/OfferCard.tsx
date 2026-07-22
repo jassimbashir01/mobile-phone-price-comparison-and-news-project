@@ -1,4 +1,4 @@
-import { CldImage } from 'next-cloudinary';
+import CloudinaryImage from '@/components/cloudinary-image';
 import { formatPKR } from '@/lib/utils';
 import type { Offer } from '@/types/database';
 
@@ -14,7 +14,7 @@ export function OfferCard({ offer }: { offer: Offer }) {
     >
       <div className="relative aspect-square bg-surface">
         {offer.image_public_id ? (
-          <CldImage
+          <CloudinaryImage
             src={offer.image_public_id}
             alt={offer.title}
             width={300}

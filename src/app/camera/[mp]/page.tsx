@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { CAMERA_OPTIONS } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { CAMERA_OPTIONS } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -42,23 +42,24 @@ export default async function CameraPage({
   const opt = getOption(mp);
   if (!opt) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
   const { phones, total } = await filterPhones(
-    opt.slug === 'without-camera'
+    opt.slug === "without-camera"
       ? { cameraNone: true, page, limit }
-      : { cameraMin: opt.min, cameraMax: opt.max, page, limit }
+      : { cameraMin: opt.min, cameraMax: opt.max, page, limit },
   );
 
   return (
     <PageShell>
       <CategoryPageContent
         breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Camera' },
+          { label: "Home", href: "/" },
+          { label: "Camera" },
           { label: opt.label },
         ]}
         title={`${opt.label} Camera Mobile Phones in Pakistan`}
+        description={`Compare mobile phones with a ${opt.label.toLowerCase()} camera in Pakistan, with prices and full specifications.`}
         phones={phones}
         total={total}
         page={page}

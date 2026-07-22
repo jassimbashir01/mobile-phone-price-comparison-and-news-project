@@ -1,9 +1,17 @@
-import { notFound } from 'next/navigation';
-import { PhoneForm } from '@/components/admin/PhoneForm';
-import { ExtendedSpecsForm } from '@/components/admin/ExtendedSpecsForm';
-import { getPhoneByIdAdmin, getAllBrandsAdmin, getPhoneExtendedSpecsAdmin } from '@/queries/admin';
+import { notFound } from "next/navigation";
+import { PhoneForm } from "@/components/admin/PhoneForm";
+import { ExtendedSpecsForm } from "@/components/admin/ExtendedSpecsForm";
+import {
+  getPhoneByIdAdmin,
+  getAllBrandsAdmin,
+  getPhoneExtendedSpecsAdmin,
+} from "@/queries/admin";
 
-export default async function EditPhonePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditPhonePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const [phone, brands, extendedSpecs] = await Promise.all([
     getPhoneByIdAdmin(id),
@@ -20,8 +28,14 @@ export default async function EditPhonePage({ params }: { params: Promise<{ id: 
       </div>
 
       <div>
-        <h1 className="mb-4 text-xl font-bold">Full Specifications (public spec table)</h1>
-        <ExtendedSpecsForm phoneId={phone.id} phoneSlug={phone.slug} initialValues={extendedSpecs} />
+        <h2 className="mb-4 text-xl font-bold">
+          Full Specifications (public spec table)
+        </h2>
+        <ExtendedSpecsForm
+          phoneId={phone.id}
+          phoneSlug={phone.slug}
+          initialValues={extendedSpecs}
+        />
       </div>
     </div>
   );

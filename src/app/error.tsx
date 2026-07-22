@@ -1,13 +1,22 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Vercel captures console.error output in its function logs — this is
+    // the free, zero-dependency way to at least know an error occurred,
+    // versus it vanishing the moment the visitor clicks "Try Again."
+    console.error('Unhandled page error:', error);
+  }, [error]);
+
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-4 py-20 text-center">
       <h1 className="mb-2 text-xl font-bold">Something went wrong</h1>

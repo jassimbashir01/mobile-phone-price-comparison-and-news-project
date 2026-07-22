@@ -5,17 +5,7 @@ import {
   type AdvertiseInquiryValues,
 } from "@/lib/validation/advertise";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const submissionLog = new Map<string, number[]>();
-
-function isRateLimited(key: string, maxPerHour = 5): boolean {
-  const now = Date.now();
-  const hourAgo = now - 60 * 60 * 1000;
-  const timestamps = (submissionLog.get(key) ?? []).filter((t) => t > hourAgo);
-  timestamps.push(now);
-  submissionLog.set(key, timestamps);
-  return timestamps.length > maxPerHour;
-}
+import { isRateLimited } from '@/lib/rateLimit';
 
 export async function submitAdvertiseInquiry(
   values: AdvertiseInquiryValues,

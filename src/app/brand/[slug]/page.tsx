@@ -1,80 +1,61 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { PhoneGrid } from '@/components/phone/PhoneGrid';
-import { Pagination } from '@/components/ui/Pagination';
-import { JsonLd } from '@/components/seo/JsonLd';
-import { buildBreadcrumbJsonLd } from '@/lib/seo';
-import { siteUrl } from '@/lib/site';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { getBrandBySlug, getAllBrandSlugs } from '@/queries/brands';
-import { getPhonesByBrandSlug } from '@/queries/phones';
+import { NextRequest, NextResponse } from 'next/server';
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+import { requireRole } from '@/lib/auth';
+import { SITE_NAME } from '@/lib/site-config';
 
-export const revalidate = 21600;
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-export async function generateStaticParams() {
-  const slugs = await getAllBrandSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const brand = await getBrandBySlug(slug);
-  if (!brand) return {};
-  return {
-    title: `${brand.name} Mobile Prices in Pakistan`,
-    description:
-      brand.description ??
-      `Browse all ${brand.name} mobile phones with prices and specifications in Pakistan.`,
-    alternates: { canonical: `/brand/${brand.slug}` },
-  };
-}
+export async function POST(req: NextRequest) {
+  try {
+    await requireRole(['admin', 'editor']);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-export default async function BrandPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { slug } = await params;
-  const { page: pageParam } = await searchParams;
-  const brand = await getBrandBySlug(slug);
-  if (!brand) notFound();
+  const formData = await req.formData();
+  const file = formData.get('file') as File | null;
+  if (!file) {
+    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+  }
 
-  const page = Number(pageParam ?? '1') || 1;
-  const limit = 24;
-  const { phones, total } = await getPhonesByBrandSlug(slug, { page, limit });
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (!file.type.startsWith('image/')) {
+    return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
+  }
 
-  const breadcrumbItems = [{ label: 'Home', href: '/' }, { label: brand.name }];
+  if (file.size > MAX_SIZE_BYTES) {
+    return NextResponse.json({ error: 'File must be under 10MB' }, { status: 400 });
+  }
 
-  return (
-    <PageShell>
-      <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
-      <Breadcrumb items={breadcrumbItems} />
-      <div className="mb-4 flex items-center gap-3">
-        {brand.logo_url && (
-          <CloudinaryImage
-            src={brand.logo_url}
-            alt={`${brand.name} logo`}
-            width={40}
-            height={40}
-            sizes="40px"
-            className="h-10 w-10 object-contain"
-          />
-        )}
-        <h1 className="text-xl font-bold">{brand.name} Mobile Prices in Pakistan</h1>
-      </div>
-      {brand.description && <p className="mb-4 text-sm text-ink/60">{brand.description}</p>}
-      <p className="mb-4 text-xs text-ink/40">{total} phones found</p>
-      <PhoneGrid phones={phones} />
-      <Pagination basePath={`/brand/${slug}`} currentPage={page} totalPages={totalPages} />
-    </PageShell>
-  );
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: SITE_NAME,
+          // Only shrinks images larger than 1600px on either side — smaller
+          // images are untouched. This is comfortably larger than any image
+          // requested by any component on the site (the largest is the
+          // phone detail gallery, currently requesting well under 600px),
+          // so nothing visible changes; it just caps worst-case storage and
+          // bandwidth cost from an oversized original upload.
+          transformation: [{ width: 1600, height: 1600, crop: 'limit' }],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else if (result) resolve(result);
+          else reject(new Error('Cloudinary upload returned no result'));
+        }
+      )
+      .end(buffer);
+  });
+
+  return NextResponse.json({ publicId: result.public_id });
 }

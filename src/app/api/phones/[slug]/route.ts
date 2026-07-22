@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPhoneBySlug } from '@/queries/phones';
+import { getPhoneBySlug, getPhoneExtendedSpecs } from '@/queries/phones';
 
 export async function GET(
   _req: NextRequest,
@@ -10,5 +10,7 @@ export async function GET(
   if (!phone) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
-  return NextResponse.json(phone);
+
+  const extendedSpecs = await getPhoneExtendedSpecs(phone.id);
+  return NextResponse.json({ ...phone, extendedSpecs });
 }

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import CloudinaryImage from "@/components/cloudinary-image";
-import { Star, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { useState } from 'react';
+import CloudinaryImage from '@/components/cloudinary-image';
+import { Star, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 
 export interface ManagedImage {
   id?: string;
@@ -19,27 +19,38 @@ export function ImageUploader({
   onChange: (images: ManagedImage[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const data = await res.json();
-    setUploading(false);
-    if (data.publicId) {
-      onChange([
-        ...images,
-        {
-          cloudinary_public_id: data.publicId,
-          is_primary: images.length === 0,
-          sort_order: images.length,
-        },
-      ]);
+    setUploadError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadError(data.error ?? 'Upload failed. Please try again.');
+        return;
+      }
+      if (data.publicId) {
+        onChange([
+          ...images,
+          {
+            cloudinary_public_id: data.publicId,
+            is_primary: images.length === 0,
+            sort_order: images.length,
+          },
+        ]);
+      }
+    } catch {
+      setUploadError('Upload failed. Please check your connection and try again.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
     }
-    e.target.value = "";
   }
 
   function setPrimary(index: number) {
@@ -50,8 +61,7 @@ export function ImageUploader({
     const next = images
       .filter((_, i) => i !== index)
       .map((img, i) => ({ ...img, sort_order: i }));
-    if (next.length > 0 && !next.some((i) => i.is_primary))
-      next[0].is_primary = true;
+    if (next.length > 0 && !next.some((i) => i.is_primary)) next[0].is_primary = true;
     onChange(next);
   }
 
@@ -67,10 +77,7 @@ export function ImageUploader({
     <div>
       <div className="mb-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
         {images.map((img, i) => (
-          <div
-            key={img.cloudinary_public_id + i}
-            className="relative rounded-md border border-border p-1"
-          >
+          <div key={img.cloudinary_public_id + i} className="relative rounded-md border border-border p-1">
             <div className="relative aspect-square overflow-hidden rounded">
               <CloudinaryImage
                 src={img.cloudinary_public_id}
@@ -90,19 +97,18 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={() => setPrimary(i)}
+                aria-label="Set as primary image"
                 title="Set as primary"
                 className="text-ink/50 hover:text-primary"
               >
-                <Star
-                  size={14}
-                  fill={img.is_primary ? "currentColor" : "none"}
-                />
+                <Star size={14} fill={img.is_primary ? 'currentColor' : 'none'} />
               </button>
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
+                  aria-label="Move image earlier"
                   className="text-ink/40 hover:text-primary disabled:opacity-20"
                 >
                   <ArrowUp size={14} />
@@ -111,6 +117,7 @@ export function ImageUploader({
                   type="button"
                   onClick={() => move(i, 1)}
                   disabled={i === images.length - 1}
+                  aria-label="Move image later"
                   className="text-ink/40 hover:text-primary disabled:opacity-20"
                 >
                   <ArrowDown size={14} />
@@ -118,6 +125,7 @@ export function ImageUploader({
                 <button
                   type="button"
                   onClick={() => remove(i)}
+                  aria-label="Remove image"
                   className="text-ink/40 hover:text-red-600"
                 >
                   <Trash2 size={14} />
@@ -127,14 +135,9 @@ export function ImageUploader({
           </div>
         ))}
       </div>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFile}
-        disabled={uploading}
-        className="text-sm"
-      />
+      <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="text-sm" />
       {uploading && <p className="mt-1 text-xs text-ink/40">Uploading…</p>}
+      {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
     </div>
   );
 }

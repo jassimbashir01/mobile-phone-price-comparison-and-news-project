@@ -20,10 +20,11 @@ function CategoryBlock({
   defaultOpen?: boolean;
 }) {
   return (
-    <details open={defaultOpen} className="border-b border-border py-3">
+    <details open={defaultOpen} className="group border-b border-border py-3">
       <summary className="flex items-center justify-between text-sm font-semibold text-ink">
         {title}
-        <span className="text-ink/40">+</span>
+        <span className="text-ink/40 group-open:hidden">+</span>
+        <span className="hidden text-ink/40 group-open:inline">−</span>
       </summary>
       <ul className="mt-2 space-y-1 pl-1 text-sm text-ink/80">{children}</ul>
     </details>

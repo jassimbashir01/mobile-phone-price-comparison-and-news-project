@@ -3,9 +3,25 @@ import { getActiveBrands } from "@/queries/brands";
 import { PRICE_RANGES, FEATURE_TYPES } from "@/lib/constants";
 import { SITE_NAME } from "@/lib/site-config";
 
+// Picked from the middle of the full price spread (ranges 3–8 of 11) so
+// this footer column represents the site's core, most-searched price
+// brackets rather than skewing toward either the cheapest or priciest
+// extremes.
+const FOOTER_PRICE_SLUGS = [
+  "10000-15000",
+  "15000-25000",
+  "25000-35000",
+  "35000-45000",
+  "45000-55000",
+  "55000-105000",
+];
+
 export async function Footer() {
   const brands = await getActiveBrands();
   const topBrands = brands.slice(0, 6);
+  const footerPriceRanges = FOOTER_PRICE_SLUGS.map((slug) =>
+    PRICE_RANGES.find((p) => p.slug === slug),
+  ).filter((p): p is (typeof PRICE_RANGES)[number] => Boolean(p));
 
   return (
     <footer className="mt-12 border-t border-border bg-white">
@@ -30,8 +46,7 @@ export async function Footer() {
             Popular Price Ranges
           </h3>
           <ul className="space-y-1.5 text-ink/70">
-          {/* TODO: change price ranges according to the brand lengths */}
-            {PRICE_RANGES.slice(0, 9).map((p) => (
+            {footerPriceRanges.map((p) => (
               <li key={p.slug}>
                 <Link href={`/price/${p.slug}`} className="hover:text-primary">
                   {p.label}
@@ -84,21 +99,11 @@ export async function Footer() {
                 Privacy Policy
               </Link>
             </li>
-            {/* <li>
-              <Link href="/stolen-phone-guide" className="hover:text-primary">
-                Stolen Phone Guide
-              </Link>
-            </li> */}
             <li>
               <Link href="/news" className="hover:text-primary">
                 Latest News
               </Link>
             </li>
-            {/* <li>
-              <Link href="/compare" className="hover:text-primary">
-                Compare Phones
-              </Link>
-            </li> */}
           </ul>
         </div>
       </div>

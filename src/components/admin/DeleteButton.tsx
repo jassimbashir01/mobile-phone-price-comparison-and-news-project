@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useTransition } from 'react';
-import { Trash2 } from 'lucide-react';
+import { useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
 
 export function DeleteButton({
   isAdmin,
@@ -17,7 +17,12 @@ export function DeleteButton({
 
   if (!confirming) {
     return (
-      <button onClick={() => setConfirming(true)} className="text-red-600 hover:text-red-700" title="Delete">
+      <button
+        onClick={() => setConfirming(true)}
+        aria-label="Delete"
+        title="Delete"
+        className="text-red-600 hover:text-red-700"
+      >
         <Trash2 size={16} />
       </button>
     );
@@ -31,9 +36,12 @@ export function DeleteButton({
         disabled={isPending}
         className="font-semibold text-red-600 hover:underline"
       >
-        {isPending ? '…' : 'Yes'}
+        {isPending ? "…" : "Yes"}
       </button>
-      <button onClick={() => setConfirming(false)} className="text-ink/50 hover:underline">
+      <button
+        onClick={() => setConfirming(false)}
+        className="text-ink/50 hover:underline"
+      >
         No
       </button>
     </span>

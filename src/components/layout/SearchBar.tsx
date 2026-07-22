@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-'use client';
+"use client";
 
-import { useRouter, usePathname } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { Search } from 'lucide-react';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { formatPKR } from '@/lib/utils';
+import { useRouter, usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { Search } from "lucide-react";
+import CloudinaryImage from "@/components/cloudinary-image";
+import { formatPKR } from "@/lib/utils";
 
 interface SearchResult {
   id: string;
@@ -18,24 +18,22 @@ interface SearchResult {
 }
 
 export function SearchBar({ className }: { className?: string }) {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Clears the query and closes the dropdown on every route change —
-  // without this, the text (and any stale dropdown) persists after
-  // navigating away, which is the second bug being fixed here.
   useEffect(() => {
-    setQ('');
+    setQ("");
     setResults([]);
     setOpen(false);
+    setError("");
   }, [pathname]);
 
-  // Debounced live search-as-you-type, same pattern as SwapModal.
   useEffect(() => {
     if (q.trim().length < 2) {
       setResults([]);
@@ -43,27 +41,41 @@ export function SearchBar({ className }: { className?: string }) {
       return;
     }
     setLoading(true);
+    setError("");
     const timeout = setTimeout(async () => {
-      const res = await fetch(`/api/phones/search?q=${encodeURIComponent(q.trim())}`);
-      const data = await res.json();
-      setResults(data.phones ?? []);
-      setOpen(true);
-      setLoading(false);
+      try {
+        const res = await fetch(
+          `/api/phones/search?q=${encodeURIComponent(q.trim())}`,
+        );
+        if (!res.ok) {
+          setError("Search failed. Please try again.");
+          setResults([]);
+          return;
+        }
+        const data = await res.json();
+        setResults(data.phones ?? []);
+        setOpen(true);
+      } catch {
+        setError("Search failed. Please check your connection.");
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
     }, 300);
     return () => clearTimeout(timeout);
   }, [q]);
 
-  // Closes the dropdown on outside click, without needing a full-screen
-  // overlay the way SwapModal's modal pattern does — this is an inline
-  // dropdown, not a modal.
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
@@ -74,12 +86,17 @@ export function SearchBar({ className }: { className?: string }) {
   }
 
   return (
-    <div ref={containerRef} className={`relative ${className ?? ''}`}>
-      <form onSubmit={handleSubmit}>
+    <div ref={containerRef} className={`relative ${className ?? ""}`}>
+      <form onSubmit={handleSubmit} role="search">
         <div className="flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2">
           <Search size={18} className="text-ink/50" />
           <input
             type="text"
+            role="combobox"
+            aria-expanded={open}
+            aria-controls="search-results-listbox"
+            aria-autocomplete="list"
+            aria-label="Search phones"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onFocus={() => results.length > 0 && setOpen(true)}
@@ -90,16 +107,27 @@ export function SearchBar({ className }: { className?: string }) {
       </form>
 
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-96 overflow-y-auto rounded-lg border border-border bg-white shadow-lg">
-          {loading && <p className="px-4 py-3 text-xs text-ink/40">Searching…</p>}
-          {!loading && results.length === 0 && (
+        <div
+          id="search-results-listbox"
+          role="listbox"
+          aria-label="Search results"
+          className="absolute left-0 right-0 top-full z-50 mt-1 max-h-96 overflow-y-auto rounded-lg border border-border bg-white shadow-lg"
+        >
+          {loading && (
+            <p className="px-4 py-3 text-xs text-ink/40">Searching…</p>
+          )}
+          {error && <p className="px-4 py-3 text-xs text-red-600">{error}</p>}
+          {!loading && !error && results.length === 0 && (
             <p className="px-4 py-3 text-xs text-ink/40">No phones found.</p>
           )}
           {!loading &&
+            !error &&
             results.map((r) => (
               <Link
                 key={r.id}
                 href={`/phone/${r.slug}`}
+                role="option"
+                aria-selected={false}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-3 border-b border-border px-4 py-2 last:border-0 hover:bg-primary-light"
               >
@@ -119,10 +147,12 @@ export function SearchBar({ className }: { className?: string }) {
                   <p className="text-[10px] text-ink/50">{r.brand.name}</p>
                   <p className="truncate text-sm font-medium">{r.name}</p>
                 </div>
-                <span className="shrink-0 text-xs font-semibold text-primary">{formatPKR(r.price_pkr)}</span>
+                <span className="shrink-0 text-xs font-semibold text-primary">
+                  {formatPKR(r.price_pkr)}
+                </span>
               </Link>
             ))}
-          {!loading && results.length > 0 && (
+          {!loading && !error && results.length > 0 && (
             <button
               onClick={handleSubmit}
               className="block w-full border-t border-border px-4 py-2 text-center text-xs font-medium text-primary hover:bg-primary-light"

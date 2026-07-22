@@ -39,6 +39,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
+  // Running both at once double-counts every pageview in GA4 — set up GA4
+  // inside your GTM container and leave NEXT_PUBLIC_GA4_ID blank, or use
+  // GA4 directly and leave NEXT_PUBLIC_GTM_ID blank. Never both.
+  if (ga4Id && gtmId) {
+    throw new Error(
+      'Both NEXT_PUBLIC_GA4_ID and NEXT_PUBLIC_GTM_ID are set — this double-counts every pageview in GA4. Set up GA4 inside your GTM container instead, and leave NEXT_PUBLIC_GA4_ID blank, or use GA4 directly and leave NEXT_PUBLIC_GTM_ID blank.'
+    );
+  }
+
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable}`}>
       <head>

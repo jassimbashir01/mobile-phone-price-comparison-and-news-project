@@ -11,17 +11,34 @@ export function SingleImageUploader({
   onChange: (publicId: string | null) => void;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const data = await res.json();
-    setUploading(false);
-    if (data.publicId) onChange(data.publicId);
+    setUploadError("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUploadError(data.error ?? "Upload failed. Please try again.");
+        return;
+      }
+      if (data.publicId) onChange(data.publicId);
+    } catch {
+      setUploadError(
+        "Upload failed. Please check your connection and try again.",
+      );
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   }
 
   return (
@@ -39,6 +56,7 @@ export function SingleImageUploader({
           <button
             type="button"
             onClick={() => onChange(null)}
+            aria-label="Remove image"
             className="absolute right-1 top-1 rounded-full bg-white/90 px-2 py-0.5 text-xs"
           >
             Remove
@@ -56,6 +74,9 @@ export function SingleImageUploader({
         className="text-sm"
       />
       {uploading && <p className="mt-1 text-xs text-ink/40">Uploading…</p>}
+      {uploadError && (
+        <p className="mt-1 text-xs text-red-600">{uploadError}</p>
+      )}
     </div>
   );
 }

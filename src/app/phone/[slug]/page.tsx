@@ -248,7 +248,7 @@ export default async function PhonePage({
                 href={`/compare?a=${phone.slug}&b=${c.slug}`}
                 className="rounded-md border border-border bg-white px-3 py-2 text-sm hover:border-primary hover:text-primary"
               >
-                vs {c.name}
+                vs {c.brand.name} {c.name}
               </Link>
             ))}
           </div>

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { PhoneCard } from './PhoneCard';
-import type { PhoneCardData } from '@/types/database';
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PhoneCard } from "./PhoneCard";
+import type { PhoneCardData } from "@/types/database";
 
 export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
   const [index, setIndex] = useState(0);
@@ -18,12 +18,18 @@ export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
     );
   }
 
+  // Each step must move by one slide-width relative to the *track's* total
+  // width (phones.length items), not the viewport's visible width
+  // (perView items) — these differ whenever phones.length > perView,
+  // which is the common case and exactly where the old math broke down.
+  const stepPercent = 100 / phones.length;
+
   return (
     <div className="relative">
       <div className="overflow-hidden">
         <div
           className="flex gap-3 transition-transform duration-300"
-          style={{ transform: `translateX(-${index * (100 / perView)}%)` }}
+          style={{ transform: `translateX(-${index * stepPercent}%)` }}
         >
           {phones.map((p) => (
             <div key={p.id} className="w-1/3 shrink-0 sm:w-1/4 lg:w-1/6">

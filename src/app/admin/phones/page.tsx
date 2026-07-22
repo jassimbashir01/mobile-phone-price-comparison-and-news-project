@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import Link from 'next/link';
-import { getAllPhonesAdmin } from '@/queries/admin';
-import { getCurrentUserProfile } from '@/lib/auth';
-import { Pagination } from '@/components/ui/Pagination';
-import { PhoneDeleteButton } from '@/components/admin/PhoneDeleteButton';
-import { formatPKR } from '@/lib/utils';
+import Link from "next/link";
+import { getAllPhonesAdmin, type AdminPhoneListItem } from "@/queries/admin";
+import { getCurrentUserProfile } from "@/lib/auth";
+import { Pagination } from "@/components/ui/Pagination";
+import { PhoneDeleteButton } from "@/components/admin/PhoneDeleteButton";
+import { formatPKR } from "@/lib/utils";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function AdminPhonesPage({
   searchParams,
@@ -14,7 +13,7 @@ export default async function AdminPhonesPage({
   searchParams: Promise<{ page?: string; q?: string }>;
 }) {
   const { page: pageParam, q } = await searchParams;
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 20;
 
   const [{ phones, total }, profile] = await Promise.all([
@@ -28,7 +27,10 @@ export default async function AdminPhonesPage({
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-bold">Phones ({total})</h1>
-        <Link href="/admin/phones/new" className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">
+        <Link
+          href="/admin/phones/new"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+        >
           + New Phone
         </Link>
       </div>
@@ -54,7 +56,7 @@ export default async function AdminPhonesPage({
             </tr>
           </thead>
           <tbody>
-            {phones.map((p: any) => (
+            {phones.map((p: AdminPhoneListItem) => (
               <tr key={p.id} className="border-b border-border last:border-0">
                 <td className="px-3 py-2">{p.name}</td>
                 <td className="px-3 py-2 text-ink/50">{p.brand?.name}</td>
@@ -62,8 +64,17 @@ export default async function AdminPhonesPage({
                 <td className="px-3 py-2">{p.status}</td>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-3">
-                    <Link href={`/admin/phones/${p.id}/edit`} className="text-primary hover:underline">Edit</Link>
-                    <PhoneDeleteButton id={p.id} slug={p.slug} isAdmin={profile?.role === 'admin'} />
+                    <Link
+                      href={`/admin/phones/${p.id}/edit`}
+                      className="text-primary hover:underline"
+                    >
+                      Edit
+                    </Link>
+                    <PhoneDeleteButton
+                      id={p.id}
+                      slug={p.slug}
+                      isAdmin={profile?.role === "admin"}
+                    />
                   </div>
                 </td>
               </tr>
@@ -72,7 +83,13 @@ export default async function AdminPhonesPage({
         </table>
       </div>
 
-      <Pagination basePath={q ? `/admin/phones?q=${q}` : '/admin/phones'} currentPage={page} totalPages={totalPages} />
+      <Pagination
+        basePath={
+          q ? `/admin/phones?q=${encodeURIComponent(q)}` : "/admin/phones"
+        }
+        currentPage={page}
+        totalPages={totalPages}
+      />
     </div>
   );
 }

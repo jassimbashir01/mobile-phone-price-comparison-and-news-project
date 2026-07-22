@@ -1,15 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server';
 
 import { requireRole } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { triggerRevalidate } from '@/lib/revalidate';
+import { pingIndexNow, triggerRevalidate } from '@/lib/revalidate';
 import { offerSchema, type OfferFormValues } from '@/lib/validation/offer';
 
 function nullifyUndefined<T extends Record<string, unknown>>(obj: T): T {
   const out = { ...obj };
   for (const key in out) {
-    if (out[key] === undefined) out[key] = null as any;
+    if (out[key] === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      out[key] = null as any;
+    }
   }
   return out;
 }
@@ -27,6 +29,7 @@ export async function createOffer(values: OfferFormValues, imagePublicId: string
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/offers']);
+  await pingIndexNow(['/offers']);
   return data;
 }
 
@@ -42,6 +45,7 @@ export async function updateOffer(id: string, values: OfferFormValues, imagePubl
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(['/offers']);
+  await pingIndexNow(['/offers']);
 }
 
 export async function deleteOffer(id: string) {

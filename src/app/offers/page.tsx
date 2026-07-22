@@ -1,18 +1,27 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { PageShell } from '@/components/layout/PageShell';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { OfferCard } from '@/components/offers/OfferCard';
-import { Pagination } from '@/components/ui/Pagination';
-import { AdSlot } from '@/components/ads/AdSlot';
-import { getActiveOffers } from '@/queries/offers';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PageShell } from "@/components/layout/PageShell";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { OfferCard } from "@/components/offers/OfferCard";
+import { Pagination } from "@/components/ui/Pagination";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { getActiveOffers } from "@/queries/offers";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Deals & Offers',
-  description: 'Affiliate deals and local shop offers on mobile phones and accessories.',
-  alternates: { canonical: '/offers' },
+  title: "Deals & Offers",
+  description:
+    "Affiliate deals and local shop offers on mobile phones and accessories.",
+  alternates: { canonical: "/offers" },
+  openGraph: {
+    title: "Deals & Offers",
+    description:
+      "Affiliate deals and local shop offers on mobile phones and accessories.",
+  },
 };
 
 export default async function OffersPage({
@@ -21,15 +30,20 @@ export default async function OffersPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const { page: pageParam } = await searchParams;
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
 
   const { offers, total } = await getActiveOffers(undefined, page, limit);
   const totalPages = Math.max(1, Math.ceil(total / limit));
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Deals & Offers" },
+  ];
 
   return (
     <PageShell>
-      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Deals & Offers' }]} />
+      <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+      <Breadcrumb items={breadcrumbItems} />
       <h1 className="mb-2 text-xl font-bold">Deals & Offers</h1>
       <p className="mb-4 text-sm text-ink/60">
         Affiliate deals and offers from local shops. Links may earn us a
@@ -37,14 +51,20 @@ export default async function OffersPage({
       </p>
       <div className="mb-6 rounded-lg border border-border bg-primary-light/40 p-4 text-sm">
         <p className="text-ink/80">
-          Run a mobile shop and want your own deals listed here?{' '}
-          <Link href="/advertise" className="font-semibold text-primary hover:underline">
+          Run a mobile shop and want your own deals listed here?{" "}
+          <Link
+            href="/advertise"
+            className="font-semibold text-primary hover:underline"
+          >
             Advertise with us
-          </Link>{' '}
-          or{' '}
-          <Link href="/contact" className="font-semibold text-primary hover:underline">
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/contact"
+            className="font-semibold text-primary hover:underline"
+          >
             get in touch
-          </Link>{' '}
+          </Link>{" "}
           to get featured.
         </p>
       </div>
@@ -72,7 +92,11 @@ export default async function OffersPage({
           </div>
         </>
       )}
-      <Pagination basePath="/offers" currentPage={page} totalPages={totalPages} />
+      <Pagination
+        basePath="/offers"
+        currentPage={page}
+        totalPages={totalPages}
+      />
     </PageShell>
   );
 }

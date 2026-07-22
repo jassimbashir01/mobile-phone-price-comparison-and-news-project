@@ -1,10 +1,11 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { advertiseInquirySchema, type AdvertiseInquiryValues } from '@/lib/validation/advertise';
 import { submitAdvertiseInquiry } from '@/lib/actions/advertise';
+import { WordCounter } from '@/components/admin/WordCounter';
 
 const PLACEMENT_LABELS: Record<AdvertiseInquiryValues['placement'], string> = {
   'homepage-banner': 'Homepage Banner',
@@ -24,8 +25,11 @@ export function AdvertiseForm() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AdvertiseInquiryValues>({ resolver: zodResolver(advertiseInquirySchema) });
+
+  const messageValue = useWatch({ control, name: 'message' }) ?? '';
 
   async function onSubmit(values: AdvertiseInquiryValues) {
     const result = await submitAdvertiseInquiry(values);
@@ -72,7 +76,10 @@ export function AdvertiseForm() {
         </select>
       </div>
       <div>
-        <label htmlFor="message" className="mb-1 block text-sm font-medium">Tell us more</label>
+        <div className="mb-1 flex items-center justify-between">
+          <label htmlFor="message" className="block text-sm font-medium">Tell us more</label>
+          <WordCounter text={messageValue} target="under ~300 words" />
+        </div>
         <textarea id="message" rows={5} {...register('message')} className="w-full rounded-md border border-border px-3 py-2 text-sm outline-none focus:border-primary" />
         {errors.message && <p className="mt-1 text-xs text-red-600">{errors.message.message}</p>}
       </div>

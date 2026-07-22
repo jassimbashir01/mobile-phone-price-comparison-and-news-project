@@ -88,11 +88,26 @@ export function RichTextEditor({
   function setLink() {
     const url = window.prompt("Link URL");
     if (url === null) return;
-    if (url === "") {
+
+    const trimmed = url.trim();
+    if (trimmed === "") {
       editor?.chain().focus().unsetLink().run();
       return;
     }
-    editor?.chain().focus().setLink({ href: url }).run();
+
+    // Only allow http(s) links and same-site relative paths — blocks
+    // javascript:, data:, and other unexpected schemes at entry, as a
+    // first layer alongside the DOMPurify sanitization already applied
+    // on save.
+    const isSafe = /^https?:\/\//i.test(trimmed) || trimmed.startsWith("/");
+    if (!isSafe) {
+      window.alert(
+        "Please enter a full https:// URL or a relative path starting with /",
+      );
+      return;
+    }
+
+    editor?.chain().focus().setLink({ href: trimmed }).run();
   }
 
   return (

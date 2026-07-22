@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageShell } from '@/components/layout/PageShell';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { buildBreadcrumbJsonLd } from '@/lib/seo';
+import { siteUrl } from '@/lib/site';
 import { getMediaKitStats } from '@/queries/settings';
 import { SITE_NAME } from '@/lib/site-config';
 
@@ -9,7 +12,19 @@ export const metadata: Metadata = {
   title: 'Media Kit',
   description: `Audience and traffic details for ${SITE_NAME}.`,
   alternates: { canonical: '/media-kit' },
+  // ⚠️ Once real stats are filled in via /admin/settings, remove the line
+  // below so this page becomes indexable — right now it would show
+  // placeholder text like "Add your traffic number..." to anyone who
+  // finds it via search, which looks unprofessional and reads as thin
+  // content to Google.
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: `Media Kit | ${SITE_NAME}`,
+    description: `Audience and traffic details for ${SITE_NAME}.`,
+  },
 };
+
+export const revalidate = 3600;
 
 export default async function MediaKitPage() {
   const stats = await getMediaKitStats();
@@ -21,9 +36,12 @@ export default async function MediaKitPage() {
     { label: 'Top Regions', value: stats.top_regions },
   ];
 
+  const breadcrumbItems = [{ label: 'Home', href: '/' }, { label: 'Media Kit' }];
+
   return (
     <PageShell>
-      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Media Kit' }]} />
+      <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+      <Breadcrumb items={breadcrumbItems} />
       <h1 className="mb-2 text-xl font-bold">Media Kit</h1>
       <p className="mb-6 text-sm text-ink/60">{stats.audience_description}</p>
 

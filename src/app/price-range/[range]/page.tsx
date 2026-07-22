@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { HOMEPAGE_PRICE_RANGES } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { HOMEPAGE_PRICE_RANGES } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -24,8 +24,8 @@ export async function generateMetadata({
   const range = getRange(slug);
   if (!range) return {};
   return {
-    title: `Mobile Phones ${range.label} in Pakistan`,
-    description: `Browse mobile phones priced ${range.label} in Pakistan with full specifications and prices.`,
+    title: `Best Mobile Phones ${range.label} in Pakistan`,
+    description: `Our top picks for mobile phones priced ${range.label} in Pakistan, hand-picked and updated regularly.`,
     alternates: { canonical: `/price-range/${range.slug}` },
   };
 }
@@ -42,7 +42,7 @@ export default async function HomepagePriceRangePage({
   const range = getRange(slug);
   if (!range) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
   const { phones, total } = await filterPhones({
     priceMin: range.min,
@@ -54,9 +54,9 @@ export default async function HomepagePriceRangePage({
   return (
     <PageShell>
       <CategoryPageContent
-        breadcrumbItems={[{ label: 'Home', href: '/' }, { label: range.label }]}
-        title={`Mobile Phones ${range.label} in Pakistan`}
-        description={`Compare mobile phones priced ${range.label.toLowerCase()} in Pakistan.`}
+        breadcrumbItems={[{ label: "Home", href: "/" }, { label: range.label }]}
+        title={`Best Mobile Phones ${range.label} in Pakistan`}
+        description={`Our top picks for mobile phones priced ${range.label.toLowerCase()} in Pakistan — hand-picked and updated regularly, with full specifications and prices.`}
         phones={phones}
         total={total}
         page={page}

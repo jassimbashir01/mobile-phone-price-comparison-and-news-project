@@ -14,7 +14,6 @@ import type {
   SocialLink,
   MediaKitStats,
   HomepageBannerSetting,
-  Brand,
   SidebarBannerSetting,
 } from "@/types/database";
 
@@ -26,6 +25,11 @@ const PLATFORM_LABELS: Record<SocialLink["platform"], string> = {
   tiktok: "TikTok",
   whatsapp: "WhatsApp",
 };
+
+function isSafeUrl(url: string): boolean {
+  if (!url) return true;
+  return /^https?:\/\//i.test(url.trim());
+}
 
 export function SettingsForm({
   initialRate,
@@ -50,9 +54,16 @@ export function SettingsForm({
   async function handleSaveRate(e: React.FormEvent) {
     e.preventDefault();
     setRateError("");
+
+    const numericRate = Number(rate);
+    if (!Number.isFinite(numericRate) || numericRate <= 0) {
+      setRateError("Exchange rate must be a positive number.");
+      return;
+    }
+
     setRateSaving(true);
     try {
-      await updateExchangeRate(Number(rate));
+      await updateExchangeRate(numericRate);
       setRateSaved(true);
       router.refresh();
       setTimeout(() => setRateSaved(false), 2000);
@@ -128,6 +139,10 @@ export function SettingsForm({
 
   async function handleSaveBanner() {
     setBannerError("");
+    if (!isSafeUrl(banner.link_url)) {
+      setBannerError("Destination URL must start with https:// (or http://).");
+      return;
+    }
     setBannerSaving(true);
     try {
       await updateHomepageBanner(banner);
@@ -149,6 +164,12 @@ export function SettingsForm({
 
   async function handleSaveSidebarBanner() {
     setSidebarBannerError("");
+    if (!isSafeUrl(sidebarBanner.link_url)) {
+      setSidebarBannerError(
+        "Destination URL must start with https:// (or http://).",
+      );
+      return;
+    }
     setSidebarBannerSaving(true);
     try {
       await updateSidebarBanner(sidebarBanner);
@@ -180,6 +201,7 @@ export function SettingsForm({
               id="rate"
               type="number"
               step="0.01"
+              min="0.01"
               value={rate}
               onChange={(e) => setRate(e.target.value)}
               className="w-32 rounded-md border border-border px-3 py-2 text-sm"

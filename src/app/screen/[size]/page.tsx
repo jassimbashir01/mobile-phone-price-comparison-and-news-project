@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { SCREEN_SIZES } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { SCREEN_SIZES } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -42,7 +42,7 @@ export default async function ScreenPage({
   const opt = getOption(size);
   if (!opt) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
   const { phones, total } = await filterPhones({
     displayMin: opt.min,
@@ -55,11 +55,12 @@ export default async function ScreenPage({
     <PageShell>
       <CategoryPageContent
         breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Screen Size' },
+          { label: "Home", href: "/" },
+          { label: "Screen Size" },
           { label: opt.label },
         ]}
         title={`Mobile Phones with ${opt.label} Screen in Pakistan`}
+        description={`Compare mobile phones with a ${opt.label.toLowerCase()} display in Pakistan, with prices and full specifications.`}
         phones={phones}
         total={total}
         page={page}

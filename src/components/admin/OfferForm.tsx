@@ -9,6 +9,7 @@ import { createOffer, updateOffer } from "@/lib/actions/offers";
 import { SingleImageUploader } from "@/components/admin/SingleImageUploader";
 import { AdminSuccessScreen } from "./AdminSuccessScreen";
 import type { Offer } from "@/types/database";
+import { WordCounter } from "./WordCounter";
 
 export function OfferForm({ offer }: { offer?: Offer }) {
   const router = useRouter();
@@ -45,6 +46,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
   });
 
   const offerType = useWatch({ control, name: "offer_type" });
+  const descriptionValue = useWatch({ control, name: "description" }) ?? "";
 
   async function onSubmit(values: OfferFormValues) {
     setServerError("");
@@ -101,9 +103,12 @@ export function OfferForm({ offer }: { offer?: Offer }) {
         )}
       </div>
       <div>
-        <label htmlFor="description" className="mb-1 block text-sm font-medium">
-          Description
-        </label>
+        <div className="mb-1 flex items-center justify-between">
+          <label htmlFor="description" className="block text-sm font-medium">
+            Description
+          </label>
+          <WordCounter text={descriptionValue} target="20–50 words" />
+        </div>
         <textarea
           id="description"
           rows={3}

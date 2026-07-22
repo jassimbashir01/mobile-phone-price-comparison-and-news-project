@@ -1,6 +1,8 @@
-import { getPublishedNews } from '@/queries/news';
-import { siteUrl } from '@/lib/site';
-import { SITE_NAME } from '@/lib/site-config';
+import { getPublishedNews } from "@/queries/news";
+import { siteUrl } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site-config";
+
+export const revalidate = 1800;
 
 export async function GET() {
   const { news } = await getPublishedNews({ limit: 20 });
@@ -8,15 +10,15 @@ export async function GET() {
   const items = news
     .map(
       (n) => `
-    <item>
-      <title><![CDATA[${n.title}]]></title>
-      <link>${siteUrl}/news/${n.slug}</link>
-      <guid>${siteUrl}/news/${n.slug}</guid>
-      <description><![CDATA[${n.excerpt ?? ''}]]></description>
-      <pubDate>${n.published_at ? new Date(n.published_at).toUTCString() : ''}</pubDate>
-    </item>`
+  <item>
+    <title><![CDATA[${n.title}]]></title>
+    <link>${siteUrl}/news/${n.slug}</link>
+    <guid>${siteUrl}/news/${n.slug}</guid>
+    <description><![CDATA[${n.excerpt ?? ""}]]></description>
+    ${n.published_at ? `<pubDate>${new Date(n.published_at).toUTCString()}</pubDate>` : ""}
+  </item>`,
     )
-    .join('');
+    .join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -29,6 +31,6 @@ export async function GET() {
 </rss>`;
 
   return new Response(xml, {
-    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    headers: { "Content-Type": "application/xml; charset=utf-8" },
   });
 }

@@ -5,7 +5,7 @@ import {
   HOMEPAGE_PRICE_RANGES,
   homepagePriceSectionKey,
 } from "@/lib/constants";
-import type { Brand, News, PhoneWithDetails } from "@/types/database";
+import type { Brand, News, Phone, PhoneWithDetails } from "@/types/database";
 
 export async function getAllBrandsAdmin(): Promise<Brand[]> {
   const supabase = createAdminClient();
@@ -28,11 +28,18 @@ export async function getBrandByIdAdmin(id: string): Promise<Brand | null> {
   return data;
 }
 
+export interface AdminPhoneListItem extends Phone {
+  brand: Pick<Brand, "id" | "name" | "slug"> | null;
+}
+
 export async function getAllPhonesAdmin({
   page = 1,
   limit = 20,
   search,
-}: { page?: number; limit?: number; search?: string } = {}) {
+}: { page?: number; limit?: number; search?: string } = {}): Promise<{
+  phones: AdminPhoneListItem[];
+  total: number;
+}> {
   const supabase = createAdminClient();
   const from = (page - 1) * limit;
   const to = from + limit - 1;
@@ -47,7 +54,7 @@ export async function getAllPhonesAdmin({
 
   const { data, error, count } = await query;
   if (error) throw new Error(`getAllPhonesAdmin: ${error.message}`);
-  return { phones: data ?? [], total: count ?? 0 };
+  return { phones: (data ?? []) as AdminPhoneListItem[], total: count ?? 0 };
 }
 
 export async function getPhoneByIdAdmin(

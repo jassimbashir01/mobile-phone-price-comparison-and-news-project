@@ -4,7 +4,22 @@ import { z } from 'zod';
 import { requireRole } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { triggerRevalidate } from '@/lib/revalidate';
-import type { SocialLink, MediaKitStats, HomepageBannerSetting } from '@/types/database';
+import type {
+  SocialLink,
+  MediaKitStats,
+  HomepageBannerSetting,
+  SidebarBannerSetting,
+} from '@/types/database';
+
+// Restricts to http(s) only — z.string().url() alone would accept
+// javascript: and other unsafe schemes, since they're syntactically valid
+// URLs. These fields render as live hrefs on the public site, so this is
+// the real trust boundary, not just the client-side form.
+const httpUrlSchema = z
+  .string()
+  .refine((val) => val === '' || /^https?:\/\//i.test(val), {
+    message: 'Must be a valid https:// or http:// URL',
+  });
 
 const rateSchema = z.object({ rate: z.coerce.number().positive() });
 
@@ -23,7 +38,7 @@ export async function updateExchangeRate(rate: number) {
 
 const socialLinkSchema = z.object({
   platform: z.enum(['facebook', 'instagram', 'twitter', 'youtube', 'tiktok', 'whatsapp']),
-  url: z.string().url().or(z.literal('')),
+  url: httpUrlSchema,
   enabled: z.boolean(),
 });
 
@@ -61,16 +76,19 @@ export async function updateMediaKitStats(stats: MediaKitStats) {
   await triggerRevalidate(['/media-kit']);
 }
 
-const homepageBannerSchema = z.object({
+// Shared by both the homepage and sidebar banner — previously two
+// separately-declared but identical schemas, which risked drifting out of
+// sync the next time a field was added to one but not the other.
+const bannerSettingSchema = z.object({
   cloudinary_public_id: z.string(),
-  link_url: z.string().url().or(z.literal('')),
+  link_url: httpUrlSchema,
   alt_text: z.string().max(200),
   enabled: z.boolean(),
 });
 
 export async function updateHomepageBanner(banner: HomepageBannerSetting) {
   await requireRole(['admin', 'editor']);
-  const parsed = homepageBannerSchema.parse(banner);
+  const parsed = bannerSettingSchema.parse(banner);
 
   const supabase = createAdminClient();
   const { error } = await supabase
@@ -81,14 +99,7 @@ export async function updateHomepageBanner(banner: HomepageBannerSetting) {
   await triggerRevalidate(['/']);
 }
 
-const bannerSettingSchema = z.object({
-  cloudinary_public_id: z.string(),
-  link_url: z.string().url().or(z.literal('')),
-  alt_text: z.string().max(200),
-  enabled: z.boolean(),
-});
-
-export async function updateSidebarBanner(banner: import('@/types/database').SidebarBannerSetting) {
+export async function updateSidebarBanner(banner: SidebarBannerSetting) {
   await requireRole(['admin', 'editor']);
   const parsed = bannerSettingSchema.parse(banner);
 

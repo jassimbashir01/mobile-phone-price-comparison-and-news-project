@@ -128,10 +128,12 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
         />
       </div>
       <div>
-        <label htmlFor="body" className="block text-sm font-medium">
-          Body
-        </label>
-        <WordCounter text={bodyValue} target="600–1,000 words" />
+        <div className="mb-1 flex items-center justify-between">
+          <label htmlFor="body" className="block text-sm font-medium">
+            Body
+          </label>
+          <WordCounter text={bodyValue} target="600–1,000 words" />
+        </div>
         <textarea
           id="body"
           rows={10}

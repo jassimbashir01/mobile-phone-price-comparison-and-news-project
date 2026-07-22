@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { FEATURE_TYPES } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { FEATURE_TYPES } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -42,19 +42,24 @@ export default async function TypePage({
   const opt = getOption(feature);
   if (!opt) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
-  const { phones, total } = await filterPhones({ feature: opt.column, page, limit });
+  const { phones, total } = await filterPhones({
+    feature: opt.column,
+    page,
+    limit,
+  });
 
   return (
     <PageShell>
       <CategoryPageContent
         breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'Type' },
+          { label: "Home", href: "/" },
+          { label: "Type" },
           { label: opt.label },
         ]}
         title={`${opt.label} in Pakistan`}
+        description={`Compare ${opt.label.toLowerCase()} available in Pakistan, with prices and full specifications.`}
         phones={phones}
         total={total}
         page={page}

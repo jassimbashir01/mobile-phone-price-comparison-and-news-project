@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { PageShell } from '@/components/layout/PageShell';
-import { CategoryPageContent } from '@/components/category/CategoryPageContent';
-import { filterPhones } from '@/queries/phones';
-import { RAM_OPTIONS } from '@/lib/constants';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageShell } from "@/components/layout/PageShell";
+import { CategoryPageContent } from "@/components/category/CategoryPageContent";
+import { filterPhones } from "@/queries/phones";
+import { RAM_OPTIONS } from "@/lib/constants";
 
 export const revalidate = 21600;
 
@@ -42,19 +42,25 @@ export default async function RamPage({
   const opt = getOption(size);
   if (!opt) notFound();
 
-  const page = Number(pageParam ?? '1') || 1;
+  const page = Number(pageParam ?? "1") || 1;
   const limit = 24;
-  const { phones, total } = await filterPhones({ ramMin: opt.min, ramMax: opt.max, page, limit });
+  const { phones, total } = await filterPhones({
+    ramMin: opt.min,
+    ramMax: opt.max,
+    page,
+    limit,
+  });
 
   return (
     <PageShell>
       <CategoryPageContent
         breadcrumbItems={[
-          { label: 'Home', href: '/' },
-          { label: 'RAM' },
+          { label: "Home", href: "/" },
+          { label: "RAM" },
           { label: opt.label },
         ]}
         title={`${opt.label} Mobile Phones in Pakistan`}
+        description={`Compare mobile phones with ${opt.label.toLowerCase()} available in Pakistan, with prices and full specifications.`}
         phones={phones}
         total={total}
         page={page}
