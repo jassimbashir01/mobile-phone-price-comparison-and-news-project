@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { supabase } from '@/lib/supabase/public';
-import type { PhoneCardData } from '@/types/database';
+import { supabase } from "@/lib/supabase/public";
+import type { PhoneCardData } from "@/types/database";
 
 const PHONE_CARD_SELECT = `
   *,
@@ -26,18 +26,19 @@ export async function getHomepageSectionPhones(
   options: {
     slotCount?: number;
     fallback?: { priceMin?: number | null; priceMax?: number | null };
-  } = {}
+  } = {},
 ): Promise<HomepageSectionResult | null> {
   const slotCount = options.slotCount ?? 6;
 
   const { data: section, error: sectionError } = await supabase
-    .from('homepage_sections')
-    .select('*')
-    .eq('section_key', sectionKey)
-    .eq('is_active', true)
+    .from("homepage_sections")
+    .select("*")
+    .eq("section_key", sectionKey)
+    .eq("is_active", true)
     .maybeSingle();
 
-  if (sectionError) throw new Error(`getHomepageSectionPhones: ${sectionError.message}`);
+  if (sectionError)
+    throw new Error(`getHomepageSectionPhones: ${sectionError.message}`);
   if (!section) return null;
 
   // Pinned phones — manually picked by an admin, always shown first, in the
@@ -45,11 +46,13 @@ export async function getHomepageSectionPhones(
   let pinnedPhones: PhoneCardData[] = [];
   if (section.phone_ids.length > 0) {
     const { data: phones, error: phonesError } = await supabase
-      .from('phones')
+      .from("phones")
       .select(PHONE_CARD_SELECT)
-      .in('id', section.phone_ids);
+      .eq("status", "available")
+      .in("id", section.phone_ids);
 
-    if (phonesError) throw new Error(`getHomepageSectionPhones: ${phonesError.message}`);
+    if (phonesError)
+      throw new Error(`getHomepageSectionPhones: ${phonesError.message}`);
 
     pinnedPhones = section.phone_ids
       .map((id: string) => phones?.find((p: any) => p.id === id))
@@ -66,17 +69,22 @@ export async function getHomepageSectionPhones(
   const remaining = slotCount - pinnedPhones.length;
   if (options.fallback && remaining > 0) {
     let query = supabase
-      .from('phones')
+      .from("phones")
       .select(PHONE_CARD_SELECT)
-      .eq('status', 'available')
-      .order('created_at', { ascending: false })
+      .eq("status", "available")
+      .order("created_at", { ascending: false })
       .limit(remaining + pinnedIds.size); // extra buffer in case of overlap
 
-    if (options.fallback.priceMin != null) query = query.gte('price_pkr', options.fallback.priceMin);
-    if (options.fallback.priceMax != null) query = query.lte('price_pkr', options.fallback.priceMax);
+    if (options.fallback.priceMin != null)
+      query = query.gte("price_pkr", options.fallback.priceMin);
+    if (options.fallback.priceMax != null)
+      query = query.lte("price_pkr", options.fallback.priceMax);
 
     const { data: candidates, error: fallbackError } = await query;
-    if (fallbackError) throw new Error(`getHomepageSectionPhones (fallback): ${fallbackError.message}`);
+    if (fallbackError)
+      throw new Error(
+        `getHomepageSectionPhones (fallback): ${fallbackError.message}`,
+      );
 
     autoPhones = (candidates ?? [])
       .filter((p: any) => !pinnedIds.has(p.id))

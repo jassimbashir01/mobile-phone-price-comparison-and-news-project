@@ -9,7 +9,7 @@ if (!process.env.NEXT_PUBLIC_SITE_URL) {
 module.exports = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
   generateRobotsTxt: true,
-  exclude: ['/admin', '/admin/*', '/login', '/compare', '/search', '/api/*'],
+  exclude: ['/admin', '/admin/*', '/login', '/compare', '/search', '/media-kit', '/api/*'],
   robotsTxtOptions: {
     policies: [
       {

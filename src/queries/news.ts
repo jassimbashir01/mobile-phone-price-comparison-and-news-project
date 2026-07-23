@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase/public';
-import type { News } from '@/types/database';
+import { supabase } from "@/lib/supabase/public";
+import type { News } from "@/types/database";
 
 const NEWS_LIST_SELECT = `id, title, slug, excerpt, cover_image_public_id, published_at, brand:brands(id, name, slug)`;
 
@@ -39,30 +39,51 @@ export async function getPublishedNews({
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  let query = supabase
-    .from('news')
-    .select(NEWS_LIST_SELECT, { count: 'exact' })
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
+  if (brandSlug) {
+    // Brand filtering on a joined column is unreliable via PostgREST's
+    // query builder (documented risk from this project's original build).
+    // Fetch a generous unfiltered batch, apply the JS-level filter for
+    // correctness, then paginate and count against the *filtered* result
+    // — not the raw database query's count, which would otherwise disagree
+    // with what's actually shown once the JS filter runs.
+    const { data, error } = await supabase
+      .from("news")
+      .select(NEWS_LIST_SELECT)
+      .eq("is_published", true)
+      .order("published_at", { ascending: false })
+      .limit(500); // generous cap — see note below
+
+    if (error) throw new Error(`getPublishedNews: ${error.message}`);
+
+    const rows = (data ?? []) as unknown as NewsListItem[];
+    const filtered = rows.filter((n) => n.brand?.slug === brandSlug);
+
+    return {
+      news: filtered.slice(from, to + 1),
+      total: filtered.length,
+    };
+  }
+
+  const { data, error, count } = await supabase
+    .from("news")
+    .select(NEWS_LIST_SELECT, { count: "exact" })
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
     .range(from, to);
 
-  if (brandSlug) query = query.eq('brand.slug', brandSlug);
-
-  const { data, error, count } = await query;
   if (error) throw new Error(`getPublishedNews: ${error.message}`);
 
-  const rows = (data ?? []) as unknown as NewsListItem[];
-  const filtered = brandSlug ? rows.filter((n) => n.brand?.slug === brandSlug) : rows;
-
-  return { news: filtered, total: count ?? 0 };
+  return { news: (data ?? []) as unknown as NewsListItem[], total: count ?? 0 };
 }
 
-export async function getNewsBySlug(slug: string): Promise<NewsWithBrand | null> {
+export async function getNewsBySlug(
+  slug: string,
+): Promise<NewsWithBrand | null> {
   const { data, error } = await supabase
-    .from('news')
-    .select('*, brand:brands(id, name, slug)')
-    .eq('slug', slug)
-    .eq('is_published', true)
+    .from("news")
+    .select("*, brand:brands(id, name, slug)")
+    .eq("slug", slug)
+    .eq("is_published", true)
     .maybeSingle();
 
   if (error) throw new Error(`getNewsBySlug: ${error.message}`);
@@ -70,7 +91,10 @@ export async function getNewsBySlug(slug: string): Promise<NewsWithBrand | null>
 }
 
 export async function getAllNewsSlugs(): Promise<string[]> {
-  const { data, error } = await supabase.from('news').select('slug').eq('is_published', true);
+  const { data, error } = await supabase
+    .from("news")
+    .select("slug")
+    .eq("is_published", true);
   if (error) throw new Error(`getAllNewsSlugs: ${error.message}`);
   return (data ?? []).map((n) => n.slug);
 }
@@ -78,17 +102,17 @@ export async function getAllNewsSlugs(): Promise<string[]> {
 export async function getRelatedNews(
   newsId: string,
   brandId: string | null,
-  limit = 4
+  limit = 4,
 ): Promise<NewsListItem[]> {
   let query = supabase
-    .from('news')
+    .from("news")
     .select(NEWS_LIST_SELECT)
-    .neq('id', newsId)
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
+    .neq("id", newsId)
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
     .limit(limit);
 
-  if (brandId) query = query.eq('brand_id', brandId);
+  if (brandId) query = query.eq("brand_id", brandId);
 
   const { data, error } = await query;
   if (error) throw new Error(`getRelatedNews: ${error.message}`);
