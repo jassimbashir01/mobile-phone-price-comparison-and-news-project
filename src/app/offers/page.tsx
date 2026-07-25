@@ -49,25 +49,6 @@ export default async function OffersPage({
         Affiliate deals and offers from local shops. Links may earn us a
         commission at no extra cost to you.
       </p>
-      <div className="mb-6 rounded-lg border border-border bg-primary-light/40 p-4 text-sm">
-        <p className="text-ink/80">
-          Run a mobile shop and want your own deals listed here?{" "}
-          <Link
-            href="/advertise"
-            className="font-semibold text-primary hover:underline"
-          >
-            Advertise with us
-          </Link>{" "}
-          or{" "}
-          <Link
-            href="/contact"
-            className="font-semibold text-primary hover:underline"
-          >
-            get in touch
-          </Link>{" "}
-          to get featured.
-        </p>
-      </div>
       <p className="mb-4 text-xs text-ink/40">{total} offers found</p>
       {offers.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-ink/50">
@@ -97,6 +78,25 @@ export default async function OffersPage({
         currentPage={page}
         totalPages={totalPages}
       />
+      <div className="mb-6 mt-6 rounded-lg border border-border bg-primary-light/40 p-4 text-sm">
+        <p className="text-ink/80">
+          Run a mobile shop and want your own deals listed here?{" "}
+          <Link
+            href="/advertise"
+            className="font-semibold text-primary hover:underline"
+          >
+            Advertise with us
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/contact"
+            className="font-semibold text-primary hover:underline"
+          >
+            get in touch
+          </Link>{" "}
+          to get featured.
+        </p>
+      </div>
     </PageShell>
   );
 }

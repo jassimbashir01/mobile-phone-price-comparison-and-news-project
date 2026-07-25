@@ -13,7 +13,7 @@ export function FeaturedSlider({ phones }: { phones: PhoneCardData[] }) {
   if (phones.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-ink/50">
-        No featured phones yet — add some from /admin/featured.
+        No featured phones yet
       </p>
     );
   }
