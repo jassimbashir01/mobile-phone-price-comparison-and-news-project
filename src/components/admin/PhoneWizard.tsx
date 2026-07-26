@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { AdminStepper } from './AdminStepper';
-import { AdminSuccessScreen } from './AdminSuccessScreen';
-import { PhoneForm } from './PhoneForm';
-import { ImageUploader, type ManagedImage } from './ImageUploader';
-import { ExtendedSpecsForm } from './ExtendedSpecsForm';
-import { savePhoneImages } from '@/lib/actions/phones';
-import type { Brand } from '@/types/database';
+import { useState } from "react";
+import { AdminStepper } from "./AdminStepper";
+import { AdminSuccessScreen } from "./AdminSuccessScreen";
+import { PhoneForm } from "./PhoneForm";
+import { ImageUploader, type ManagedImage } from "./ImageUploader";
+import { ExtendedSpecsForm } from "./ExtendedSpecsForm";
+import { savePhoneImages } from "@/lib/actions/phones";
+import type { Brand } from "@/types/database";
 
-const STEPS = ['Filtering Specs', 'Images', 'Full Specifications', 'Done'];
+const STEPS = ["Filtering Specs", "Images", "Full Specifications", "Done"];
 
 export function PhoneWizard({ brands }: { brands: Brand[] }) {
   const [step, setStep] = useState(1);
@@ -19,25 +19,29 @@ export function PhoneWizard({ brands }: { brands: Brand[] }) {
     name: string;
   } | null>(null);
   const [images, setImages] = useState<ManagedImage[]>([]);
-  const [imageError, setImageError] = useState('');
+  const [imageError, setImageError] = useState("");
   const [savingImages, setSavingImages] = useState(false);
 
   // Step 1 finishes by creating the phone (PhoneForm's own create action),
   // which gives us the real phone_id every later step needs.
-  function handlePhoneCreated(phone: { id: string; slug: string; name: string }) {
+  function handlePhoneCreated(phone: {
+    id: string;
+    slug: string;
+    name: string;
+  }) {
     setCreatedPhone(phone);
     setStep(2);
   }
 
   async function handleImagesNext() {
     if (!createdPhone) return;
-    setImageError('');
+    setImageError("");
     setSavingImages(true);
     try {
       await savePhoneImages(createdPhone.id, images, createdPhone.slug);
       setStep(3);
     } catch (e) {
-      setImageError(e instanceof Error ? e.message : 'Failed to save images');
+      setImageError(e instanceof Error ? e.message : "Failed to save images");
     } finally {
       setSavingImages(false);
     }
@@ -51,12 +55,16 @@ export function PhoneWizard({ brands }: { brands: Brand[] }) {
     <div>
       <AdminStepper steps={STEPS} currentStep={step} />
 
-      {step === 1 && <PhoneForm brands={brands} onCreated={handlePhoneCreated} />}
+      {step === 1 && (
+        <PhoneForm brands={brands} onCreated={handlePhoneCreated} />
+      )}
 
       {step === 2 && createdPhone && (
         <div className="max-w-3xl space-y-4">
           <div>
-            <h2 className="mb-1 text-sm font-semibold">Upload Images for {createdPhone.name}</h2>
+            <h2 className="mb-1 text-sm font-semibold">
+              Upload Images for {createdPhone.name}
+            </h2>
             <p className="mb-3 text-xs text-ink/50">
               Add as many as you like, set one as primary, reorder with the
               arrows. You can skip this for now and add images later from the
@@ -71,7 +79,7 @@ export function PhoneWizard({ brands }: { brands: Brand[] }) {
               disabled={savingImages}
               className="rounded-md bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
             >
-              {savingImages ? 'Saving…' : 'Next: Full Specifications'}
+              {savingImages ? "Saving…" : "Next: Full Specifications"}
             </button>
             <button
               onClick={() => setStep(3)}
@@ -85,7 +93,9 @@ export function PhoneWizard({ brands }: { brands: Brand[] }) {
 
       {step === 3 && createdPhone && (
         <div className="max-w-3xl">
-          <h2 className="mb-1 text-sm font-semibold">Full Specifications for {createdPhone.name}</h2>
+          <h2 className="mb-1 text-sm font-semibold">
+            Full Specifications for {createdPhone.name}
+          </h2>
           <p className="mb-3 text-xs text-ink/50">
             This is the detailed table shown publicly on the phone page. You can
             also skip this now and fill it in later from the phone&apos;s edit
@@ -114,6 +124,12 @@ export function PhoneWizard({ brands }: { brands: Brand[] }) {
           primaryLabel="Check Phones"
           createAnotherHref="/admin/phones/new"
           createAnotherLabel="Create Another Phone"
+          onCreateAnother={() => {
+            setStep(1);
+            setCreatedPhone(null);
+            setImages([]);
+            setImageError("");
+          }}
         />
       )}
     </div>

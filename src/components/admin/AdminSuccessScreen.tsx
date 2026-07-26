@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { CheckCircle2 } from 'lucide-react';
+import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 
 export function AdminSuccessScreen({
   title,
@@ -8,6 +8,7 @@ export function AdminSuccessScreen({
   primaryLabel,
   createAnotherHref,
   createAnotherLabel,
+  onCreateAnother,
 }: {
   title: string;
   message: string;
@@ -15,6 +16,11 @@ export function AdminSuccessScreen({
   primaryLabel: string;
   createAnotherHref: string;
   createAnotherLabel: string;
+  // When provided, "create another" resets local state instead of
+  // navigating — needed because these success screens render on the
+  // exact same URL as their own "create another" link, so a normal
+  // navigation to that URL is a no-op and never remounts the form.
+  onCreateAnother?: () => void;
 }) {
   return (
     <div className="rounded-lg border border-primary bg-primary-light p-8 text-center">
@@ -28,12 +34,21 @@ export function AdminSuccessScreen({
         >
           {primaryLabel}
         </Link>
-        <Link
-          href={createAnotherHref}
-          className="rounded-md border border-primary px-5 py-2.5 text-sm font-semibold text-primary hover:bg-white"
-        >
-          {createAnotherLabel}
-        </Link>
+        {onCreateAnother ? (
+          <button
+            onClick={onCreateAnother}
+            className="rounded-md border border-primary px-5 py-2.5 text-sm font-semibold text-primary hover:bg-white"
+          >
+            {createAnotherLabel}
+          </button>
+        ) : (
+          <Link
+            href={createAnotherHref}
+            className="rounded-md border border-primary px-5 py-2.5 text-sm font-semibold text-primary hover:bg-white"
+          >
+            {createAnotherLabel}
+          </Link>
+        )}
       </div>
     </div>
   );

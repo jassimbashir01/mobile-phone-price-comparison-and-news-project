@@ -25,6 +25,7 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<NewsFormValues>({
     resolver: zodResolver(newsSchema),
@@ -67,6 +68,11 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
         primaryLabel="Check News"
         createAnotherHref="/admin/news/new"
         createAnotherLabel="Create Another Article"
+        onCreateAnother={() => {
+          setCreatedArticle(null);
+          setCoverImage(null);
+          reset();
+        }}
       />
     );
   }

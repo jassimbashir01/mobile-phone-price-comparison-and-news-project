@@ -13,7 +13,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@supabase/ssr": "^0.12.0",
-    "@supabase/supabase-js": "^2.110.2",
+    "@supabase/supabase-js": "^2.110.8",
     "@tiptap/extension-link": "^3.28.0",
     "@tiptap/extension-placeholder": "^3.28.0",
     "@tiptap/pm": "^3.28.0",
@@ -26,6 +26,7 @@
     "next": "16.2.10",
     "next-cloudinary": "^6.17.5",
     "next-sitemap": "^4.2.3",
+    "openai": "^6.49.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.81.0",
@@ -38,9 +39,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "playwright": "^1.62.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

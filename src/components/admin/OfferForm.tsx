@@ -25,6 +25,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<OfferFormValues>({
     resolver: zodResolver(offerSchema),
@@ -75,6 +76,11 @@ export function OfferForm({ offer }: { offer?: Offer }) {
         primaryLabel="Check Offers"
         createAnotherHref="/admin/offers/new"
         createAnotherLabel="Create Another Offer"
+        onCreateAnother={() => {
+          setCreatedOffer(null);
+          setImage(null);
+          reset();
+        }}
       />
     );
   }

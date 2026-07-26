@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { ChevronDown } from 'lucide-react';
-import type { Brand } from '@/types/database';
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import type { Brand } from "@/types/database";
 
 export function BrandsDropdown({ brands }: { brands: Brand[] }) {
   const [open, setOpen] = useState(false);
@@ -11,18 +11,21 @@ export function BrandsDropdown({ brands }: { brands: Brand[] }) {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -39,7 +42,7 @@ export function BrandsDropdown({ brands }: { brands: Brand[] }) {
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-40 w-48 rounded-md border border-border bg-white py-2 shadow-lg"
+          className="absolute left-0 top-full z-40 max-h-80 w-48 overflow-y-auto rounded-md border border-border bg-white py-2 shadow-lg"
         >
           {brands.map((b) => (
             <Link
