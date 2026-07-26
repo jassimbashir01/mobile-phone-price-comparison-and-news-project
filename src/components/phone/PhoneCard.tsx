@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { formatPKR } from '@/lib/utils';
-import type { PhoneCardData } from '@/types/database';
+import Link from "next/link";
+import CloudinaryImage from "@/components/cloudinary-image";
+import { formatPKR } from "@/lib/utils";
+import type { PhoneCardData } from "@/types/database";
 
 export function PhoneCard({ phone }: { phone: PhoneCardData }) {
   return (
@@ -20,7 +20,9 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
             className="h-full w-full object-contain p-1"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-[10px] text-ink/30">No image</div>
+          <div className="flex h-full items-center justify-center text-[10px] text-ink/30">
+            No image
+          </div>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-0.5 p-2">
@@ -28,7 +30,13 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
         <h3 className="line-clamp-2 text-xs font-semibold text-ink group-hover:text-primary">
           {phone.name}
         </h3>
-        <p className="mt-auto pt-0.5 text-xs font-semibold text-primary">{formatPKR(phone.price_pkr)}</p>
+        <p className="mt-auto pt-0.5 text-xs font-semibold text-primary">
+          {phone.price_pkr != null ? (
+            formatPKR(phone.price_pkr)
+          ) : (
+            <span className="text-ink/40">Price N/A</span>
+          )}
+        </p>
       </div>
     </Link>
   );

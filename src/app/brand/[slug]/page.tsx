@@ -7,7 +7,6 @@ import { Pagination } from "@/components/ui/Pagination";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
-import CloudinaryImage from "@/components/cloudinary-image";
 import { getBrandBySlug, getAllBrandSlugs } from "@/queries/brands";
 import { getPhonesByBrandSlug } from "@/queries/phones";
 
@@ -58,21 +57,9 @@ export default async function BrandPage({
     <PageShell>
       <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       <Breadcrumb items={breadcrumbItems} />
-      <div className="mb-4 flex items-center gap-3">
-        {brand.logo_url && (
-          <CloudinaryImage
-            src={brand.logo_url}
-            alt={`${brand.name} logo`}
-            width={40}
-            height={40}
-            sizes="40px"
-            className="h-10 w-10 object-contain"
-          />
-        )}
-        <h1 className="text-xl font-bold">
-          {brand.name} Mobile Prices in Pakistan
-        </h1>
-      </div>
+      <h1 className="mb-4 text-xl font-bold">
+        {brand.name} Mobile Prices in Pakistan
+      </h1>
       {brand.description && (
         <p className="mb-4 text-sm text-ink/60">{brand.description}</p>
       )}
