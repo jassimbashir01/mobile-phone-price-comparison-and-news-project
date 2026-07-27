@@ -7,7 +7,8 @@
   --color-accent: #F2A93B;
   --color-accent-dark: #D6900F;
   --color-ink: #14231C;
-  --color-surface: #F7F8F6;
+  --color-surface: #FFFFFF;
+  /* --color-surface: #F7F8F6; */
   --color-border: #E2E6E2;
   --font-display: var(--font-display);
   --font-body: var(--font-body);
