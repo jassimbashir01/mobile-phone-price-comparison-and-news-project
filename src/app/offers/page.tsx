@@ -31,7 +31,7 @@ export default async function OffersPage({
 }) {
   const { page: pageParam } = await searchParams;
   const page = Number(pageParam ?? "1") || 1;
-  const limit = 24;
+  const limit = 96;
 
   const { offers, total } = await getActiveOffers(undefined, page, limit);
   const totalPages = Math.max(1, Math.ceil(total / limit));

@@ -43,7 +43,7 @@ export default async function CameraPage({
   if (!opt) notFound();
 
   const page = Number(pageParam ?? "1") || 1;
-  const limit = 24;
+  const limit = 96;
   const { phones, total } = await filterPhones(
     opt.slug === "without-camera"
       ? { cameraNone: true, page, limit }

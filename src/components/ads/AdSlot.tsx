@@ -13,6 +13,7 @@ const SLOT_IDS: Record<string, string> = {
   "news-article-multiplex": "REPLACE_WITH_NEWS_ARTICLE_MULTIPLEX_UNIT_ID",
   "homepage-between-sections": "REPLACE_WITH_HOMEPAGE_SECTION_UNIT_ID",
   "category-mid-grid": "REPLACE_WITH_CATEGORY_MID_GRID_UNIT_ID",
+  "category-mid-grid-2": "REPLACE_WITH_CATEGORY_MID_GRID_2_UNIT_ID",
   "before-footer": "REPLACE_WITH_BEFORE_FOOTER_UNIT_ID",
   "anchor-mobile": "REPLACE_WITH_ANCHOR_UNIT_ID",
   "compare-below-table": "REPLACE_WITH_COMPARE_UNIT_ID",

@@ -18,7 +18,7 @@ export default async function SearchPage({
   const { q, page: pageParam } = await searchParams;
   const query = q?.trim() ?? '';
   const page = Number(pageParam ?? '1') || 1;
-  const limit = 24;
+  const limit = 96;
 
   const { phones, total } = query ? await searchPhones(query, page, limit) : { phones: [], total: 0 };
   const totalPages = Math.max(1, Math.ceil(total / limit));

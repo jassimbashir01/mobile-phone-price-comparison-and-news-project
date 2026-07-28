@@ -43,7 +43,7 @@ export default async function TypePage({
   if (!opt) notFound();
 
   const page = Number(pageParam ?? "1") || 1;
-  const limit = 24;
+  const limit = 96;
   const { phones, total } = await filterPhones({
     feature: opt.column,
     page,

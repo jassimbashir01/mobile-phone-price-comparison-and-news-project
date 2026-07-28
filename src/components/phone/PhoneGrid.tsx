@@ -21,6 +21,13 @@ export function PhoneGrid({ phones }: { phones: PhoneCardData[] }) {
         </div>
       );
     }
+    if (i === 47) {
+      items.push(
+        <div key="mid-grid-ad-2" className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6">
+          <AdSlot slot="category-mid-grid-2" />
+        </div>
+      );
+    }
   });
 
   return (
