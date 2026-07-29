@@ -31,11 +31,13 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
           {phone.name}
         </h3>
         <p className="mt-auto pt-0.5 text-xs font-semibold text-primary">
-          {phone.price_pkr != null ? (
-            formatPKR(phone.price_pkr)
-          ) : (
-            <span className="text-ink/40">Price N/A</span>
-          )}
+          {phone.status === "coming_soon"
+            ? phone.expected_price_pkr != null
+              ? `${formatPKR(phone.expected_price_pkr)} (Expected)`
+              : "Coming Soon"
+            : phone.price_pkr != null
+              ? formatPKR(phone.price_pkr)
+              : "Price N/A"}
         </p>
       </div>
     </Link>

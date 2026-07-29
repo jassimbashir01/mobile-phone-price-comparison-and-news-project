@@ -8,6 +8,7 @@ export interface Brand {
   logo_url: string | null;
   description: string | null;
   is_active: boolean;
+  show_in_sidebar: boolean;
   created_at: string;
 }
 
@@ -18,6 +19,7 @@ export interface Phone {
   slug: string;
   status: PhoneStatus;
   price_pkr: number | null;
+  expected_price_pkr: number | null;
   is_featured: boolean;
   sort_order: number;
   seo_description: string | null;
@@ -219,4 +221,8 @@ export interface PhoneExtendedSpecs {
   feat_extra: string | null;
   battery_charging: string | null;
   battery_extra: string | null;
+}
+
+export interface FooterBrandsSetting {
+  brand_ids: string[];
 }

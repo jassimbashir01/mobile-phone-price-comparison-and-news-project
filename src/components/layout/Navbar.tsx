@@ -13,7 +13,7 @@ export async function Navbar() {
   const brands = await getActiveBrands();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-white">
+    <header className="sticky top-0 z-30 border-b border-border bg-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 lg:justify-start">
         <Link href="/" className="font-display text-xl font-bold text-primary">
           {SITE_NAME_PRIMARY_PART}

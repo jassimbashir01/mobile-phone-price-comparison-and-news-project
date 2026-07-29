@@ -150,6 +150,8 @@ export default async function PhonePage({
 
           <PriceDisplay
             pricePkr={phone.price_pkr}
+            expectedPricePkr={phone.expected_price_pkr}
+            status={phone.status}
             exchangeRate={exchangeRate}
           />
 

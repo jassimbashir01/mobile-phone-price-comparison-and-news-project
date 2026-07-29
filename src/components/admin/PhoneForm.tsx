@@ -64,6 +64,7 @@ export function PhoneForm({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PhoneFormValues>({
     resolver: zodResolver(phoneSchema),
@@ -74,7 +75,9 @@ export function PhoneForm({
           slug: phone.slug,
           status: phone.status,
           price_pkr: phone.price_pkr ?? undefined,
+          expected_price_pkr: phone.expected_price_pkr ?? undefined,
           is_featured: phone.is_featured,
+
           sort_order: phone.sort_order,
           seo_description: phone.seo_description ?? "",
           overview: phone.overview ?? "",
@@ -99,6 +102,8 @@ export function PhoneForm({
         }
       : { status: "available", is_featured: false, sort_order: 0 },
   });
+
+  const status = watch("status");
 
   const seoDescriptionValue =
     useWatch({ control, name: "seo_description" }) ?? "";
@@ -160,6 +165,19 @@ export function PhoneForm({
               <option value="discontinued">Discontinued</option>
             </select>
           </Field>
+          {status === "coming_soon" && (
+            <Field
+              id="expected_price_pkr"
+              label="Expected Price (PKR) — optional"
+            >
+              <input
+                id="expected_price_pkr"
+                type="number"
+                {...register("expected_price_pkr")}
+                className={inputClass}
+              />
+            </Field>
+          )}
           <Field id="name" label="Name" error={errors.name?.message}>
             <input id="name" {...register("name")} className={inputClass} />
           </Field>

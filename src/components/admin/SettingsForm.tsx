@@ -8,6 +8,7 @@ import {
   updateMediaKitStats,
   updateHomepageBanner,
   updateSidebarBanner,
+  updateFooterBrands,
 } from "@/lib/actions/settings";
 import { SingleImageUploader } from "@/components/admin/SingleImageUploader";
 import type {
@@ -15,6 +16,7 @@ import type {
   MediaKitStats,
   HomepageBannerSetting,
   SidebarBannerSetting,
+  Brand,
 } from "@/types/database";
 
 const PLATFORM_LABELS: Record<SocialLink["platform"], string> = {
@@ -37,12 +39,16 @@ export function SettingsForm({
   initialMediaKitStats,
   initialHomepageBanner,
   initialSidebarBanner,
+  initialFooterBrands,
+  allBrands,
 }: {
   initialRate: number;
   initialSocialLinks: SocialLink[];
   initialMediaKitStats: MediaKitStats;
   initialHomepageBanner: HomepageBannerSetting;
   initialSidebarBanner: SidebarBannerSetting;
+  initialFooterBrands: string[];
+  allBrands: Brand[];
 }) {
   const router = useRouter();
 
@@ -185,6 +191,29 @@ export function SettingsForm({
     }
   }
 
+  const [footerBrandIds, setFooterBrandIds] =
+    useState<string[]>(initialFooterBrands);
+  const [footerBrandsSaving, setFooterBrandsSaving] = useState(false);
+  const [footerBrandsSaved, setFooterBrandsSaved] = useState(false);
+  const [footerBrandsError, setFooterBrandsError] = useState("");
+
+  async function handleSaveFooterBrands() {
+    setFooterBrandsError("");
+    setFooterBrandsSaving(true);
+    try {
+      await updateFooterBrands(footerBrandIds);
+      setFooterBrandsSaved(true);
+      router.refresh();
+      setTimeout(() => setFooterBrandsSaved(false), 2000);
+    } catch (err) {
+      setFooterBrandsError(
+        err instanceof Error ? err.message : "Failed to save",
+      );
+    } finally {
+      setFooterBrandsSaving(false);
+    }
+  }
+
   return (
     <div className="max-w-2xl space-y-8">
       <section className="rounded-lg border border-border bg-white p-4">
@@ -220,6 +249,48 @@ export function SettingsForm({
           ⚠️ Already-cached phone pages take up to 24 hours to reflect a rate
           change.
         </p>
+      </section>
+
+      <section className="rounded-lg border border-border bg-white p-4">
+        <h2 className="mb-1 text-sm font-bold">Footer Brands</h2>
+        <p className="mb-3 text-xs text-ink/50">
+          Pick which brands show in the footer&apos;s Top Brands column, in the
+          order checked. Leave empty to fall back to 6 active brands
+          automatically.
+        </p>
+        <div className="mb-3 max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+          {allBrands.map((b) => (
+            <label key={b.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={footerBrandIds.includes(b.id)}
+                onChange={(e) => {
+                  setFooterBrandIds((prev) =>
+                    e.target.checked
+                      ? [...prev, b.id]
+                      : prev.filter((id) => id !== b.id),
+                  );
+                  setFooterBrandsSaved(false);
+                }}
+              />
+              {b.name}
+            </label>
+          ))}
+        </div>
+        <button
+          onClick={handleSaveFooterBrands}
+          disabled={footerBrandsSaving}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
+        >
+          {footerBrandsSaving
+            ? "Saving…"
+            : footerBrandsSaved
+              ? "Saved ✓"
+              : "Save Footer Brands"}
+        </button>
+        {footerBrandsError && (
+          <p className="mt-2 text-xs text-red-600">{footerBrandsError}</p>
+        )}
       </section>
 
       <section className="rounded-lg border border-border bg-white p-4">

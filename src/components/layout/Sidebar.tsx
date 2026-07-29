@@ -32,7 +32,8 @@ function CategoryBlock({
 }
 
 export async function Sidebar() {
-  const brands = await getActiveBrands();
+  const allBrands = await getActiveBrands();
+  const brands = allBrands.filter((b) => b.show_in_sidebar);
 
   return (
     <aside className="w-full shrink-0 rounded-lg border border-border bg-white p-4 lg:w-64">

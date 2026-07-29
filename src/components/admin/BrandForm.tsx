@@ -30,10 +30,11 @@ export function BrandForm({ brand }: { brand?: Brand }) {
           name: brand.name,
           slug: brand.slug,
           logo_url: brand.logo_url ?? "",
+          show_in_sidebar: brand.show_in_sidebar,
           description: brand.description ?? "",
           is_active: brand.is_active,
         }
-      : { is_active: true },
+      : { is_active: true, show_in_sidebar: true },
   });
 
   async function onSubmit(values: BrandFormValues) {
@@ -124,6 +125,10 @@ export function BrandForm({ brand }: { brand?: Brand }) {
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" {...register("is_active")} />
         Active (visible on the public site)
+      </label>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" {...register("show_in_sidebar")} />
+        Show in sidebar (still searchable and indexable either way)
       </label>
       {serverError && <p className="text-sm text-red-600">{serverError}</p>}
       <button

@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { getActiveBrands } from "@/queries/brands";
+import { getFooterBrands } from "@/queries/settings";
 import { PRICE_RANGES, FEATURE_TYPES } from "@/lib/constants";
 import { SITE_NAME } from "@/lib/site-config";
 
-// Picked from the middle of the full price spread (ranges 3–8 of 11) so
-// this footer column represents the site's core, most-searched price
-// brackets rather than skewing toward either the cheapest or priciest
-// extremes.
 const FOOTER_PRICE_SLUGS = [
   "10000-15000",
   "15000-25000",
@@ -17,23 +13,22 @@ const FOOTER_PRICE_SLUGS = [
 ];
 
 export async function Footer() {
-  const brands = await getActiveBrands();
-  const topBrands = brands.slice(0, 6);
+  const footerBrands = await getFooterBrands();
   const footerPriceRanges = FOOTER_PRICE_SLUGS.map((slug) =>
     PRICE_RANGES.find((p) => p.slug === slug),
   ).filter((p): p is (typeof PRICE_RANGES)[number] => Boolean(p));
 
   return (
-    <footer className="mt-12 border-t border-border bg-white">
+    <footer className="mt-12 border-t border-border bg-ink text-white/80">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-10 text-sm md:grid-cols-4">
         <div>
-          <h3 className="mb-3 font-display font-semibold text-ink">
+          <h3 className="mb-3 font-display font-semibold text-white">
             Top Brands
           </h3>
-          <ul className="space-y-1.5 text-ink/70">
-            {topBrands.map((b) => (
+          <ul className="space-y-1.5">
+            {footerBrands.map((b) => (
               <li key={b.id}>
-                <Link href={`/brand/${b.slug}`} className="hover:text-primary">
+                <Link href={`/brand/${b.slug}`} className="hover:text-accent">
                   {b.name}
                 </Link>
               </li>
@@ -42,13 +37,13 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-3 font-display font-semibold text-ink">
+          <h3 className="mb-3 font-display font-semibold text-white">
             Popular Price Ranges
           </h3>
-          <ul className="space-y-1.5 text-ink/70">
+          <ul className="space-y-1.5">
             {footerPriceRanges.map((p) => (
               <li key={p.slug}>
-                <Link href={`/price/${p.slug}`} className="hover:text-primary">
+                <Link href={`/price/${p.slug}`} className="hover:text-accent">
                   {p.label}
                 </Link>
               </li>
@@ -57,13 +52,13 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-3 font-display font-semibold text-ink">
+          <h3 className="mb-3 font-display font-semibold text-white">
             By Feature
           </h3>
-          <ul className="space-y-1.5 text-ink/70">
+          <ul className="space-y-1.5">
             {FEATURE_TYPES.slice(0, 6).map((f) => (
               <li key={f.slug}>
-                <Link href={`/type/${f.slug}`} className="hover:text-primary">
+                <Link href={`/type/${f.slug}`} className="hover:text-accent">
                   {f.label}
                 </Link>
               </li>
@@ -72,35 +67,37 @@ export async function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-3 font-display font-semibold text-ink">Company</h3>
-          <ul className="space-y-1.5 text-ink/70">
+          <h3 className="mb-3 font-display font-semibold text-white">
+            Company
+          </h3>
+          <ul className="space-y-1.5">
             <li>
-              <Link href="/contact" className="hover:text-primary">
+              <Link href="/contact" className="hover:text-accent">
                 Contact Us
               </Link>
             </li>
             <li>
-              <Link href="/advertise" className="hover:text-primary">
+              <Link href="/advertise" className="hover:text-accent">
                 Advertise With Us
               </Link>
             </li>
             <li>
-              <Link href="/offers" className="hover:text-primary">
+              <Link href="/offers" className="hover:text-accent">
                 Deals & Offers
               </Link>
             </li>
             <li>
-              <Link href="/media-kit" className="hover:text-primary">
+              <Link href="/media-kit" className="hover:text-accent">
                 Media Kit
               </Link>
             </li>
             <li>
-              <Link href="/privacy-policy" className="hover:text-primary">
+              <Link href="/privacy-policy" className="hover:text-accent">
                 Privacy Policy
               </Link>
             </li>
             <li>
-              <Link href="/news" className="hover:text-primary">
+              <Link href="/news" className="hover:text-accent">
                 Latest News
               </Link>
             </li>
@@ -108,7 +105,7 @@ export async function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border px-4 py-4 text-center text-xs text-ink/50">
+      <div className="border-t border-white/10 px-4 py-4 text-center text-xs text-white/50">
         <p>
           © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
         </p>
