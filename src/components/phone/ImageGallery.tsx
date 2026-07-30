@@ -1,11 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { PhoneImage } from '@/types/database';
+import { useState } from "react";
+import CloudinaryImage from "@/components/cloudinary-image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { PhoneImage } from "@/types/database";
 
-export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phoneName: string }) {
+export function ImageGallery({
+  images,
+  phoneName,
+}: {
+  images: PhoneImage[];
+  phoneName: string;
+}) {
   const [active, setActive] = useState(0);
 
   if (images.length === 0) {
@@ -34,6 +40,7 @@ export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phon
           width={390}
           height={730}
           sizes="320px"
+          priority={active === 0}
           className="h-full w-full object-contain p-3"
         />
         {images.length > 1 && (
@@ -63,7 +70,7 @@ export function ImageGallery({ images, phoneName }: { images: PhoneImage[]; phon
               key={img.id}
               onClick={() => setActive(i)}
               className={`relative aspect-[85/155] w-11 shrink-0 overflow-hidden rounded-md border ${
-                i === active ? 'border-primary' : 'border-border'
+                i === active ? "border-primary" : "border-border"
               }`}
             >
               <CloudinaryImage

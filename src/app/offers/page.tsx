@@ -7,7 +7,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { getActiveOffers } from "@/queries/offers";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildOffersItemListJsonLd } from "@/lib/seo";
 import { siteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -43,6 +43,7 @@ export default async function OffersPage({
   return (
     <PageShell>
       <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
+      <JsonLd data={buildOffersItemListJsonLd(offers, siteUrl)} />
       <Breadcrumb items={breadcrumbItems} />
       <h1 className="mb-2 text-xl font-bold">Deals & Offers</h1>
       <p className="mb-4 text-sm text-ink/60">

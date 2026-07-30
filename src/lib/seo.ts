@@ -56,6 +56,7 @@ export function buildProductJsonLd(
     name: string;
     seo_description: string | null;
     price_pkr: number | null;
+    expected_price_pkr?: number | null;
     images: PhoneImage[];
     status: "available" | "coming_soon" | "discontinued";
   },
@@ -68,6 +69,9 @@ export function buildProductJsonLd(
     discontinued: "https://schema.org/Discontinued",
   } as const;
 
+  const effectivePrice =
+    phone.status === "coming_soon" ? phone.expected_price_pkr : phone.price_pkr;
+
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -77,15 +81,31 @@ export function buildProductJsonLd(
       (img) =>
         `https://res.cloudinary.com/${cloudName}/image/upload/${img.cloudinary_public_id}`,
     ),
-    ...(phone.price_pkr != null
+    ...(effectivePrice != null
       ? {
           offers: {
             "@type": "Offer",
             priceCurrency: "PKR",
-            price: String(phone.price_pkr),
+            price: String(effectivePrice),
             availability: availabilityMap[phone.status],
           },
         }
       : {}),
+  };
+}
+
+export function buildOffersItemListJsonLd(
+  offers: { title: string; id: string }[],
+  siteUrl: string,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: offers.map((o, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: o.title,
+      url: `${siteUrl}/offers#${o.id}`,
+    })),
   };
 }
