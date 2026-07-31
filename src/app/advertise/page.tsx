@@ -23,11 +23,20 @@ const PLACEMENTS = [
     title: "Homepage Banner",
     description:
       "A prominent banner near the top of the homepage, seen by every visitor before they browse.",
+    dimensions:
+      "1800 x 300px (landscape) — keep key content centered, since it crops narrower on mobile.",
   },
   {
     title: "Sidebar Banner",
     description:
       "Displayed in the sidebar across every category and phone page — sitewide, sticky visibility.",
+    dimensions: "800 x 800px (square)",
+  },
+  {
+    title: "Footer Banner",
+    description: "Displayed at the bottom of every page, sitewide.",
+    dimensions:
+      "1800 x 300px (landscape) — same centering guidance as the homepage banner.",
   },
   {
     title: "Featured Phone Slot",
@@ -80,6 +89,7 @@ export default function AdvertisePage() {
           >
             <h2 className="mb-1 text-sm font-bold">{p.title}</h2>
             <p className="text-xs text-ink/60">{p.description}</p>
+            {p.dimensions && <p className="mt-1 text-[11px] text-ink/40">{p.dimensions}</p>}
           </div>
         ))}
       </div>

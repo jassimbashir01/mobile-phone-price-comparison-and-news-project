@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getFooterBrands } from "@/queries/settings";
+import { getFooterBanner } from "@/queries/settings";
+import { FooterBanner } from "./FooterBanner";
 import { PRICE_RANGES, FEATURE_TYPES } from "@/lib/constants";
 import { SITE_NAME } from "@/lib/site-config";
 
@@ -13,13 +15,17 @@ const FOOTER_PRICE_SLUGS = [
 ];
 
 export async function Footer() {
-  const footerBrands = await getFooterBrands();
+  const [footerBrands, footerBanner] = await Promise.all([
+    getFooterBrands(),
+    getFooterBanner(),
+  ]);
   const footerPriceRanges = FOOTER_PRICE_SLUGS.map((slug) =>
     PRICE_RANGES.find((p) => p.slug === slug),
   ).filter((p): p is (typeof PRICE_RANGES)[number] => Boolean(p));
 
   return (
     <footer className="mt-12 border-t border-border bg-ink text-white/80">
+      <FooterBanner banner={footerBanner} />
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 py-10 text-sm md:grid-cols-4">
         <div>
           <h3 className="mb-3 font-display font-semibold text-white">

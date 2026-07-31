@@ -122,3 +122,14 @@ export async function getFooterBrandIds(): Promise<string[]> {
   if (error) throw new Error(`getFooterBrandIds: ${error.message}`);
   return (data?.value as { brand_ids?: string[] } | null)?.brand_ids ?? [];
 }
+
+export async function getFooterBanner(): Promise<HomepageBannerSetting> {
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "footer_banner")
+    .maybeSingle();
+
+  if (error) throw new Error(`getFooterBanner: ${error.message}`);
+  return (data?.value as HomepageBannerSetting | null) ?? DEFAULT_BANNER;
+}

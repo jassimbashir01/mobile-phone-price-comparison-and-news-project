@@ -9,6 +9,7 @@ import {
   updateHomepageBanner,
   updateSidebarBanner,
   updateFooterBrands,
+  updateFooterBanner,
 } from "@/lib/actions/settings";
 import { SingleImageUploader } from "@/components/admin/SingleImageUploader";
 import type {
@@ -40,6 +41,7 @@ export function SettingsForm({
   initialHomepageBanner,
   initialSidebarBanner,
   initialFooterBrands,
+  initialFooterBanner,
   allBrands,
 }: {
   initialRate: number;
@@ -48,6 +50,7 @@ export function SettingsForm({
   initialHomepageBanner: HomepageBannerSetting;
   initialSidebarBanner: SidebarBannerSetting;
   initialFooterBrands: string[];
+  initialFooterBanner: HomepageBannerSetting;
   allBrands: Brand[];
 }) {
   const router = useRouter();
@@ -211,6 +214,35 @@ export function SettingsForm({
       );
     } finally {
       setFooterBrandsSaving(false);
+    }
+  }
+
+  const [footerBanner, setFooterBanner] =
+    useState<HomepageBannerSetting>(initialFooterBanner);
+  const [footerBannerSaving, setFooterBannerSaving] = useState(false);
+  const [footerBannerSaved, setFooterBannerSaved] = useState(false);
+  const [footerBannerError, setFooterBannerError] = useState("");
+
+  async function handleSaveFooterBanner() {
+    setFooterBannerError("");
+    if (!isSafeUrl(footerBanner.link_url)) {
+      setFooterBannerError(
+        "Destination URL must start with https:// (or http://).",
+      );
+      return;
+    }
+    setFooterBannerSaving(true);
+    try {
+      await updateFooterBanner(footerBanner);
+      setFooterBannerSaved(true);
+      router.refresh();
+      setTimeout(() => setFooterBannerSaved(false), 2000);
+    } catch (err) {
+      setFooterBannerError(
+        err instanceof Error ? err.message : "Failed to save",
+      );
+    } finally {
+      setFooterBannerSaving(false);
     }
   }
 
@@ -443,6 +475,7 @@ export function SettingsForm({
         <h2 className="mb-1 text-sm font-bold">
           Homepage Banner (sold placement)
         </h2>
+        <p className="mb-3 text-xs text-ink/50">Recommended size: 1800 x 300px. Keep key content centered — it crops narrower on mobile.</p>
         <p className="mb-3 text-xs text-ink/50">
           Upload a creative, set the destination link, and enable it once a
           client has paid for the slot.
@@ -526,6 +559,7 @@ export function SettingsForm({
         <h2 className="mb-1 text-sm font-bold">
           Sidebar Banner (sold placement)
         </h2>
+        <p className="mb-3 text-xs text-ink/50">Recommended size: 800 x 800px, square.</p>
         <div className="space-y-3">
           <SingleImageUploader
             value={sidebarBanner.cloudinary_public_id || null}
@@ -586,6 +620,68 @@ export function SettingsForm({
         </button>
         {sidebarBannerError && (
           <p className="mt-2 text-xs text-red-600">{sidebarBannerError}</p>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-border bg-white p-4">
+        <h2 className="mb-1 text-sm font-bold">
+          Footer Banner (sold placement)
+        </h2>
+        <p className="mb-3 text-xs text-ink/50">Recommended size: 1800 x 300px. Keep key content centered — it crops narrower on mobile.</p>
+        <div className="space-y-3">
+          <SingleImageUploader
+            value={footerBanner.cloudinary_public_id || null}
+            onChange={(id) =>
+              setFooterBanner((prev) => ({
+                ...prev,
+                cloudinary_public_id: id ?? "",
+              }))
+            }
+          />
+          <input
+            type="url"
+            placeholder="Destination URL"
+            value={footerBanner.link_url}
+            onChange={(e) =>
+              setFooterBanner((prev) => ({ ...prev, link_url: e.target.value }))
+            }
+            className="w-full rounded-md border border-border px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Alt text"
+            value={footerBanner.alt_text}
+            onChange={(e) =>
+              setFooterBanner((prev) => ({ ...prev, alt_text: e.target.value }))
+            }
+            className="w-full rounded-md border border-border px-3 py-2 text-sm"
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={footerBanner.enabled}
+              onChange={(e) =>
+                setFooterBanner((prev) => ({
+                  ...prev,
+                  enabled: e.target.checked,
+                }))
+              }
+            />
+            Enabled
+          </label>
+        </div>
+        <button
+          onClick={handleSaveFooterBanner}
+          disabled={footerBannerSaving}
+          className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
+        >
+          {footerBannerSaving
+            ? "Saving…"
+            : footerBannerSaved
+              ? "Saved ✓"
+              : "Save Footer Banner"}
+        </button>
+        {footerBannerError && (
+          <p className="mt-2 text-xs text-red-600">{footerBannerError}</p>
         )}
       </section>
     </div>

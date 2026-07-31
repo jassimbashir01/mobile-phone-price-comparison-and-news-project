@@ -7,6 +7,7 @@ import {
   getHomepageBanner,
   getSidebarBanner,
   getFooterBrandIds,
+  getFooterBanner
 } from "@/queries/settings";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export default async function AdminSettingsPage() {
     homepageBanner,
     sidebarBanner,
     initialFooterBrands,
+    initialFooterBanner,
     allBrands,
   ] = await Promise.all([
     getExchangeRate(),
@@ -27,6 +29,7 @@ export default async function AdminSettingsPage() {
     getHomepageBanner(),
     getSidebarBanner(),
     getFooterBrandIds(),
+    getFooterBanner(),
     getAllBrandsAdmin(),
   ]);
 
@@ -40,6 +43,7 @@ export default async function AdminSettingsPage() {
         initialHomepageBanner={homepageBanner}
         initialSidebarBanner={sidebarBanner}
         initialFooterBrands={initialFooterBrands}
+        initialFooterBanner={initialFooterBanner}
         allBrands={allBrands}
       />
     </div>

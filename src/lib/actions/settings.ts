@@ -138,3 +138,16 @@ export async function updateFooterBrands(brandIds: string[]) {
   if (error) throw new Error(error.message);
   await triggerRevalidate(["/"]);
 }
+
+export async function updateFooterBanner(banner: HomepageBannerSetting) {
+  await requireRole(["admin", "editor"]);
+  const parsed = bannerSettingSchema.parse(banner);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ key: "footer_banner", value: parsed }, { onConflict: "key" });
+
+  if (error) throw new Error(error.message);
+  await triggerRevalidate(["/"]);
+}

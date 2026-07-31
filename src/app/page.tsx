@@ -15,7 +15,8 @@ import {
 } from "@/lib/constants";
 import { getHomepageSectionPhones } from "@/queries/homepage";
 import { getPublishedNews } from "@/queries/news";
-import { getHomepageBanner} from "@/queries/settings";
+import { getHomepageBanner } from "@/queries/settings";
+import { EmailCapture } from "@/components/EmailCapture";
 
 export const revalidate = 3600;
 
@@ -27,27 +28,21 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [
-    featured,
-    latest,
-    priceSections,
-    comingSoon,
-    newsResult,
-    banner,
-  ] = await Promise.all([
-    getHomepageSectionPhones("featured_slider"),
-    getHomepageSectionPhones("latest_phones"),
-    Promise.all(
-      HOMEPAGE_PRICE_RANGES.map((range) =>
-        getHomepageSectionPhones(homepagePriceSectionKey(range), {
-          fallback: { priceMin: range.min, priceMax: range.max },
-        }),
+  const [featured, latest, priceSections, comingSoon, newsResult, banner] =
+    await Promise.all([
+      getHomepageSectionPhones("featured_slider"),
+      getHomepageSectionPhones("latest_phones"),
+      Promise.all(
+        HOMEPAGE_PRICE_RANGES.map((range) =>
+          getHomepageSectionPhones(homepagePriceSectionKey(range), {
+            fallback: { priceMin: range.min, priceMax: range.max },
+          }),
+        ),
       ),
-    ),
-    getHomepageSectionPhones("coming_soon"),
-    getPublishedNews({ limit: 6 }),
-    getHomepageBanner(),
-  ]);
+      getHomepageSectionPhones("coming_soon"),
+      getPublishedNews({ limit: 6 }),
+      getHomepageBanner(),
+    ]);
 
   return (
     <PageShell>
@@ -113,6 +108,18 @@ export default async function HomePage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="mt-8 rounded-lg border border-border bg-white p-6 text-center">
+        <h2 className="mb-1 text-lg font-bold">
+          Never Miss a New Phone Launch
+        </h2>
+        <p className="mb-4 text-sm text-ink/60">
+          Get notified when new phones and price drops go live.
+        </p>
+        <div className="mx-auto max-w-sm">
+          <EmailCapture source="homepage" />
+        </div>
       </section>
     </PageShell>
   );
