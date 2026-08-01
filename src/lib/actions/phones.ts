@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { triggerRevalidate, pingIndexNow } from "@/lib/revalidate";
 import { sanitizeRichText } from "@/lib/sanitize";
+import { destroyCloudinaryAsset } from "@/lib/cloudinary";
 import { phoneSchema, type PhoneFormValues } from "@/lib/validation/phone";
 import type { ManagedImage } from "@/components/admin/ImageUploader";
 
@@ -121,8 +122,21 @@ export async function updatePhone(id: string, values: PhoneFormValues) {
 export async function deletePhone(id: string, slug: string) {
   await requireRole(["admin"]);
   const supabase = createAdminClient();
+
+  const { data: images } = await supabase
+    .from("phone_images")
+    .select("cloudinary_public_id")
+    .eq("phone_id", id);
+
   const { error } = await supabase.from("phones").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  await Promise.all(
+    (images ?? []).map((img) =>
+      destroyCloudinaryAsset(img.cloudinary_public_id),
+    ),
+  );
+
   await triggerRevalidate(["/", `/phone/${slug}`]);
 }
 
@@ -133,6 +147,11 @@ export async function savePhoneImages(
 ) {
   await requireRole(["admin", "editor"]);
   const supabase = createAdminClient();
+
+  const { data: oldImages } = await supabase
+    .from("phone_images")
+    .select("cloudinary_public_id")
+    .eq("phone_id", phoneId);
 
   const { error: deleteError } = await supabase
     .from("phone_images")
@@ -152,6 +171,13 @@ export async function savePhoneImages(
     if (insertError) throw new Error(insertError.message);
   }
 
+  const newIds = new Set(images.map((i) => i.cloudinary_public_id));
+  const toDelete = (oldImages ?? []).filter(
+    (old) => !newIds.has(old.cloudinary_public_id),
+  );
+  await Promise.all(
+    toDelete.map((img) => destroyCloudinaryAsset(img.cloudinary_public_id)),
+  );
+
   await triggerRevalidate([`/phone/${slug}`]);
-  await pingIndexNow([`/phone/${slug}`]);
 }

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { triggerRevalidate } from "@/lib/revalidate";
+import { destroyCloudinaryAsset } from "@/lib/cloudinary";
 import type {
   SocialLink,
   MediaKitStats,
@@ -11,10 +12,6 @@ import type {
   SidebarBannerSetting,
 } from "@/types/database";
 
-// Restricts to http(s) only — z.string().url() alone would accept
-// javascript: and other unsafe schemes, since they're syntactically valid
-// URLs. These fields render as live hrefs on the public site, so this is
-// the real trust boundary, not just the client-side form.
 const httpUrlSchema = z
   .string()
   .refine((val) => val === "" || /^https?:\/\//i.test(val), {
@@ -86,9 +83,6 @@ export async function updateMediaKitStats(stats: MediaKitStats) {
   await triggerRevalidate(["/media-kit"]);
 }
 
-// Shared by both the homepage and sidebar banner — previously two
-// separately-declared but identical schemas, which risked drifting out of
-// sync the next time a field was added to one but not the other.
 const bannerSettingSchema = z.object({
   cloudinary_public_id: z.string(),
   link_url: httpUrlSchema,
@@ -96,9 +90,24 @@ const bannerSettingSchema = z.object({
   enabled: z.boolean(),
 });
 
+async function getExistingBannerPublicId(
+  key: string,
+): Promise<string | undefined> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
+  return (data?.value as { cloudinary_public_id?: string } | null)
+    ?.cloudinary_public_id;
+}
+
 export async function updateHomepageBanner(banner: HomepageBannerSetting) {
   await requireRole(["admin", "editor"]);
   const parsed = bannerSettingSchema.parse(banner);
+
+  const existingPublicId = await getExistingBannerPublicId("homepage_banner");
 
   const supabase = createAdminClient();
   const { error } = await supabase
@@ -106,6 +115,11 @@ export async function updateHomepageBanner(banner: HomepageBannerSetting) {
     .upsert({ key: "homepage_banner", value: parsed }, { onConflict: "key" });
 
   if (error) throw new Error(error.message);
+
+  if (existingPublicId && existingPublicId !== parsed.cloudinary_public_id) {
+    await destroyCloudinaryAsset(existingPublicId);
+  }
+
   await triggerRevalidate(["/"]);
 }
 
@@ -113,12 +127,39 @@ export async function updateSidebarBanner(banner: SidebarBannerSetting) {
   await requireRole(["admin", "editor"]);
   const parsed = bannerSettingSchema.parse(banner);
 
+  const existingPublicId = await getExistingBannerPublicId("sidebar_banner");
+
   const supabase = createAdminClient();
   const { error } = await supabase
     .from("site_settings")
     .upsert({ key: "sidebar_banner", value: parsed }, { onConflict: "key" });
 
   if (error) throw new Error(error.message);
+
+  if (existingPublicId && existingPublicId !== parsed.cloudinary_public_id) {
+    await destroyCloudinaryAsset(existingPublicId);
+  }
+
+  await triggerRevalidate(["/"]);
+}
+
+export async function updateFooterBanner(banner: HomepageBannerSetting) {
+  await requireRole(["admin", "editor"]);
+  const parsed = bannerSettingSchema.parse(banner);
+
+  const existingPublicId = await getExistingBannerPublicId("footer_banner");
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ key: "footer_banner", value: parsed }, { onConflict: "key" });
+
+  if (error) throw new Error(error.message);
+
+  if (existingPublicId && existingPublicId !== parsed.cloudinary_public_id) {
+    await destroyCloudinaryAsset(existingPublicId);
+  }
+
   await triggerRevalidate(["/"]);
 }
 
@@ -134,19 +175,6 @@ export async function updateFooterBrands(brandIds: string[]) {
   const { error } = await supabase
     .from("site_settings")
     .upsert({ key: "footer_brands", value: parsed }, { onConflict: "key" });
-
-  if (error) throw new Error(error.message);
-  await triggerRevalidate(["/"]);
-}
-
-export async function updateFooterBanner(banner: HomepageBannerSetting) {
-  await requireRole(["admin", "editor"]);
-  const parsed = bannerSettingSchema.parse(banner);
-
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("site_settings")
-    .upsert({ key: "footer_banner", value: parsed }, { onConflict: "key" });
 
   if (error) throw new Error(error.message);
   await triggerRevalidate(["/"]);

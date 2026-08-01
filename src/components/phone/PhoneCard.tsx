@@ -3,7 +3,18 @@ import CloudinaryImage from "@/components/cloudinary-image";
 import { formatPKR } from "@/lib/utils";
 import type { PhoneCardData } from "@/types/database";
 
-export function PhoneCard({ phone }: { phone: PhoneCardData }) {
+export function PhoneCard({
+  phone,
+  priority,
+}: {
+  phone: PhoneCardData;
+  priority?: boolean;
+}) {
+  const showExpectedTag =
+    phone.status === "coming_soon" && phone.expected_price_pkr != null;
+  const showDiscontinuedTag =
+    phone.status === "discontinued" && phone.price_pkr != null;
+
   return (
     <Link
       href={`/phone/${phone.slug}`}
@@ -18,6 +29,7 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
             height={155}
             sizes="85px"
             className="h-full w-full object-contain p-1"
+            priority={priority}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[10px] text-ink/30">
@@ -30,15 +42,27 @@ export function PhoneCard({ phone }: { phone: PhoneCardData }) {
         <h3 className="line-clamp-2 text-xs font-semibold text-ink group-hover:text-primary">
           {phone.name}
         </h3>
-        <p className="mt-auto pt-0.5 text-xs font-semibold text-primary">
-          {phone.status === "coming_soon"
-            ? phone.expected_price_pkr != null
-              ? `${formatPKR(phone.expected_price_pkr)} (Expected)`
-              : "Coming Soon"
-            : phone.price_pkr != null
-              ? formatPKR(phone.price_pkr)
-              : "Price N/A"}
-        </p>
+        <div className="mt-auto flex flex-col gap-0.5 pt-0.5">
+          {showExpectedTag && (
+            <span className="w-fit rounded bg-accent px-1 text-[8px] font-semibold">
+              Expected Price
+            </span>
+          )}
+          {showDiscontinuedTag && (
+            <span className="w-fit rounded bg-ink/10 px-1 text-[8px] font-semibold text-ink/60">
+              Discontinued
+            </span>
+          )}
+          <p className="text-xs font-semibold text-primary">
+            {phone.status === "coming_soon"
+              ? phone.expected_price_pkr != null
+                ? formatPKR(phone.expected_price_pkr)
+                : "Coming Soon"
+              : phone.price_pkr != null
+                ? formatPKR(phone.price_pkr)
+                : "Price N/A"}
+          </p>
+        </div>
       </div>
     </Link>
   );

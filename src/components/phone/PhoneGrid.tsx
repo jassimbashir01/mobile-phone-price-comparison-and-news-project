@@ -1,6 +1,6 @@
-import { PhoneCard } from './PhoneCard';
-import { AdSlot } from '@/components/ads/AdSlot';
-import type { PhoneCardData } from '@/types/database';
+import { PhoneCard } from "./PhoneCard";
+import { AdSlot } from "@/components/ads/AdSlot";
+import type { PhoneCardData } from "@/types/database";
 
 export function PhoneGrid({ phones }: { phones: PhoneCardData[] }) {
   if (phones.length === 0) {
@@ -13,19 +13,25 @@ export function PhoneGrid({ phones }: { phones: PhoneCardData[] }) {
 
   const items: React.ReactNode[] = [];
   phones.forEach((p, i) => {
-    items.push(<PhoneCard key={p.id} phone={p} />);
+    items.push(<PhoneCard key={p.id} phone={p} priority={i === 0} />);
     if (i === 11) {
       items.push(
-        <div key="mid-grid-ad" className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6">
+        <div
+          key="mid-grid-ad"
+          className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6"
+        >
           <AdSlot slot="category-mid-grid" />
-        </div>
+        </div>,
       );
     }
     if (i === 47) {
       items.push(
-        <div key="mid-grid-ad-2" className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6">
+        <div
+          key="mid-grid-ad-2"
+          className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6"
+        >
           <AdSlot slot="category-mid-grid-2" />
-        </div>
+        </div>,
       );
     }
   });
