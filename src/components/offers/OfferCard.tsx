@@ -1,9 +1,13 @@
-import CloudinaryImage from '@/components/cloudinary-image';
-import { formatPKR } from '@/lib/utils';
-import type { Offer } from '@/types/database';
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
+import { formatPKR } from "@/lib/utils";
+import type { Offer } from "@/types/database";
 
 export function OfferCard({ offer }: { offer: Offer }) {
-  const hasDiscount = offer.original_price_pkr != null && offer.price_pkr != null && offer.original_price_pkr > offer.price_pkr;
+  const hasDiscount =
+    offer.original_price_pkr != null &&
+    offer.price_pkr != null &&
+    offer.original_price_pkr > offer.price_pkr;
 
   return (
     <a
@@ -14,28 +18,50 @@ export function OfferCard({ offer }: { offer: Offer }) {
     >
       <div className="relative aspect-square bg-surface">
         {offer.image_public_id ? (
-          <CloudinaryImage
-            src={offer.image_public_id}
+          <Image
+            src={cloudinaryUrl(offer.image_public_id, {
+              width: 600,
+              height: 600,
+            })}
             alt={offer.title}
             width={300}
             height={300}
-            sizes="(max-width: 768px) 50vw, 25vw"
+            unoptimized
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-ink/30">No image</div>
+          <div className="flex h-full items-center justify-center text-xs text-ink/30">
+            No image
+          </div>
         )}
         <span className="absolute left-2 top-2 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold">
-          {offer.offer_type === 'affiliate' ? 'Deal' : 'Local Offer'}
+          {offer.offer_type === "affiliate" ? "Deal" : "Local Offer"}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        {offer.shop_name && <span className="text-xs text-ink/50">{offer.shop_name}{offer.shop_location ? ` · ${offer.shop_location}` : ''}</span>}
+        {offer.shop_name && (
+          <span className="text-xs text-ink/50">
+            {offer.shop_name}
+            {offer.shop_location ? ` · ${offer.shop_location}` : ""}
+          </span>
+        )}
         <h3 className="line-clamp-2 text-sm font-semibold">{offer.title}</h3>
-        {offer.description && <p className="line-clamp-2 text-xs text-ink/60">{offer.description}</p>}
+        {offer.description && (
+          <p className="line-clamp-2 text-xs text-ink/60">
+            {offer.description}
+          </p>
+        )}
         <div className="mt-auto flex items-baseline gap-2 pt-1">
-          {offer.price_pkr != null && <span className="text-sm font-semibold text-primary">{formatPKR(offer.price_pkr)}</span>}
-          {hasDiscount && <span className="text-xs text-ink/40 line-through">{formatPKR(offer.original_price_pkr)}</span>}
+          {offer.price_pkr != null && (
+            <span className="text-sm font-semibold text-primary">
+              {formatPKR(offer.price_pkr)}
+            </span>
+          )}
+          {hasDiscount && (
+            <span className="text-xs text-ink/40 line-through">
+              {formatPKR(offer.original_price_pkr)}
+            </span>
+          )}
         </div>
       </div>
     </a>

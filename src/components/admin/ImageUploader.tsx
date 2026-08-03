@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { Star, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { useState } from "react";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
+import { Star, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 
 export interface ManagedImage {
   id?: string;
@@ -19,20 +20,23 @@ export function ImageUploader({
   onChange: (images: ManagedImage[]) => void;
 }) {
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
+  const [uploadError, setUploadError] = useState("");
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    setUploadError('');
+    setUploadError("");
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
       const data = await res.json();
       if (!res.ok) {
-        setUploadError(data.error ?? 'Upload failed. Please try again.');
+        setUploadError(data.error ?? "Upload failed. Please try again.");
         return;
       }
       if (data.publicId) {
@@ -46,10 +50,12 @@ export function ImageUploader({
         ]);
       }
     } catch {
-      setUploadError('Upload failed. Please check your connection and try again.');
+      setUploadError(
+        "Upload failed. Please check your connection and try again.",
+      );
     } finally {
       setUploading(false);
-      e.target.value = '';
+      e.target.value = "";
     }
   }
 
@@ -61,7 +67,8 @@ export function ImageUploader({
     const next = images
       .filter((_, i) => i !== index)
       .map((img, i) => ({ ...img, sort_order: i }));
-    if (next.length > 0 && !next.some((i) => i.is_primary)) next[0].is_primary = true;
+    if (next.length > 0 && !next.some((i) => i.is_primary))
+      next[0].is_primary = true;
     onChange(next);
   }
 
@@ -77,14 +84,20 @@ export function ImageUploader({
     <div>
       <div className="mb-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
         {images.map((img, i) => (
-          <div key={img.cloudinary_public_id + i} className="relative rounded-md border border-border p-1">
+          <div
+            key={img.cloudinary_public_id + i}
+            className="relative rounded-md border border-border p-1"
+          >
             <div className="relative aspect-square overflow-hidden rounded">
-              <CloudinaryImage
-                src={img.cloudinary_public_id}
+              <Image
+                src={cloudinaryUrl(img.cloudinary_public_id, {
+                  width: 240,
+                  height: 240,
+                })}
                 alt=""
-                width={200}
-                height={200}
-                sizes="120px"
+                width={120}
+                height={120}
+                unoptimized
                 className="h-full w-full object-contain"
               />
             </div>
@@ -101,7 +114,10 @@ export function ImageUploader({
                 title="Set as primary"
                 className="text-ink/50 hover:text-primary"
               >
-                <Star size={14} fill={img.is_primary ? 'currentColor' : 'none'} />
+                <Star
+                  size={14}
+                  fill={img.is_primary ? "currentColor" : "none"}
+                />
               </button>
               <div className="flex gap-1">
                 <button
@@ -135,9 +151,17 @@ export function ImageUploader({
           </div>
         ))}
       </div>
-      <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="text-sm" />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        disabled={uploading}
+        className="text-sm"
+      />
       {uploading && <p className="mt-1 text-xs text-ink/40">Uploading…</p>}
-      {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
+      {uploadError && (
+        <p className="mt-1 text-xs text-red-600">{uploadError}</p>
+      )}
     </div>
   );
 }

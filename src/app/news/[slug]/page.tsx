@@ -1,17 +1,18 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import CloudinaryImage from '@/components/cloudinary-image';
-import { PageShell } from '@/components/layout/PageShell';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { NewsCard } from '@/components/news/NewsCard';
-import { PhoneGrid } from '@/components/phone/PhoneGrid';
-import { AdSlot } from '@/components/ads/AdSlot';
-import { JsonLd } from '@/components/seo/JsonLd';
-import { buildBreadcrumbJsonLd } from '@/lib/seo';
-import { getNewsBySlug, getAllNewsSlugs, getRelatedNews } from '@/queries/news';
-import { getPhonesByBrandSlug } from '@/queries/phones';
-import { siteUrl } from '@/lib/site';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
+import { PageShell } from "@/components/layout/PageShell";
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { NewsCard } from "@/components/news/NewsCard";
+import { PhoneGrid } from "@/components/phone/PhoneGrid";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo";
+import { getNewsBySlug, getAllNewsSlugs, getRelatedNews } from "@/queries/news";
+import { getPhonesByBrandSlug } from "@/queries/phones";
+import { siteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -50,7 +51,7 @@ export async function generateMetadata({
 
 function renderBodyWithAd(body: string | null) {
   if (!body) return null;
-  const paragraphs = body.split('\n\n').filter(Boolean);
+  const paragraphs = body.split("\n\n").filter(Boolean);
   return paragraphs.map((p, i) => (
     <div key={i}>
       <p className="mb-4 text-sm leading-relaxed text-ink/80">{p}</p>
@@ -76,21 +77,23 @@ export default async function NewsArticlePage({
 
   const [relatedNews, brandPhonesResult] = await Promise.all([
     getRelatedNews(article.id, article.brand_id, 4),
-    brand ? getPhonesByBrandSlug(brand.slug, { limit: 6 }) : Promise.resolve({ phones: [], total: 0 }),
+    brand
+      ? getPhonesByBrandSlug(brand.slug, { limit: 6 })
+      : Promise.resolve({ phones: [], total: 0 }),
   ]);
   const brandPhones = brandPhonesResult.phones;
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'News', href: '/news' },
+    { label: "Home", href: "/" },
+    { label: "News", href: "/news" },
     { label: article.title },
   ];
 
   const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString('en-PK', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+    ? new Date(article.published_at).toLocaleDateString("en-PK", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       })
     : null;
 
@@ -99,8 +102,8 @@ export default async function NewsArticlePage({
       <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
       <JsonLd
         data={{
-          '@context': 'https://schema.org',
-          '@type': 'NewsArticle',
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
           headline: article.title,
           description: article.excerpt ?? article.title,
           datePublished: article.published_at ?? undefined,
@@ -122,9 +125,12 @@ export default async function NewsArticlePage({
           {publishedDate}
           {brand && (
             <>
-              {' '}
-              ·{' '}
-              <Link href={`/brand/${brand.slug}`} className="text-primary hover:underline">
+              {" "}
+              ·{" "}
+              <Link
+                href={`/brand/${brand.slug}`}
+                className="text-primary hover:underline"
+              >
                 {brand.name}
               </Link>
             </>
@@ -133,12 +139,16 @@ export default async function NewsArticlePage({
 
         {article.cover_image_public_id && (
           <div className="relative mb-6 aspect-video overflow-hidden rounded-lg border border-border bg-surface">
-            <CloudinaryImage
-              src={article.cover_image_public_id}
+            <Image
+              src={cloudinaryUrl(article.cover_image_public_id, {
+                width: 1200,
+                height: 675,
+              })}
               alt={article.title}
-              width={1200}
-              height={675}
-              sizes="(max-width: 768px) 100vw, 768px"
+              width={800}
+              height={450}
+              priority
+              unoptimized
               className="h-full w-full object-cover"
             />
           </div>

@@ -49,9 +49,28 @@ export async function getPhoneBySlug(
 }
 
 export async function getAllPhoneSlugs(): Promise<string[]> {
-  const { data, error } = await supabase.from("phones").select("slug");
-  if (error) throw new Error(`getAllPhoneSlugs: ${error.message}`);
-  return (data ?? []).map((p) => p.slug);
+  const slugs: string[] = [];
+  const PAGE_SIZE = 1000;
+  let offset = 0;
+
+  // Supabase silently caps every query at 1,000 rows — without paging,
+  // 1,500+ phones would be missing from prerendering and the sitemap.
+  while (true) {
+    const { data, error } = await supabase
+      .from("phones")
+      .select("slug")
+      .order("created_at", { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) throw new Error(`getAllPhoneSlugs: ${error.message}`);
+    if (!data || data.length === 0) break;
+
+    slugs.push(...data.map((p) => p.slug));
+    if (data.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+
+  return slugs;
 }
 
 export async function getFeaturedPhones(limit = 8): Promise<PhoneCardData[]> {
@@ -347,13 +366,18 @@ export async function getAdjacentPhones(
   prev: { name: string; slug: string } | null;
   next: { name: string; slug: string } | null;
 }> {
+  // Fetch only id/name/slug/sort_order — enough to order and locate
+  // neighbours without pulling full rows. Capped at 1,000 deliberately:
+  // no single brand approaches that, and it bounds the query cost on
+  // every phone page load.
   const { data, error } = await supabase
     .from("phones")
     .select("id, name, slug")
     .eq("brand_id", brandId)
     .eq("status", "available")
     .order("sort_order", { ascending: true })
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .limit(1000);
 
   if (error) throw new Error(`getAdjacentPhones: ${error.message}`);
   const list = data ?? [];
@@ -361,9 +385,7 @@ export async function getAdjacentPhones(
   if (index === -1 || list.length <= 1) return { prev: null, next: null };
 
   // Wraps around — the last phone's "next" is the first, and vice versa,
-  // so browsing never dead-ends. Every click is a real page navigation
-  // (not client-side scroll-loading), which is also what lets vignette
-  // ads' default trigger — same-site link clicks — actually fire.
+  // so browsing never dead-ends.
   const prevIndex = index === 0 ? list.length - 1 : index - 1;
   const nextIndex = index === list.length - 1 ? 0 : index + 1;
 

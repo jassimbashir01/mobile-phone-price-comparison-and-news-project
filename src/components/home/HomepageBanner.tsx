@@ -1,5 +1,6 @@
 import Link from "next/link";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import type { HomepageBannerSetting } from "@/types/database";
 
 export function HomepageBanner({ banner }: { banner: HomepageBannerSetting }) {
@@ -14,9 +15,8 @@ export function HomepageBanner({ banner }: { banner: HomepageBannerSetting }) {
       >
         <div className="relative aspect-[3/1] w-full bg-surface sm:aspect-[6/1]">
           {/* Real art direction — a genuinely different, purpose-cropped
-              image per breakpoint, not a CSS crop of one wide image. This
-              is what <picture>/<source media> exists for: the browser only
-              downloads whichever image actually matches, never both. */}
+              image per breakpoint. The browser only downloads whichever
+              image actually matches, never both. */}
           <picture>
             <source
               media="(min-width: 640px)"
@@ -26,9 +26,6 @@ export function HomepageBanner({ banner }: { banner: HomepageBannerSetting }) {
               src="/homepage-banner-mobile.jpg"
               alt="MobileWala — Compare Mobile Phone Prices, Specs & News in Pakistan"
               className="h-full w-full object-cover"
-              // Native browser priority hints, since this bypasses
-              // next/image's automatic preload injection for this
-              // specific art-directed case.
               fetchPriority="high"
               loading="eager"
               decoding="async"
@@ -49,14 +46,17 @@ export function HomepageBanner({ banner }: { banner: HomepageBannerSetting }) {
       className="mb-6 block overflow-hidden rounded-lg border border-border"
     >
       <div className="relative aspect-[3/1] w-full bg-surface sm:aspect-[6/1]">
-        <CloudinaryImage
-          src={banner.cloudinary_public_id}
+        <Image
+          src={cloudinaryUrl(banner.cloudinary_public_id, {
+            width: 1800,
+            height: 300,
+          })}
           alt={banner.alt_text || "Sponsored"}
-          width={1200}
-          height={200}
-          sizes="100vw"
-          className="h-full w-full object-cover"
+          width={1800}
+          height={300}
           priority
+          unoptimized
+          className="h-full w-full object-cover"
         />
       </div>
     </Link>

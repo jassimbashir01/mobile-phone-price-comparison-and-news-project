@@ -1,5 +1,6 @@
-import Link from 'next/link';
-import CloudinaryImage from '@/components/cloudinary-image';
+import Link from "next/link";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 
 interface NewsCardItem {
   id: string;
@@ -19,12 +20,15 @@ export function NewsCard({ item }: { item: NewsCardItem }) {
     >
       <div className="relative aspect-video bg-surface">
         {item.cover_image_public_id ? (
-          <CloudinaryImage
-            src={item.cover_image_public_id}
+          <Image
+            src={cloudinaryUrl(item.cover_image_public_id, {
+              width: 800,
+              height: 450,
+            })}
             alt={item.title}
-            width={640}
-            height={360}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            width={400}
+            height={225}
+            unoptimized
             className="h-full w-full object-cover"
           />
         ) : (
@@ -34,7 +38,9 @@ export function NewsCard({ item }: { item: NewsCardItem }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        {item.brand && <span className="text-[10px] text-ink/50">{item.brand.name}</span>}
+        {item.brand && (
+          <span className="text-[10px] text-ink/50">{item.brand.name}</span>
+        )}
         <h3 className="line-clamp-2 text-sm font-semibold group-hover:text-primary">
           {item.title}
         </h3>
@@ -43,10 +49,10 @@ export function NewsCard({ item }: { item: NewsCardItem }) {
         )}
         {item.published_at && (
           <p className="mt-auto pt-1 text-[11px] text-ink/40">
-            {new Date(item.published_at).toLocaleDateString('en-PK', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
+            {new Date(item.published_at).toLocaleDateString("en-PK", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
             })}
           </p>
         )}

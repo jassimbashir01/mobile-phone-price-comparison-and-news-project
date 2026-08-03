@@ -5,7 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { formatPKR } from "@/lib/utils";
 
 interface SearchResult {
@@ -133,12 +134,15 @@ export function SearchBar({ className }: { className?: string }) {
               >
                 <div className="relative h-10 w-6 shrink-0 overflow-hidden rounded bg-surface">
                   {r.primary_image ? (
-                    <CloudinaryImage
-                      src={r.primary_image.cloudinary_public_id}
+                    <Image
+                      src={cloudinaryUrl(r.primary_image.cloudinary_public_id, {
+                        width: 48,
+                        height: 80,
+                      })}
                       alt={r.name}
                       width={24}
                       height={40}
-                      sizes="24px"
+                      unoptimized
                       className="h-full w-full object-contain"
                     />
                   ) : null}

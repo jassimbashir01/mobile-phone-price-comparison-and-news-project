@@ -1,5 +1,6 @@
 import Link from "next/link";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { formatPKR } from "@/lib/utils";
 import type { PhoneCardData } from "@/types/database";
 
@@ -15,21 +16,28 @@ export function PhoneCard({
   const showDiscontinuedTag =
     phone.status === "discontinued" && phone.price_pkr != null;
 
+  const imageUrl = phone.primary_image
+    ? cloudinaryUrl(phone.primary_image.cloudinary_public_id, {
+        width: 170,
+        height: 310,
+      })
+    : null;
+
   return (
     <Link
       href={`/phone/${phone.slug}`}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-white transition hover:shadow-md"
     >
       <div className="relative mx-auto aspect-[85/155] w-full max-w-[85px] bg-surface">
-        {phone.primary_image ? (
-          <CloudinaryImage
-            src={phone.primary_image.cloudinary_public_id}
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
             alt={`${phone.name} price in Pakistan`}
             width={85}
             height={155}
-            sizes="85px"
             className="h-full w-full object-contain p-1"
             priority={priority}
+            unoptimized
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[10px] text-ink/30">

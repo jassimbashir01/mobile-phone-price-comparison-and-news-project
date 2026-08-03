@@ -41,4 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# service worker
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+
 scripts/

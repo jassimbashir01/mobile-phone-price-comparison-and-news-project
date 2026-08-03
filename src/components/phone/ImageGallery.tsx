@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import type { PhoneImage } from "@/types/database";
 
 export function ImageGallery({
@@ -34,13 +35,16 @@ export function ImageGallery({
   return (
     <div>
       <div className="relative mx-auto aspect-[195/365] w-full max-w-[320px] overflow-hidden rounded-lg border border-border bg-surface">
-        <CloudinaryImage
-          src={current.cloudinary_public_id}
+        <Image
+          src={cloudinaryUrl(current.cloudinary_public_id, {
+            width: 640,
+            height: 1200,
+          })}
           alt={`${phoneName} image ${active + 1}`}
-          width={390}
-          height={730}
-          sizes="320px"
+          width={320}
+          height={600}
           priority={active === 0}
+          unoptimized
           className="h-full w-full object-contain p-3"
         />
         {images.length > 1 && (
@@ -73,12 +77,15 @@ export function ImageGallery({
                 i === active ? "border-primary" : "border-border"
               }`}
             >
-              <CloudinaryImage
-                src={img.cloudinary_public_id}
+              <Image
+                src={cloudinaryUrl(img.cloudinary_public_id, {
+                  width: 88,
+                  height: 160,
+                })}
                 alt={`${phoneName} thumbnail ${i + 1}`}
-                width={85}
-                height={155}
-                sizes="44px"
+                width={44}
+                height={80}
+                unoptimized
                 className="h-full w-full object-contain p-0.5"
               />
             </button>

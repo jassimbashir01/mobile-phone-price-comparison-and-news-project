@@ -6,18 +6,20 @@ if (!process.env.NEXT_PUBLIC_SITE_URL) {
   );
 }
 
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-export const generateRobotsTxt = true;
-export const exclude = ['/admin', '/admin/*', '/login', '/compare', '/search', '/media-kit', '/api/*'];
-export const robotsTxtOptions = {
-  policies: [
-    {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin', '/admin/*', '/login', '/api/*'],
-    },
-  ],
-  additionalSitemaps: [`${process.env.NEXT_PUBLIC_SITE_URL}/sitemap-images.xml`],
+module.exports = {
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+  generateRobotsTxt: true,
+  exclude: ['/admin', '/admin/*', '/login', '/compare', '/search', '/media-kit', '/offline', '/api/*'],
+  robotsTxtOptions: {
+    policies: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin', '/admin/*', '/login', '/api/*'],
+      },
+    ],
+    additionalSitemaps: [`${process.env.NEXT_PUBLIC_SITE_URL}/sitemap-images.xml`],
+  },
+  changefreq: 'daily',
+  priority: 0.7,
 };
-export const changefreq = 'daily';
-export const priority = 0.7;

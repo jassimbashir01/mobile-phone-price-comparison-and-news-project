@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 
 export function SingleImageUploader({
   value,
@@ -45,12 +46,12 @@ export function SingleImageUploader({
     <div>
       {value ? (
         <div className="relative mb-2 aspect-video w-full max-w-xs overflow-hidden rounded-md border border-border">
-          <CloudinaryImage
-            src={value}
+          <Image
+            src={cloudinaryUrl(value, { width: 640, height: 360 })}
             alt="Cover"
-            width={640}
-            height={360}
-            sizes="320px"
+            width={320}
+            height={180}
+            unoptimized
             className="h-full w-full object-cover"
           />
           <button

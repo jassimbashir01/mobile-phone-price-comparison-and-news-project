@@ -64,7 +64,6 @@ export function PhoneForm({
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<PhoneFormValues>({
     resolver: zodResolver(phoneSchema),
@@ -103,7 +102,7 @@ export function PhoneForm({
       : { status: "available", is_featured: false, sort_order: 0 },
   });
 
-  const status = watch("status");
+  const status = useWatch({ control, name: "status" });
 
   const seoDescriptionValue =
     useWatch({ control, name: "seo_description" }) ?? "";

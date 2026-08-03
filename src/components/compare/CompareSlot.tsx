@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { formatPKR } from "@/lib/utils";
 import type { PhoneWithDetails } from "@/types/database";
-import CloudinaryImage from "../cloudinary-image";
 
 export function CompareSlot({
   phone,
@@ -29,12 +30,15 @@ export function CompareSlot({
     <div className="rounded-lg border border-border bg-white p-4 text-center">
       <div className="relative mx-auto mb-2 aspect-[45/100] w-16">
         {primary ? (
-          <CloudinaryImage
-            src={primary.cloudinary_public_id}
+          <Image
+            src={cloudinaryUrl(primary.cloudinary_public_id, {
+              width: 128,
+              height: 284,
+            })}
             alt={phone.name}
-            width={90}
-            height={200}
-            sizes="64px"
+            width={64}
+            height={142}
+            unoptimized
             className="h-full w-full object-contain"
           />
         ) : (

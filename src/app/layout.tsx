@@ -1,15 +1,21 @@
-import type { Metadata } from 'next';
-import Script from 'next/script';
-import { spaceGrotesk, inter } from './fonts';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
-import { AdSlot } from '@/components/ads/AdSlot';
-import { AnchorAd } from '@/components/ads/AnchorAd';
-import { JsonLd } from '@/components/seo/JsonLd';
-import { buildOrganizationJsonLd } from '@/lib/seo';
-import { siteUrl } from '@/lib/site';
-import { SITE_NAME } from '@/lib/site-config';
-import './globals.css';
+import type { Metadata } from "next";
+import Script from "next/script";
+import { spaceGrotesk, inter } from "./fonts";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { AdSlot } from "@/components/ads/AdSlot";
+import { AnchorAd } from "@/components/ads/AnchorAd";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildOrganizationJsonLd } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site-config";
+import { InstallPrompt } from "@/components/InstallPrompt";
+import { CacheVersionWatcher } from "@/components/CacheVersionWatcher";
+import "./globals.css";
+
+export const viewport = {
+  themeColor: "#0F6E4F",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -18,23 +24,33 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Compare mobile phone prices in Pakistan, browse full specifications, and read the latest phone news.',
+    "Compare mobile phone prices in Pakistan, browse full specifications, and read the latest phone news.",
   openGraph: {
-    type: 'website',
+    type: "website",
     siteName: SITE_NAME,
-    locale: 'en_PK',
+    locale: "en_PK",
   },
   twitter: {
-    card: 'summary_large_image',
+    card: "summary_large_image",
   },
   alternates: {
-    types: { 'application/rss+xml': '/feed.xml' },
+    types: { "application/rss+xml": "/feed.xml" },
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MobileWala",
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pubId = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
-  const adsenseReady = pubId && !pubId.includes('0000000000000000');
+  const adsenseReady = pubId && !pubId.includes("0000000000000000");
 
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -44,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // GA4 directly and leave NEXT_PUBLIC_GTM_ID blank. Never both.
   if (ga4Id && gtmId) {
     throw new Error(
-      'Both NEXT_PUBLIC_GA4_ID and NEXT_PUBLIC_GTM_ID are set — this double-counts every pageview in GA4. Set up GA4 inside your GTM container instead, and leave NEXT_PUBLIC_GA4_ID blank, or use GA4 directly and leave NEXT_PUBLIC_GTM_ID blank.'
+      "Both NEXT_PUBLIC_GA4_ID and NEXT_PUBLIC_GTM_ID are set — this double-counts every pageview in GA4. Set up GA4 inside your GTM container instead, and leave NEXT_PUBLIC_GA4_ID blank, or use GA4 directly and leave NEXT_PUBLIC_GTM_ID blank.",
     );
   }
 
@@ -62,7 +78,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {ga4Id && (
           <>
-            <Script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} strategy="afterInteractive" />
+            <Script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+              strategy="afterInteractive"
+            />
             <Script id="ga4-init" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
@@ -93,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
               height="0"
               width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
+              style={{ display: "none", visibility: "hidden" }}
               title="Google Tag Manager"
             />
           </noscript>
@@ -116,6 +136,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <Footer />
         <AnchorAd />
+        <InstallPrompt />
+        <CacheVersionWatcher />
       </body>
     </html>
   );

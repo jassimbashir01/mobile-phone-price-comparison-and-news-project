@@ -1,5 +1,21 @@
 import { siteUrl } from "@/lib/site";
 
+import { createAdminClient } from "@/lib/supabase/admin";
+
+async function bumpCacheVersion() {
+  try {
+    const supabase = createAdminClient();
+    await supabase
+      .from("site_settings")
+      .upsert(
+        { key: "cache_version", value: { version: Date.now() } },
+        { onConflict: "key" },
+      );
+  } catch (err) {
+    console.error("bumpCacheVersion failed:", err);
+  }
+}
+
 export async function triggerRevalidate(paths: string[]) {
   try {
     const res = await fetch(`${siteUrl}/api/revalidate`, {
@@ -17,12 +33,11 @@ export async function triggerRevalidate(paths: string[]) {
       );
     }
   } catch (err) {
-    // Best-effort — ISR still refreshes naturally on its own schedule even
-    // if this on-demand call fails for some reason (e.g. during local dev
-    // before the dev server has finished starting). Still log it, since a
-    // silent failure here means pages quietly stop updating with zero trace.
     console.error("triggerRevalidate threw for paths:", paths, err);
   }
+  // Every admin content change bumps the version, which causes every
+  // installed PWA client to purge its page cache on next check.
+  await bumpCacheVersion();
 }
 
 export async function pingIndexNow(urls: string[]) {

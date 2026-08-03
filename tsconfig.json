@@ -28,7 +28,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
-, "next-sitemap.config.js"  ],
-  "exclude": ["node_modules"]
+    "**/*.mts",
+    "next-sitemap.config.js"
+  ],
+  "exclude": ["node_modules", "src/app/sw.ts"]
 }

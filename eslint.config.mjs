@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     '.vercel/**',
     'coverage/**',
+    'src/app/sw.ts',
+    'public/sw.js',
   ]),
 ]);
 

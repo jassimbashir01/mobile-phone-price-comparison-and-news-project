@@ -1,5 +1,6 @@
 import Link from "next/link";
-import CloudinaryImage from "@/components/cloudinary-image";
+import Image from "next/image";
+import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import type { HomepageBannerSetting } from "@/types/database";
 
 export function FooterBanner({ banner }: { banner: HomepageBannerSetting }) {
@@ -17,12 +18,15 @@ export function FooterBanner({ banner }: { banner: HomepageBannerSetting }) {
         className="block overflow-hidden rounded-lg border border-white/10"
       >
         <div className="relative aspect-[3/1] w-full bg-white/5 sm:aspect-[6/1]">
-          <CloudinaryImage
-            src={banner.cloudinary_public_id}
+          <Image
+            src={cloudinaryUrl(banner.cloudinary_public_id, {
+              width: 1800,
+              height: 300,
+            })}
             alt={banner.alt_text || "Sponsored"}
-            width={1200}
-            height={200}
-            sizes="100vw"
+            width={1800}
+            height={300}
+            unoptimized
             className="h-full w-full object-cover"
           />
         </div>
