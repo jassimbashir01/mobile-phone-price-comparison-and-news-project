@@ -21,14 +21,26 @@ export interface HomepageSectionResult {
   phones: (PhoneCardData & { isPinned: boolean })[];
 }
 
+export interface SectionFallback {
+  priceMin?: number | null;
+  priceMax?: number | null;
+  /**
+   * Which phone status the auto-fill should draw from. Also governs which
+   * pinned phones remain visible — a Coming Soon section shouldn't drop a
+   * pinned phone just because it isn't "available".
+   */
+  status?: "available" | "coming_soon";
+}
+
 export async function getHomepageSectionPhones(
   sectionKey: string,
   options: {
     slotCount?: number;
-    fallback?: { priceMin?: number | null; priceMax?: number | null };
+    fallback?: SectionFallback;
   } = {},
 ): Promise<HomepageSectionResult | null> {
   const slotCount = options.slotCount ?? 6;
+  const status = options.fallback?.status ?? "available";
 
   const { data: section, error: sectionError } = await supabase
     .from("homepage_sections")
@@ -48,7 +60,7 @@ export async function getHomepageSectionPhones(
     const { data: phones, error: phonesError } = await supabase
       .from("phones")
       .select(PHONE_CARD_SELECT)
-      .eq("status", "available")
+      .eq("status", status)
       .in("id", section.phone_ids);
 
     if (phonesError)
@@ -63,17 +75,18 @@ export async function getHomepageSectionPhones(
   const pinnedIds = new Set(pinnedPhones.map((p) => p.id));
   let autoPhones: PhoneCardData[] = [];
 
-  // Auto-fill whatever slots aren't pinned, using the latest available
-  // phones in this section's price bracket. Sections with no fallback
-  // filter (featured_slider, latest_phones, coming_soon) stay pinned-only.
+  // Auto-fill whatever slots aren't pinned. Every section now passes a
+  // fallback: price sections filter by bracket, Latest and Coming Soon
+  // filter only by status and take the newest. Pin none → all auto; pin
+  // three → those three plus three auto.
   const remaining = slotCount - pinnedPhones.length;
   if (options.fallback && remaining > 0) {
     let query = supabase
       .from("phones")
       .select(PHONE_CARD_SELECT)
-      .eq("status", "available")
+      .eq("status", status)
       .order("created_at", { ascending: false })
-      .limit(remaining + pinnedIds.size); // extra buffer in case of overlap
+      .limit(remaining + pinnedIds.size); // buffer in case of overlap
 
     if (options.fallback.priceMin != null)
       query = query.gte("price_pkr", options.fallback.priceMin);

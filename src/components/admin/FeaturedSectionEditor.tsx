@@ -103,11 +103,11 @@ export function FeaturedSectionEditor({
     <div className="mb-8 rounded-lg border border-border bg-white p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-bold">{title}</h2>
-        {isPriceSection && (
-          <span className="text-[10px] text-ink/40">
-            Unpinned slots auto-fill with the latest phones in this price range
-          </span>
-        )}
+        <span className="text-[10px] text-ink/40">
+          {isPriceSection
+            ? "Unpinned slots auto-fill with the latest phones in this price range"
+            : "Unpinned slots auto-fill automatically"}
+        </span>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {current.map((slot, i) => (

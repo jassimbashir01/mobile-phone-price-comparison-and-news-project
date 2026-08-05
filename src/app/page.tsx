@@ -31,7 +31,10 @@ export default async function HomePage() {
   const [featured, latest, priceSections, comingSoon, newsResult, banner] =
     await Promise.all([
       getHomepageSectionPhones("featured_slider"),
-      getHomepageSectionPhones("latest_phones"),
+      // No price filter — auto-fills with the newest available phones
+      getHomepageSectionPhones("latest_phones", {
+        fallback: { status: "available" },
+      }),
       Promise.all(
         HOMEPAGE_PRICE_RANGES.map((range) =>
           getHomepageSectionPhones(homepagePriceSectionKey(range), {
@@ -39,7 +42,10 @@ export default async function HomePage() {
           }),
         ),
       ),
-      getHomepageSectionPhones("coming_soon"),
+      // Auto-fills with the newest coming-soon phones
+      getHomepageSectionPhones("coming_soon", {
+        fallback: { status: "coming_soon" },
+      }),
       getPublishedNews({ limit: 6 }),
       getHomepageBanner(),
     ]);

@@ -154,10 +154,29 @@ export async function getHomepageSectionsAdmin() {
   const resolved = await Promise.all(
     (sections ?? []).map(async (s) => {
       const bracket = priceBracketMap.get(s.section_key);
+
+      // Mirror the homepage exactly, or the admin shows empty slots while
+      // the live site shows auto-filled ones. Price sections filter by
+      // bracket; latest_phones and coming_soon filter by status only.
+      // featured_slider stays pinned-only — it's a curated slot.
+      let fallback:
+        | {
+            priceMin?: number | null;
+            priceMax?: number | null;
+            status?: "available" | "coming_soon";
+          }
+        | undefined;
+
+      if (bracket) {
+        fallback = { priceMin: bracket.min, priceMax: bracket.max };
+      } else if (s.section_key === "latest_phones") {
+        fallback = { status: "available" };
+      } else if (s.section_key === "coming_soon") {
+        fallback = { status: "coming_soon" };
+      }
+
       const result = await getHomepageSectionPhones(s.section_key, {
-        fallback: bracket
-          ? { priceMin: bracket.min, priceMax: bracket.max }
-          : undefined,
+        fallback,
       });
       return { ...s, phones: result?.phones ?? [] };
     }),
