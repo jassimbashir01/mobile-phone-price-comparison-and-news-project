@@ -63,9 +63,7 @@ export default async function OffersPage({
             ))}
           </div>
           {offers.length > 8 && (
-            <div className="my-6">
-              <AdSlot slot="offers-mid-grid" />
-            </div>
+            <AdSlot slot="offers-mid-grid" wrapperClassName="my-6" />
           )}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {offers.slice(8).map((o) => (

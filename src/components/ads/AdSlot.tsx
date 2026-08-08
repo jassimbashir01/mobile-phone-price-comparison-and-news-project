@@ -30,19 +30,38 @@ const MULTIPLEX_SLOTS = new Set([
 ]);
 
 // Shared "is this ad genuinely ready to serve" check — single source of
-// truth, reused by AdSlot itself and by any wrapper component (e.g.
-// AnchorAd) that needs to know before rendering its own chrome around it.
-export function isAdSlotConfigured(slot: keyof typeof SLOT_IDS): boolean {
+// truth, reused by AdSlot itself and by any *client* wrapper component
+// (e.g. AnchorAd) that needs to know before rendering its own chrome.
+//
+// Note: this file is a client component, so server components cannot call
+// this function. They don't need to — pass `wrapperClassName` instead and
+// let AdSlot own its wrapper, so an unconfigured slot renders nothing at
+// all rather than an empty container.
+export function isAdSlotConfigured(slot: string): boolean {
   const pubId = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
   const unitId = SLOT_IDS[slot];
-  return (
-    Boolean(pubId) &&
-    !pubId!.includes("0000000000000000") &&
-    !unitId.startsWith("REPLACE_WITH_")
+  return Boolean(
+    pubId &&
+    !pubId.includes("XXXX") &&
+    unitId &&
+    !unitId.startsWith("REPLACE_WITH"),
   );
 }
 
-export function AdSlot({ slot }: { slot: keyof typeof SLOT_IDS }) {
+export function AdSlot({
+  slot,
+  wrapperClassName,
+}: {
+  slot: keyof typeof SLOT_IDS;
+  /**
+   * Layout classes for the slot's own container — grid column spans,
+   * margins, etc. Passing them here rather than wrapping <AdSlot /> in a
+   * parent <div> means an unconfigured slot consumes no layout space:
+   * returning null removes the wrapper along with the ad. A parent-owned
+   * wrapper would survive and leave a half-empty grid row or a stray gap.
+   */
+  wrapperClassName?: string;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const pushed = useRef(false);
@@ -88,6 +107,7 @@ export function AdSlot({ slot }: { slot: keyof typeof SLOT_IDS }) {
   return (
     <div
       ref={containerRef}
+      className={wrapperClassName}
       style={{ minHeight: isMultiplex ? 250 : 90 }}
       data-testid={`ad-${slot}`}
     >

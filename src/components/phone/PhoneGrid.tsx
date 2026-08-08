@@ -14,30 +14,34 @@ export function PhoneGrid({ phones }: { phones: PhoneCardData[] }) {
   const items: React.ReactNode[] = [];
   phones.forEach((p, i) => {
     items.push(<PhoneCard key={p.id} phone={p} priority={i === 0} />);
+
+    // AdSlot owns its own wrapper via wrapperClassName, so an unconfigured
+    // slot renders nothing at all — no grid cell consumed, no half-empty row.
     if (i === 11) {
       items.push(
-        <div
+        <AdSlot
           key="mid-grid-ad"
-          className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6"
-        >
-          <AdSlot slot="category-mid-grid" />
-        </div>,
+          slot="category-mid-grid"
+          wrapperClassName="col-span-3 sm:col-span-4 lg:col-span-6"
+        />,
       );
     }
     if (i === 47) {
       items.push(
-        <div
+        <AdSlot
           key="mid-grid-ad-2"
-          className="col-span-3 sm:col-span-4 md:col-span-5 lg:col-span-6"
-        >
-          <AdSlot slot="category-mid-grid-2" />
-        </div>,
+          slot="category-mid-grid-2"
+          wrapperClassName="col-span-3 sm:col-span-4 lg:col-span-6"
+        />,
       );
     }
   });
 
+  // 3 / 4 / 6 columns — all divisors of 12, so ad insertions at indexes 11
+  // and 47 always land on a row boundary. A 5-column breakpoint was removed
+  // for exactly this reason: 5 divides neither 12 nor 96.
   return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
       {items}
     </div>
   );
