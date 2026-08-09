@@ -366,17 +366,20 @@ export async function getAdjacentPhones(
   prev: { name: string; slug: string } | null;
   next: { name: string; slug: string } | null;
 }> {
-  // Fetch only id/name/slug/sort_order — enough to order and locate
-  // neighbours without pulling full rows. Capped at 1,000 deliberately:
-  // no single brand approaches that, and it bounds the query cost on
-  // every phone page load.
+  // No status filter — a Coming Soon or Discontinued phone should still have
+  // prev/next navigation. Filtering to `available` meant findIndex returned
+  // -1 for those phones and the buttons never rendered at all.
+  //
+  // Ordered by sort_tier/sort_price to match every listing page, so "next"
+  // is the phone the user would actually have seen next while browsing.
+  // Capped at 1,000 deliberately: no single brand approaches that, and it
+  // bounds the query cost on every phone page load.
   const { data, error } = await supabase
     .from("phones")
     .select("id, name, slug")
     .eq("brand_id", brandId)
-    .eq("status", "available")
-    .order("sort_order", { ascending: true })
-    .order("name", { ascending: true })
+    .order("sort_tier", { ascending: true })
+    .order("sort_price", { ascending: false })
     .limit(1000);
 
   if (error) throw new Error(`getAdjacentPhones: ${error.message}`);
@@ -384,8 +387,9 @@ export async function getAdjacentPhones(
   const index = list.findIndex((p) => p.id === phoneId);
   if (index === -1 || list.length <= 1) return { prev: null, next: null };
 
-  // Wraps around — the last phone's "next" is the first, and vice versa,
-  // so browsing never dead-ends.
+  // Wraps around — the first phone's "previous" is the last in the brand and
+  // vice versa, so every phone gets both buttons and browsing never
+  // dead-ends on a missing control.
   const prevIndex = index === 0 ? list.length - 1 : index - 1;
   const nextIndex = index === list.length - 1 ? 0 : index + 1;
 
