@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { getAllPhonesAdmin, type AdminPhoneListItem } from "@/queries/admin";
+import { getAllPhonesAdmin } from "@/queries/admin";
 import { getCurrentUserProfile } from "@/lib/auth";
 import { Pagination } from "@/components/ui/Pagination";
-import { PhoneDeleteButton } from "@/components/admin/PhoneDeleteButton";
-import { formatPKR } from "@/lib/utils";
+import { PhonesTable } from "@/components/admin/PhonesTable";
 
 export const dynamic = "force-dynamic";
 
@@ -44,44 +43,7 @@ export default async function AdminPhonesPage({
         />
       </form>
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-border bg-surface text-left text-xs text-ink/50">
-            <tr>
-              <th className="px-3 py-2">Name</th>
-              <th className="px-3 py-2">Brand</th>
-              <th className="px-3 py-2">Price</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {phones.map((p: AdminPhoneListItem) => (
-              <tr key={p.id} className="border-b border-border last:border-0">
-                <td className="px-3 py-2">{p.name}</td>
-                <td className="px-3 py-2 text-ink/50">{p.brand?.name}</td>
-                <td className="px-3 py-2">{formatPKR(p.price_pkr)}</td>
-                <td className="px-3 py-2">{p.status}</td>
-                <td className="px-3 py-2">
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href={`/admin/phones/${p.id}/edit`}
-                      className="text-primary hover:underline"
-                    >
-                      Edit
-                    </Link>
-                    <PhoneDeleteButton
-                      id={p.id}
-                      slug={p.slug}
-                      isAdmin={profile?.role === "admin"}
-                    />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <PhonesTable phones={phones} isAdmin={profile?.role === "admin"} />
 
       <Pagination
         basePath={

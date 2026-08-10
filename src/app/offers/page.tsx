@@ -43,9 +43,13 @@ export default async function OffersPage({
   return (
     <PageShell>
       <JsonLd data={buildBreadcrumbJsonLd(breadcrumbItems, siteUrl)} />
-      <JsonLd data={buildOffersItemListJsonLd(offers, siteUrl)} />
+      {/* Skip the ItemList when there's nothing to list — an empty ItemList
+          is valid but pointless structured data. */}
+      {offers.length > 0 && (
+        <JsonLd data={buildOffersItemListJsonLd(offers, siteUrl)} />
+      )}
       <Breadcrumb items={breadcrumbItems} />
-      <h1 className="mb-2 text-xl font-bold">Deals & Offers</h1>
+      <h1 className="mb-2 text-xl font-bold">Deals &amp; Offers</h1>
       <p className="mb-4 text-sm text-ink/60">
         Affiliate deals and offers from local shops. Links may earn us a
         commission at no extra cost to you.
@@ -62,6 +66,8 @@ export default async function OffersPage({
               <OfferCard key={o.id} offer={o} />
             ))}
           </div>
+          {/* AdSlot owns its own wrapper via wrapperClassName, so an
+              unconfigured slot leaves no stray vertical gap between grids. */}
           {offers.length > 8 && (
             <AdSlot slot="offers-mid-grid" wrapperClassName="my-6" />
           )}

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ExportSubscribersButton } from "@/components/admin/ExportSubscribersButton";
+import { SubscribersTable } from "@/components/admin/SubscribersTable";
 
 export const dynamic = "force-dynamic";
 
@@ -54,36 +55,7 @@ export default async function AdminSubscribersPage({
         <ExportSubscribersButton subscribers={allSubscribers} />
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-border bg-surface text-left text-xs text-ink/50">
-            <tr>
-              <th className="px-3 py-2">Email</th>
-              <th className="px-3 py-2">Source</th>
-              <th className="px-3 py-2">Subscribed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(subscribers ?? []).length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-3 py-8 text-center text-ink/50">
-                  No subscribers yet.
-                </td>
-              </tr>
-            ) : (
-              (subscribers ?? []).map((s) => (
-                <tr key={s.id} className="border-b border-border last:border-0">
-                  <td className="px-3 py-2">{s.email}</td>
-                  <td className="px-3 py-2 text-ink/50">{s.source}</td>
-                  <td className="px-3 py-2 text-ink/50">
-                    {new Date(s.created_at).toLocaleDateString("en-PK")}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <SubscribersTable subscribers={subscribers ?? []} />
 
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-center gap-2 text-sm">
