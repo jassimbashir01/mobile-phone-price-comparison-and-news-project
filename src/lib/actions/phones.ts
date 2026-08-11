@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { triggerRevalidate, pingIndexNow } from "@/lib/revalidate";
 import { sanitizeRichText } from "@/lib/sanitize";
 import { destroyCloudinaryAsset } from "@/lib/cloudinary";
+import { pruneDeletedPhoneIdsFromSections } from "./bulkDelete";
 import { phoneSchema, type PhoneFormValues } from "@/lib/validation/phone";
 import type { ManagedImage } from "@/components/admin/ImageUploader";
 
@@ -136,6 +137,9 @@ export async function deletePhone(id: string, slug: string) {
       destroyCloudinaryAsset(img.cloudinary_public_id),
     ),
   );
+  // homepage_sections.phone_ids is a uuid[] with no foreign key, so nothing
+  // cascades into it — prune the deleted ID explicitly.
+  await pruneDeletedPhoneIdsFromSections([id]);
 
   await triggerRevalidate(["/", `/phone/${slug}`]);
 }
@@ -171,6 +175,8 @@ export async function savePhoneImages(
     if (insertError) throw new Error(insertError.message);
   }
 
+  // Only destroy images that aren't still present in the new set — avoids
+  // deleting an image the admin kept unchanged.
   const newIds = new Set(images.map((i) => i.cloudinary_public_id));
   const toDelete = (oldImages ?? []).filter(
     (old) => !newIds.has(old.cloudinary_public_id),

@@ -16,12 +16,63 @@ export interface BulkDeleteResult {
  * assets, because a database cascade does nothing to a remote CDN object.
  *
  * Failures are collected per-id rather than aborting the batch, so one bad
- * row doesn't silently prevent the other 49 from being processed.
+ * row doesn't silently prevent the others from being processed.
  */
 
-export async function bulkDeletePhones(
-  ids: string[],
-): Promise<BulkDeleteResult> {
+/**
+ * Removes deleted phone IDs from homepage_sections.phone_ids.
+ *
+ * That column is a uuid[] with no foreign key, so nothing cascades into it.
+ * A stale ID is harmless at render time — getHomepageSectionPhones filters
+ * out IDs that don't resolve and auto-fills the slot instead — but it leaves
+ * the admin's pinned list showing phantom entries and quietly grows over
+ * time.
+ *
+ * Only sections that actually contain one of the deleted IDs are written to.
+ * Exported so single-phone deletes can reuse it.
+ */
+export async function pruneDeletedPhoneIdsFromSections(
+  deletedIds: string[],
+): Promise<void> {
+  if (deletedIds.length === 0) return;
+
+  try {
+    const supabase = createAdminClient();
+    const { data: sections, error } = await supabase
+      .from("homepage_sections")
+      .select("section_key, phone_ids");
+
+    if (error || !sections) {
+      console.error(
+        "pruneDeletedPhoneIdsFromSections: fetch failed",
+        error?.message,
+      );
+      return;
+    }
+
+    const deleted = new Set(deletedIds);
+
+    await Promise.all(
+      sections
+        .filter((s) => (s.phone_ids ?? []).some((id: string) => deleted.has(id)))
+        .map((s) => {
+          const pruned = (s.phone_ids ?? []).filter(
+            (id: string) => !deleted.has(id),
+          );
+          return supabase
+            .from("homepage_sections")
+            .update({ phone_ids: pruned })
+            .eq("section_key", s.section_key);
+        }),
+    );
+  } catch (err) {
+    // Non-fatal — the phones are already deleted, and a stale pinned ID
+    // degrades gracefully. Better to log than to fail the whole action.
+    console.error("pruneDeletedPhoneIdsFromSections threw:", err);
+  }
+}
+
+export async function bulkDeletePhones(ids: string[]): Promise<BulkDeleteResult> {
   await requireRole(["admin"]);
   if (ids.length === 0) return { deleted: 0, failed: [] };
 
@@ -54,6 +105,7 @@ export async function bulkDeletePhones(
   }
 
   await Promise.all(publicIds.map((pid) => destroyCloudinaryAsset(pid)));
+  await pruneDeletedPhoneIdsFromSections(ids);
   await triggerRevalidate(["/", ...slugs.map((s) => `/phone/${s}`)]);
 
   return { deleted: ids.length, failed };
@@ -79,9 +131,7 @@ export async function bulkDeleteNews(ids: string[]): Promise<BulkDeleteResult> {
   }
 
   await Promise.all(
-    (articles ?? []).map((a) =>
-      destroyCloudinaryAsset(a.cover_image_public_id),
-    ),
+    (articles ?? []).map((a) => destroyCloudinaryAsset(a.cover_image_public_id)),
   );
   await triggerRevalidate([
     "/",
@@ -92,9 +142,7 @@ export async function bulkDeleteNews(ids: string[]): Promise<BulkDeleteResult> {
   return { deleted: ids.length, failed: [] };
 }
 
-export async function bulkDeleteOffers(
-  ids: string[],
-): Promise<BulkDeleteResult> {
+export async function bulkDeleteOffers(ids: string[]): Promise<BulkDeleteResult> {
   await requireRole(["admin"]);
   if (ids.length === 0) return { deleted: 0, failed: [] };
 
