@@ -41,7 +41,8 @@ Stack: Next.js 16 · React 19 · TypeScript · Tailwind v4 · Supabase · Cloudi
   - [Caching & the PWA layer](#caching--the-pwa-layer)
   - [Security model](#security-model)
   - [Monetization architecture](#monetization-architecture)
-  - [Image pipeline](#image-pipeline)
+  - [Image pipeline & asset lifecycle](#image-pipeline--asset-lifecycle)
+  - [Layout arithmetic](#layout-arithmetic)
 - [Engineering Problems Worth Reading](#engineering-problems-worth-reading)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -71,12 +72,12 @@ content editor.
 Every significant decision in this codebase traces back to one of four
 constraints:
 
-| Constraint | Consequence in the code |
-|---|---|
-| **Low ad revenue per visitor** (Pakistan is a low-CPM market) | Aggressive caching, fixed-size image URLs, ISR over SSR — bandwidth is the dominant variable cost |
-| **Search is the only meaningful acquisition channel** | Programmatic page generation, JSON-LD on every template, dual sitemaps, IndexNow push |
-| **Content is edited by a non-developer** | Full admin CMS, role-scoped permissions, partial-pinning UX, in-app content guidance |
-| **~2,500 rows and growing** | Generated sort columns, composite indexes, paginated queries, capped `generateStaticParams` |
+| Constraint                                                    | Consequence in the code                                                                               |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Low ad revenue per visitor** (Pakistan is a low-CPM market) | Aggressive caching, fixed-size image URLs, ISR over SSR — bandwidth is the dominant variable cost     |
+| **Search is the only meaningful acquisition channel**         | Programmatic page generation, JSON-LD on every template, dual sitemaps, IndexNow push                 |
+| **Content is edited by a non-developer**                      | Full admin CMS, role-scoped permissions, partial-pinning UX, bulk operations, in-app content guidance |
+| **~2,500 rows and growing**                                   | Generated sort columns, composite indexes, paginated queries, capped `generateStaticParams`           |
 
 ---
 
@@ -92,6 +93,11 @@ constraints:
   route with its own metadata and copy
 - **Multi-tier catalogue sort** — Coming Soon first, then Coming Soon with an
   expected price, then available phones high-to-low, then discontinued
+- **Status-aware pricing** — a Coming Soon phone with no expected price shows
+  "Coming Soon" in place of a price; one with an expected price shows the
+  figure under an "Expected Price" tag; discontinued phones are tagged too
+- **Circular prev/next navigation** between phones within a brand, in the same
+  order the user browsed
 - **Side-by-side comparison** with a full extended-spec diff table
 - **Live search** with a debounced combobox dropdown backed by a Postgres RPC
 - **News section** with rich-text articles, brand association and an RSS feed
@@ -109,12 +115,17 @@ constraints:
 - Rich-text editing with live word counters against per-field content targets
 - Drag-to-reorder image management with primary-image selection
 - **Homepage section editor with partial pinning** — pin zero phones and the
-  section auto-fills; pin three and the remaining three auto-fill
+  section auto-fills; pin three and the remaining three auto-fill. Applies to
+  price brackets, Latest Phones and Coming Soon alike
+- **Bulk delete across five entities** — phones, news, offers, contact
+  messages and subscribers. Page-scoped selection, admin-only, with a typed
+  confirmation and full asset cleanup
+- **One-click CSV export** of the subscriber list, RFC 4180 escaped and
+  UTF-8 BOM prefixed so Excel opens it correctly
 - Paginated list views on every entity
 - Site settings: exchange rate, social links, media-kit stats, three sold
   banner placements, footer brand selection
 - Contact and advertise inbox
-- Subscriber list
 - In-app content guidance page with word-count targets per content type
 
 ### SEO & discoverability
@@ -130,20 +141,20 @@ constraints:
 
 ## Technologies Used
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | **Next.js 16** (App Router) | `proxy.ts` replaces `middleware.ts`; React Compiler enabled |
-| UI | **React 19.2**, **Tailwind CSS v4** | CSS-first Tailwind config via `@theme` |
-| Language | **TypeScript** (strict) | Zod schemas as the single source of truth for form + server validation |
-| Database | **Supabase** (Postgres) | Row Level Security, generated columns, composite indexes, one RPC for search |
-| Auth | **Supabase Auth** | Cookie-based sessions, role stored in `user_profiles` |
-| Media | **Cloudinary** | Fixed-size transformation URLs; server SDK for lifecycle cleanup |
-| Editor | **Tiptap** | Sanitized server-side with `isomorphic-dompurify` |
-| PWA | **Serwist** | Custom service worker, versioned cache invalidation |
-| Analytics | **Google Tag Manager** | Chosen over direct GA4 — see [rationale](#why-gtm-over-ga4) |
-| Monetization | **Google AdSense** + direct-sold placements | 14 slot positions, 3 sold banners |
-| Hosting | **Vercel** | ISR, on-demand revalidation, image optimization bypassed by design |
-| Tooling | **pnpm**, **ESLint 9** (flat config), **Playwright** | Playwright used for data-maintenance scripts, not tests |
+| Layer        | Choice                                               | Notes                                                                        |
+| ------------ | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Framework    | **Next.js 16** (App Router)                          | `proxy.ts` replaces `middleware.ts`; React Compiler enabled                  |
+| UI           | **React 19.2**, **Tailwind CSS v4**                  | CSS-first Tailwind config via `@theme`                                       |
+| Language     | **TypeScript** (strict)                              | Zod schemas as the single source of truth for form + server validation       |
+| Database     | **Supabase** (Postgres)                              | Row Level Security, generated columns, composite indexes, one RPC for search |
+| Auth         | **Supabase Auth**                                    | Cookie-based sessions, role stored in `user_profiles`                        |
+| Media        | **Cloudinary**                                       | Fixed-size transformation URLs; server SDK for lifecycle cleanup             |
+| Editor       | **Tiptap**                                           | Sanitized server-side with `isomorphic-dompurify`                            |
+| PWA          | **Serwist**                                          | Custom service worker, versioned cache invalidation                          |
+| Analytics    | **Google Tag Manager**                               | Chosen over direct GA4 — see [rationale](#why-gtm-over-ga4)                  |
+| Monetization | **Google AdSense** + direct-sold placements          | 15 slot positions, 3 sold banners                                            |
+| Hosting      | **Vercel**                                           | ISR, on-demand revalidation, image optimization bypassed by design           |
+| Tooling      | **pnpm**, **ESLint 9** (flat config), **Playwright** | Playwright used for data-maintenance scripts, not tests                      |
 
 ---
 
@@ -232,18 +243,19 @@ CREATE INDEX idx_phones_sort ON phones (sort_tier, sort_price DESC);
 Postgres maintains both on write; every listing query is a plain
 `.order('sort_tier').order('sort_price', { ascending: false })` that reads
 straight off the index. No sort in application code, and pagination with an
-exact count still works.
+exact count still works. Prev/next navigation uses the same ordering, so
+"next phone" matches what the user actually browsed past.
 
 ### Rendering & revalidation strategy
 
-| Route type | Strategy | Revalidate | Reasoning |
-|---|---|---|---|
-| Phone detail | SSG + ISR | 24h | 2,500+ pages; content is stable once entered |
-| Category / brand | Dynamic + ISR | 6h | Membership changes when phones are added |
-| Homepage | Static + ISR | 1h | Featured sections and prices are the freshest content |
-| News article | SSG + ISR | 1h | |
-| Admin | `force-dynamic` | never | Stale admin data is actively harmful |
-| Search, compare | Dynamic | never | Inherently per-request |
+| Route type       | Strategy        | Revalidate | Reasoning                                             |
+| ---------------- | --------------- | ---------- | ----------------------------------------------------- |
+| Phone detail     | SSG + ISR       | 24h        | 2,500+ pages; content is stable once entered          |
+| Category / brand | Dynamic + ISR   | 6h         | Membership changes when phones are added              |
+| Homepage         | Static + ISR    | 1h         | Featured sections and prices are the freshest content |
+| News article     | SSG + ISR       | 1h         |                                                       |
+| Admin            | `force-dynamic` | never      | Stale admin data is actively harmful                  |
+| Search, compare  | Dynamic         | never      | Inherently per-request                                |
 
 **On-demand revalidation closes the freshness gap.** A 24-hour ISR window is
 fine for a spec sheet and unacceptable for a price. Every mutating server action
@@ -271,9 +283,10 @@ so the code enforces that:
   duplicate-content problem.
 - **JSON-LD is generated, not hardcoded.** `buildProductJsonLd` handles the
   cases that matter: price serialized as a string (Google rejects numerics),
-  `status` mapped to the correct `schema.org` availability URI, and the `offers`
-  block omitted entirely when there is no price — because a Product with no
-  Offer is valid schema, whereas a fabricated price is a trust problem.
+  `status` mapped to the correct `schema.org` availability URI, the expected
+  price used for Coming Soon phones, and the `offers` block omitted entirely
+  when there is no price at all — because a Product with no Offer is valid
+  schema, whereas a fabricated price is a trust problem.
 - **Dual sitemaps.** `next-sitemap` generates the standard sitemap at build
   time; a separate dynamic route emits an `<image:image>` sitemap so the phone
   photography is discoverable in Google Images as its own traffic channel.
@@ -320,11 +333,12 @@ other. The browser downloads exactly one.
 Defence is layered, and the boundary is the server — never the form.
 
 - **RLS on every table.** Public read policies where reads are public;
-  `contact_messages` and `email_subscribers` have *no* public policy at all and
+  `contact_messages` and `email_subscribers` have _no_ public policy at all and
   are written exclusively through the secret-key admin client inside server
   actions.
-- **`requireRole()` opens every mutation.** Editors write, admins delete. The
-  check is server-side; the client UI merely reflects it.
+- **`requireRole()` opens every mutation.** Editors write, admins delete —
+  including bulk delete, whose UI is hidden from editors entirely rather than
+  shown and then rejected.
 - **URL scheme validation.** `z.string().url()` accepts `javascript:` — it is a
   syntactically valid URL. Every user-supplied URL that becomes a live `href`
   (banners, offers, social links, rich-text links) goes through a schema that
@@ -335,18 +349,26 @@ Defence is layered, and the boundary is the server — never the form.
 - **Timing-safe secret comparison** on the revalidation endpoint.
 - **Shared rate limiter** across the contact, advertise and subscribe forms.
 - **Admin is `noindex`** and gated at the edge in `proxy.ts`.
+- **Destructive bulk operations require a typed confirmation**, not a single
+  click — the affected count is shown, and selection is scoped to the current
+  page rather than the whole table.
 
 ### Monetization architecture
 
 Three revenue channels, one design principle: **nothing renders until it is
 genuinely configured.**
 
-**AdSense** — 14 named slot positions behind a single `AdSlot` component. Each
-slot self-hides unless *both* the publisher ID and that slot's own unit ID are
+**AdSense** — 15 named slot positions behind a single `AdSlot` component. Each
+slot self-hides unless _both_ the publisher ID and that slot's own unit ID are
 real values rather than placeholders. Half-configured ad units produce
 malformed requests and policy problems; rendering nothing is strictly better.
-Consolidating every placement behind one component also means a future migration
-to a premium network is a change to one file, not to every page.
+Consolidating every placement behind one component also means a future
+migration to a premium network is a change to one file, not to every page.
+
+`AdSlot` owns its own layout wrapper via a `wrapperClassName` prop rather than
+being wrapped by its parent. That matters: a parent-owned wrapper survives the
+child returning `null`, leaving an empty grid cell or a stray margin. Owning
+the wrapper means an unconfigured slot occupies no layout space at all.
 
 **Direct-sold banners** — homepage, sidebar and footer placements stored in
 `site_settings` as JSONB. Each is upload, link, alt text and an enable flag.
@@ -357,13 +379,13 @@ guarantees a stable LCP element.
 **Offers** — affiliate links and local-shop listings with `rel="sponsored"`,
 managed as a first-class content type.
 
-### Image pipeline
+### Image pipeline & asset lifecycle
 
 Cloudinary is used as an optimizing CDN, with Next's image optimizer
 deliberately bypassed (`unoptimized`):
 
 ```ts
-cloudinaryUrl(publicId, { width: 170, height: 310 })
+cloudinaryUrl(publicId, { width: 170, height: 310 });
 // → /image/upload/c_limit,w_170,h_310,f_auto,q_auto/{publicId}
 ```
 
@@ -372,12 +394,34 @@ One exact size per rendered context — 2× the CSS dimensions for retina, with
 negotiation. Routing this through Vercel's optimizer afterwards would be
 duplicate processing and duplicate cost.
 
-**Asset lifecycle is handled explicitly.** Deleting a database row does nothing
-to a remote CDN object. Every delete and replace path — phones (multi-image),
-news covers, offer images, brand logos, and all three banner placements —
-destroys the corresponding Cloudinary asset. Replacements compare old against
-new and only destroy what genuinely changed, so re-saving a form without
-touching the image is a no-op.
+**Deleting a row does nothing to a remote CDN object.** Every delete and
+replace path handles its own cleanup — phones (multi-image), news covers, offer
+images, brand logos, and all three banner placements. Replacements compare old
+against new and only destroy what genuinely changed, so re-saving a form
+without touching the image is a no-op. Bulk deletes collect every affected
+`public_id` _before_ the database delete, because `ON DELETE CASCADE` removes
+the `phone_images` rows and with them any record of what to clean up.
+
+**One referential gap is handled explicitly.** `homepage_sections.phone_ids` is
+a `uuid[]` with no foreign key, so nothing cascades into it. A deleted phone
+would leave a phantom ID pinned in a homepage section — harmless at render time,
+since the query filters unresolvable IDs and auto-fills the slot instead, but
+visible in the admin as a ghost entry. Both single and bulk deletes prune those
+arrays.
+
+### Layout arithmetic
+
+The phone grid runs `grid-cols-3 sm:grid-cols-4 lg:grid-cols-6`, and listing
+pages show **96** phones. Those numbers are chosen, not arbitrary: 3, 4 and 6
+all divide into 12, and 96 is a multiple of all three — so no page ends in a
+ragged partial row at any breakpoint, and the mid-grid ad slots at indexes 11
+and 47 always land on a row boundary.
+
+A 5-column tablet breakpoint was removed for exactly this reason. 5 divides
+neither 12 nor 96, so at that width the ad inserted mid-row and left a visibly
+half-empty line before the phones resumed. Keeping it would have meant
+maintaining separate placement indexes per breakpoint — complexity bought
+nothing.
 
 ---
 
@@ -391,7 +435,7 @@ because the fixes are more interesting than the features.
 Phone cards were downloading near-4K images. The responsive-image wrapper
 generated a `srcset` from 32w to 3840w, and when its `sizes` hint failed to
 apply, the browser fell back to the `src` attribute — which the library had set
-to the *largest* variant. At 96 cards per page, every listing page was pulling
+to the _largest_ variant. At 96 cards per page, every listing page was pulling
 tens of megabytes of images to render thumbnails.
 
 Diagnosed by reading `img.currentSrc` in the console rather than trusting the
@@ -415,7 +459,8 @@ would reintroduce the failure with no obvious cause.
 
 `generateStaticParams` was quietly prerendering exactly 1,000 phones out of
 2,500. Supabase caps every query at 1,000 rows by default — no error, no
-warning, no truncation notice. The sitemap was equally short.
+warning, no truncation notice. The sitemap was equally short, and the
+subscriber CSV export would have silently truncated too.
 
 Every unbounded query is now explicitly paginated with a stable sort key. The
 lesson generalized: an ORM default that silently changes your result set is
@@ -432,6 +477,19 @@ Production builds now run `next build --webpack` explicitly; dev keeps
 Turbopack. That in turn surfaced a bundling failure in a transitive JSDOM
 dependency, resolved via `serverExternalPackages`.
 
+### The empty wrapper that broke a grid row
+
+Ad slots were inserted as `<div className="col-span-…"><AdSlot /></div>`. With
+AdSense unconfigured, `AdSlot` returned `null` — but the parent's `<div>`
+still existed and still consumed a full row of grid cells, leaving a visibly
+blank band mid-page.
+
+The fix was inverting ownership: `AdSlot` takes a `wrapperClassName` prop and
+renders its own container, so returning `null` removes the wrapper with it. An
+attempted alternative — exporting a configuration check for parents to call —
+failed outright, because `AdSlot` is a client component and the calling pages
+are server components. Moving the wrapper inward solved both problems at once.
+
 ### A "create another" button that did nothing
 
 Post-creation success screens rendered on the same URL as their own "create
@@ -442,6 +500,18 @@ success state never cleared.
 Fixed by replacing the navigation with a state reset. The interesting part is
 the diagnosis: the URL bar updated and the server logged a 200, which made it
 look like a rendering bug rather than a no-op navigation.
+
+### Navigation that vanished on most of the catalogue
+
+Prev/next buttons appeared on available phones and nowhere else.
+`getAdjacentPhones` filtered to `status = 'available'`, so a Coming Soon phone
+was never in the list it searched — `findIndex` returned `-1` and the function
+returned two nulls. Since most of the catalogue is Coming Soon or discontinued,
+the feature was effectively missing.
+
+Removing the filter fixed it, and switching the query's ordering from
+`sort_order` to the same `sort_tier`/`sort_price` used by every listing page
+made "next" mean what a browsing user would expect.
 
 ### Partial pinning as a UX primitive
 
@@ -475,7 +545,7 @@ cd mobile-phone-price-comparison-and-news-project
 pnpm install
 ```
 
-Create `.env.local`:
+Create `.env.local` — see `.env.local.example` for the annotated version:
 
 ```bash
 # Supabase
@@ -558,6 +628,26 @@ pnpm exec tsc --noEmit    # typecheck
 The public page, its brand page, matching category pages and the homepage
 revalidate immediately, and the URL is pushed to IndexNow.
 
+### Bulk deleting
+
+Available on phones, news, offers, messages and subscribers. Select rows with
+the checkbox column (or the header checkbox for the whole page), then confirm
+by typing `DELETE`. Admin role only.
+
+Selection is **page-scoped** by design — "select all" means the rows currently
+visible, not every matching row in the table. At 2,500 phones, a table-wide
+select-all is one mis-click from an unrecoverable mistake.
+
+Associated Cloudinary assets are destroyed, and any homepage pins referencing
+deleted phones are pruned.
+
+### Exporting subscribers
+
+`/admin/subscribers` → **Export CSV**. Generates the full list client-side —
+not just the current page — RFC 4180 escaped, ISO-dated for correct
+spreadsheet sorting, and UTF-8 BOM prefixed so Excel doesn't mangle
+non-ASCII characters.
+
 ### Configuring a sold banner
 
 `/admin/settings` → choose a placement → upload creative → destination URL →
@@ -588,12 +678,13 @@ src/
 │   ├── sw.ts                    # service worker source (Serwist)
 │   └── layout.tsx
 ├── components/
-│   ├── admin/                   # CMS UI
+│   ├── admin/                   # CMS UI — forms, tables, bulk select, export
 │   ├── phone/ news/ offers/     # domain components
 │   ├── compare/ layout/ seo/    # feature + shell components
 │   └── ads/                     # AdSlot, AnchorAd — self-hiding
 ├── lib/
 │   ├── actions/                 # server actions (all mutations)
+│   │   └── bulkDelete.ts        # batch deletes + asset & pin cleanup
 │   ├── validation/              # Zod schemas — shared client + server
 │   ├── supabase/                # public, server and admin clients
 │   ├── cloudinaryUrl.ts         # fixed-size URL builder
@@ -613,6 +704,11 @@ scripts/                         # data-maintenance CLI (not shipped)
 `queries/` is read-only and safe to call from any server component. The
 boundary is visible in the import path, which makes "does this write?"
 answerable without opening the file.
+
+**Admin tables are thin client wrappers.** Each list page stays a server
+component that fetches data, then hands it to a `*Table` client component that
+owns row-selection state. Selection is inherently client state; the query is
+inherently server work. Splitting them at that seam keeps both simple.
 
 ---
 
@@ -658,23 +754,18 @@ applies a canonical-form lookup for known technology terms — so
 
 Measured against a production build:
 
-| Metric | Value |
-|---|---|
-| Static pages generated | 2,651 |
-| Static generation time | ~55s |
-| Compile time | ~6s |
-| Phone detail TTFB | cached at the edge after first request |
-| Card image payload | reduced from multi-MB to a fixed 170×310 request |
+| Metric                 | Value                                            |
+| ---------------------- | ------------------------------------------------ |
+| Static pages generated | 2,651                                            |
+| Static generation time | ~55s                                             |
+| Compile time           | ~6s                                              |
+| Phone detail TTFB      | cached at the edge after first request           |
+| Card image payload     | reduced from multi-MB to a fixed 170×310 request |
 
 **LCP handling.** Exactly one image per page template receives `priority` — the
 homepage hero, the first grid card on listing pages, the gallery's first image
 on detail pages. Marking several competes for bandwidth and can make LCP worse;
 the element is verified per template rather than assumed.
-
-**Pagination sized to the grid.** Listing pages show 96 phones — a multiple of
-3, 4 *and* 6, matching the grid's three breakpoints, so no page ever ends in a
-ragged partial row. Mid-grid ad slots sit at indexes 11 and 47, also on row
-boundaries.
 
 ---
 
@@ -704,14 +795,16 @@ submitted manually after that point, not before.
 Each of these was a decision, not an oversight. Each has a stated trigger for
 revisiting it.
 
-| Deferred | Revisit when |
-|---|---|
-| Distributed rate limiting (Redis) | Spam gets through the in-memory limiter, or a fourth public form shares the budget |
-| Premium ad network migration | ~10k–50k sessions/month; already isolated behind one component |
-| Search arrow-key navigation | Self-contained; combobox ARIA is already in place |
-| Self-serve ad payment (Stripe) | Manual placement setup becomes a real time cost |
-| Admin-definable spec fields | A genuinely new spec type is needed across many phones |
-| News brand-filter pagination | 400+ published articles (currently fetches and filters in memory to work around a PostgREST join-filter quirk) |
+| Deferred                          | Revisit when                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Distributed rate limiting (Redis) | Spam gets through the in-memory limiter, or a fourth public form shares the budget                             |
+| Premium ad network migration      | ~10k–50k sessions/month; already isolated behind one component                                                 |
+| Search arrow-key navigation       | Self-contained; combobox ARIA is already in place                                                              |
+| Self-serve ad payment (Stripe)    | Manual placement setup becomes a real time cost                                                                |
+| Admin-definable spec fields       | A genuinely new spec type is needed across many phones                                                         |
+| Table-wide bulk selection         | Page-scoped is deliberate; revisit only with an undo mechanism behind it                                       |
+| Streaming CSV export              | Subscriber count makes the in-page payload heavy (tens of thousands)                                           |
+| News brand-filter pagination      | 400+ published articles (currently fetches and filters in memory to work around a PostgREST join-filter quirk) |
 
 ---
 
@@ -744,19 +837,28 @@ pnpm build                # must complete, including SW generation
 
 ### Conventions
 
-- **Validation lives in `lib/validation/`.** One Zod schema per entity, imported
-  by both the form and the server action. Never validate in two places.
-- **Mutations are server actions and begin with `requireRole()`.** No exceptions.
+- **Validation lives in `lib/validation/`.** One Zod schema per entity,
+  imported by both the form and the server action. Never validate in two
+  places.
+- **Mutations are server actions and begin with `requireRole()`.** No
+  exceptions. Destructive actions are `admin` only, and their UI is hidden
+  from editors rather than shown and rejected.
 - **Reads go in `queries/`, writes go in `lib/actions/`.** The import path
   should tell a reader whether a function mutates.
 - **Every query that could return more than 1,000 rows must paginate
   explicitly.** Supabase truncates silently.
 - **Images use `cloudinaryUrl()` with an explicit size.** Do not reintroduce
   responsive `srcset` for fixed-dimension contexts.
-- **New ad placements go through `AdSlot`** and must self-hide when
-  unconfigured.
-- **Content mutations must call `triggerRevalidate()`** with the affected paths.
-- Comments should explain *why*, not *what*. The non-obvious constraint is the
+- **Deleting a row means cleaning up its remote assets.** Collect Cloudinary
+  `public_id`s before the delete, not after — cascades remove the record of
+  what to clean up.
+- **New ad placements go through `AdSlot`** with `wrapperClassName`, never a
+  parent-owned wrapper, and must self-hide when unconfigured.
+- **Grid column counts and pagination sizes stay divisible by 12.** See
+  [Layout arithmetic](#layout-arithmetic).
+- **Content mutations must call `triggerRevalidate()`** with the affected
+  paths.
+- Comments should explain _why_, not _what_. The non-obvious constraint is the
   thing worth writing down.
 
 ### Reporting bugs
