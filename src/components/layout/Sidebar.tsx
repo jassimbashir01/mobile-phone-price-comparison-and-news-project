@@ -10,18 +10,26 @@ import {
   NETWORK_TYPES,
 } from "@/lib/constants";
 
+/**
+ * Native <details>, no JavaScript: each section opens on click and stays open
+ * until clicked again or the page reloads.
+ *
+ * All sections start closed so the full set of facets is scannable at a
+ * glance. Multiple sections can be open at once — deliberately not an
+ * accordion, because comparing across facets (RAM while price is still
+ * visible) is a normal way to browse a catalogue, and auto-closing would
+ * work against that while also requiring client JS.
+ */
 function CategoryBlock({
   title,
   children,
-  defaultOpen = false,
 }: {
   title: string;
   children: React.ReactNode;
-  defaultOpen?: boolean;
 }) {
   return (
-    <details open={defaultOpen} className="group border-b border-border py-3">
-      <summary className="flex items-center justify-between text-sm font-semibold text-ink">
+    <details className="group border-b border-border py-3">
+      <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-ink">
         {title}
         <span className="text-ink/40 group-open:hidden">+</span>
         <span className="hidden text-ink/40 group-open:inline">−</span>
@@ -54,7 +62,7 @@ export async function Sidebar() {
         ))}
       </CategoryBlock>
 
-      <CategoryBlock title="Brands" defaultOpen>
+      <CategoryBlock title="Brands">
         {brands.map((b) => (
           <li key={b.id}>
             <Link href={`/brand/${b.slug}`} className="hover:text-primary">
