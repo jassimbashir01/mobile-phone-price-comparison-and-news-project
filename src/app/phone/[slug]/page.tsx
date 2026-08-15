@@ -124,11 +124,6 @@ export default async function PhonePage({
       <Breadcrumb items={breadcrumbItems} />
 
       <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
-      {isPhoneNew(phone.release_date) && (
-        <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
-          New
-        </span>
-      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-[320px_1fr] sm:items-center">
         <ImageGallery images={phone.images} phoneName={phone.name} />
@@ -150,6 +145,11 @@ export default async function PhonePage({
             {phone.status === "discontinued" && (
               <span className="ml-2 rounded bg-ink/10 px-1.5 py-0.5 text-[10px] font-semibold text-ink/60">
                 Discontinued
+              </span>
+            )}
+            {isPhoneNew(phone.release_date) && (
+              <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+                New
               </span>
             )}
           </p>
