@@ -60,7 +60,6 @@ export async function getHomepageSectionPhones(
     const { data: phones, error: phonesError } = await supabase
       .from("phones")
       .select(PHONE_CARD_SELECT)
-      .eq("status", status)
       .in("id", section.phone_ids);
 
     if (phonesError)
