@@ -71,7 +71,7 @@ export async function Sidebar() {
             >
               {b.name}
               {b.hasNewPhone && (
-                <span className="rounded bg-primary px-1 text-[8px] font-bold uppercase text-white">
+                <span className="badge-new rounded bg-primary px-1 text-[8px] font-bold uppercase text-white">
                   New
                 </span>
               )}

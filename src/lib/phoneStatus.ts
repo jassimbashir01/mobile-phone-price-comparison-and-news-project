@@ -24,7 +24,6 @@ export function isPhoneNew(releaseDate: string | null | undefined): boolean {
   // Not new if the release date is in the future — an unreleased phone is
   // "coming soon", which the status field already communicates.
   const now = new Date();
-  if (released > now) return false;
 
   const cutoff = new Date(now);
   cutoff.setMonth(cutoff.getMonth() - NEW_WINDOW_MONTHS);

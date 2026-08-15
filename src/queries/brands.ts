@@ -24,8 +24,7 @@ export async function getActiveBrands(): Promise<
     .from("phones")
     .select("brand_id")
     .not("release_date", "is", null)
-    .gte("release_date", cutoff.toISOString().split("T")[0])
-    .lte("release_date", new Date().toISOString().split("T")[0]);
+    .gte("release_date", cutoff.toISOString().split("T")[0]);
 
   if (recentError) throw new Error(`getActiveBrands: ${recentError.message}`);
 

@@ -148,7 +148,7 @@ export default async function PhonePage({
               </span>
             )}
             {isPhoneNew(phone.release_date) && (
-              <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+              <span className="badge-new ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
                 New
               </span>
             )}

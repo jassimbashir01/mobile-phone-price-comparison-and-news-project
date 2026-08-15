@@ -48,7 +48,7 @@ export function PhoneCard({
       className="group relative flex flex-col overflow-hidden rounded-lg border border-border bg-white transition hover:shadow-md"
     >
       {isNew && (
-        <span className="absolute left-1 top-1 z-10 rounded bg-primary px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">
+        <span className="badge-new !absolute left-1 top-1 z-10 rounded bg-primary px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">
           New
         </span>
       )}
