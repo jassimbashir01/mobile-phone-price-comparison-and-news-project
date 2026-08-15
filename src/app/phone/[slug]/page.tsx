@@ -18,6 +18,7 @@ import { siteUrl } from "@/lib/site";
 import { findPriceRangeForPrice } from "@/lib/constants";
 import { ExtendedSpecTable } from "@/components/phone/ExtendedSpecTable";
 import { SpecDisclaimer } from "@/components/phone/SpecDisclaimer";
+import { isPhoneNew, formatReleaseDate } from "@/lib/phoneStatus";
 import {
   getPhoneBySlug,
   getAllPhoneSlugs,
@@ -123,6 +124,11 @@ export default async function PhonePage({
       <Breadcrumb items={breadcrumbItems} />
 
       <h1 className="mb-4 text-2xl font-bold">{phone.name}</h1>
+      {isPhoneNew(phone.release_date) && (
+        <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
+          New
+        </span>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-[320px_1fr] sm:items-center">
         <ImageGallery images={phone.images} phoneName={phone.name} />
@@ -154,6 +160,11 @@ export default async function PhonePage({
             status={phone.status}
             exchangeRate={exchangeRate}
           />
+          {formatReleaseDate(phone.release_date) && (
+            <p className="mt-1 text-xs text-ink/50">
+              Released {formatReleaseDate(phone.release_date)}
+            </p>
+          )}
 
           {priceRange && (
             <p className="text-xs text-ink/50">

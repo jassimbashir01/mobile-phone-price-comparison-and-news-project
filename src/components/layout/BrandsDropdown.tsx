@@ -5,7 +5,13 @@ import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import type { Brand } from "@/types/database";
 
-export function BrandsDropdown({ brands }: { brands: Brand[] }) {
+// getActiveBrands returns Brand plus a derived hasNewPhone flag — true when
+// the brand has a phone released within NEW_WINDOW_MONTHS. It's computed at
+// read time rather than stored, so it can never drift out of sync with the
+// per-phone badge.
+type BrandWithNew = Brand & { hasNewPhone?: boolean };
+
+export function BrandsDropdown({ brands }: { brands: BrandWithNew[] }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,9 +56,14 @@ export function BrandsDropdown({ brands }: { brands: Brand[] }) {
               href={`/brand/${b.slug}`}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="block px-4 py-1.5 text-sm hover:bg-primary-light"
+              className="flex items-center gap-1.5 px-4 py-1.5 text-sm hover:bg-primary-light"
             >
               {b.name}
+              {b.hasNewPhone && (
+                <span className="rounded bg-primary px-1 text-[8px] font-bold uppercase text-white">
+                  New
+                </span>
+              )}
             </Link>
           ))}
         </div>

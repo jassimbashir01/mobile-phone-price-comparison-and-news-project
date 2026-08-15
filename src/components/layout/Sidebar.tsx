@@ -65,8 +65,16 @@ export async function Sidebar() {
       <CategoryBlock title="Brands">
         {brands.map((b) => (
           <li key={b.id}>
-            <Link href={`/brand/${b.slug}`} className="hover:text-primary">
+            <Link
+              href={`/brand/${b.slug}`}
+              className="flex items-center gap-1.5 hover:text-primary"
+            >
               {b.name}
+              {b.hasNewPhone && (
+                <span className="rounded bg-primary px-1 text-[8px] font-bold uppercase text-white">
+                  New
+                </span>
+              )}
             </Link>
           </li>
         ))}

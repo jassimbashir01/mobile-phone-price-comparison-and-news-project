@@ -15,6 +15,12 @@ export const phoneSchema = z.object({
   status: z.enum(["available", "coming_soon", "discontinued"]),
   price_pkr: optionalNumber,
   expected_price_pkr: optionalNumber,
+  release_date: z
+    .string()
+    .optional()
+    .refine((v) => !v || !Number.isNaN(Date.parse(v)), {
+      message: "Invalid release date",
+    }),
   is_featured: z.boolean().default(false),
   sort_order: z.coerce.number().int().default(0),
   seo_description: z.string().max(500).optional(),

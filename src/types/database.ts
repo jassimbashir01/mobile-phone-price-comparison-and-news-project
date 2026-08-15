@@ -20,6 +20,7 @@ export interface Phone {
   status: PhoneStatus;
   price_pkr: number | null;
   expected_price_pkr: number | null;
+  release_date: string | null;
   is_featured: boolean;
   sort_order: number;
   seo_description: string | null;
@@ -153,7 +154,7 @@ export interface SidebarBannerSetting {
   enabled: boolean;
 }
 
-export type OfferType = 'affiliate' | 'local_deal';
+export type OfferType = "affiliate" | "local_deal";
 
 export interface Offer {
   id: string;

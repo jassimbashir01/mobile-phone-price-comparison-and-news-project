@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
 import { formatPKR } from "@/lib/utils";
+import { isPhoneNew } from "@/lib/phoneStatus";
 import type { PhoneCardData } from "@/types/database";
 
 export function PhoneCard({
@@ -14,10 +15,11 @@ export function PhoneCard({
   const showExpectedTag =
     phone.status === "coming_soon" && phone.expected_price_pkr != null;
   // Only tag a discontinued phone that has a price — one without a price
-  // shows "Discontinued" in the price slot itself, so a tag above it would
-  // just repeat the word.
+  // shows "Discontinued" in the price slot itself, so a tag would repeat it.
   const showDiscontinuedTag =
     phone.status === "discontinued" && phone.price_pkr != null;
+  // Derived from release_date, not a stored flag.
+  const isNew = isPhoneNew(phone.release_date);
 
   const imageUrl = phone.primary_image
     ? cloudinaryUrl(phone.primary_image.cloudinary_public_id, {
@@ -43,8 +45,14 @@ export function PhoneCard({
   return (
     <Link
       href={`/phone/${phone.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-white transition hover:shadow-md"
+      className="group relative flex flex-col overflow-hidden rounded-lg border border-border bg-white transition hover:shadow-md"
     >
+      {isNew && (
+        <span className="absolute left-1 top-1 z-10 rounded bg-primary px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white">
+          New
+        </span>
+      )}
+
       <div className="relative mx-auto aspect-[85/155] w-full max-w-[85px] bg-surface">
         {imageUrl ? (
           <Image
@@ -62,6 +70,7 @@ export function PhoneCard({
           </div>
         )}
       </div>
+
       <div className="flex flex-1 flex-col gap-0.5 p-2">
         <span className="text-[10px] text-ink/50">{phone.brand.name}</span>
         <h3 className="line-clamp-2 text-xs font-semibold text-ink group-hover:text-primary">

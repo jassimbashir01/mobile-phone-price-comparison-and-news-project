@@ -75,6 +75,7 @@ export function PhoneForm({
           status: phone.status,
           price_pkr: phone.price_pkr ?? undefined,
           expected_price_pkr: phone.expected_price_pkr ?? undefined,
+          release_date: phone.release_date ?? "",
           is_featured: phone.is_featured,
 
           sort_order: phone.sort_order,
@@ -198,6 +199,18 @@ export function PhoneForm({
               {...register("sort_order")}
               className={inputClass}
             />
+          </Field>
+          <Field id="release_date" label="Release Date">
+            <input
+              id="release_date"
+              type="date"
+              {...register("release_date")}
+              className={inputClass}
+            />
+            <p className="mt-1 text-[11px] text-ink/40">
+              Drives the &quot;New&quot; badge (first 3 months) and automatic
+              discontinuation at 24 months. Leave blank to opt out of both.
+            </p>
           </Field>
         </div>
 
