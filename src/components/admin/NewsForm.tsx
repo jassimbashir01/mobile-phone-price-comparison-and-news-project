@@ -48,8 +48,8 @@ export function NewsForm({ news, brands }: { news?: News; brands: Brand[] }) {
     try {
       if (news) {
         await updateNews(news.id, values, coverImage);
+        // No router.refresh() — same race as OfferForm.
         router.push("/admin/news");
-        router.refresh();
       } else {
         const created = await createNews(values, coverImage);
         setCreatedArticle({ title: created.title });

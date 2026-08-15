@@ -89,8 +89,11 @@ export function OfferForm({ offer }: { offer?: Offer }) {
     try {
       if (offer) {
         await updateOffer(offer.id, payload, image);
+        // No router.refresh() here — firing it immediately after push races
+        // the navigation and can cancel it, leaving the user on the form
+        // with the transition indicator stuck. The server action already
+        // revalidates, and push fetches fresh data for the destination.
         router.push("/admin/offers");
-        router.refresh();
       } else {
         const created = await createOffer(payload, image);
         setCreatedOffer({ title: created.title });

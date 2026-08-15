@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { bulkDeleteOffers } from "@/lib/actions/bulkDelete";
 import { OfferDeleteButton } from "./OfferDeleteButton";
+import { formatOfferExpiry } from "@/lib/utils";
 import {
   useBulkSelect,
   BulkDeleteBar,
@@ -52,6 +53,7 @@ export function OffersTable({
               <th className="px-3 py-2">Type</th>
               <th className="px-3 py-2">Price</th>
               <th className="px-3 py-2">Active</th>
+              <th className="px-3 py-2">Expires</th>
               <th className="px-3 py-2">Actions</th>
             </tr>
           </thead>
@@ -59,7 +61,7 @@ export function OffersTable({
             {offers.length === 0 ? (
               <tr>
                 <td
-                  colSpan={isAdmin ? 6 : 5}
+                  colSpan={isAdmin ? 7 : 6}
                   className="px-3 py-8 text-center text-ink/50"
                 >
                   No offers yet.
@@ -83,6 +85,9 @@ export function OffersTable({
                   </td>
                   <td className="px-3 py-2">{formatPKR(o.price_pkr)}</td>
                   <td className="px-3 py-2">{o.is_active ? "Yes" : "No"}</td>
+                  <td className="px-3 py-2 text-ink/50">
+                    {formatOfferExpiry(o.expires_at)?.label ?? "—"}
+                  </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-3">
                       <Link

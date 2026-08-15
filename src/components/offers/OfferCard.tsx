@@ -1,6 +1,7 @@
 import Image from "next/image";
+import { Clock } from "lucide-react";
 import { cloudinaryUrl } from "@/lib/cloudinaryUrl";
-import { formatPKR } from "@/lib/utils";
+import { formatPKR, formatOfferExpiry } from "@/lib/utils";
 import type { Offer } from "@/types/database";
 
 export function OfferCard({ offer }: { offer: Offer }) {
@@ -8,6 +9,9 @@ export function OfferCard({ offer }: { offer: Offer }) {
     offer.original_price_pkr != null &&
     offer.price_pkr != null &&
     offer.original_price_pkr > offer.price_pkr;
+
+  // null when there's no expiry set — render nothing rather than an empty row.
+  const expiry = formatOfferExpiry(offer.expires_at);
 
   return (
     <a
@@ -38,6 +42,7 @@ export function OfferCard({ offer }: { offer: Offer }) {
           {offer.offer_type === "affiliate" ? "Deal" : "Local Offer"}
         </span>
       </div>
+
       <div className="flex flex-1 flex-col gap-1 p-3">
         {offer.shop_name && (
           <span className="text-xs text-ink/50">
@@ -45,12 +50,15 @@ export function OfferCard({ offer }: { offer: Offer }) {
             {offer.shop_location ? ` · ${offer.shop_location}` : ""}
           </span>
         )}
+
         <h3 className="line-clamp-2 text-sm font-semibold">{offer.title}</h3>
+
         {offer.description && (
           <p className="line-clamp-2 text-xs text-ink/60">
             {offer.description}
           </p>
         )}
+
         <div className="mt-auto flex items-baseline gap-2 pt-1">
           {offer.price_pkr != null && (
             <span className="text-sm font-semibold text-primary">
@@ -63,6 +71,17 @@ export function OfferCard({ offer }: { offer: Offer }) {
             </span>
           )}
         </div>
+
+        {expiry && (
+          <p
+            className={`flex items-center gap-1 pt-0.5 text-[11px] ${
+              expiry.isEndingSoon ? "font-semibold text-red-600" : "text-ink/40"
+            }`}
+          >
+            <Clock size={11} />
+            {expiry.isEndingSoon ? "Ends" : "Valid until"} {expiry.label}
+          </p>
+        )}
       </div>
     </a>
   );

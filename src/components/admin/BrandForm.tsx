@@ -42,8 +42,9 @@ export function BrandForm({ brand }: { brand?: Brand }) {
     try {
       if (brand) {
         await updateBrand(brand.id, values);
+        // No router.refresh() — same race as OfferForm: firing it right
+        // after push can cancel the navigation.
         router.push("/admin/brands");
-        router.refresh();
       } else {
         const created = await createBrand(values);
         setCreatedBrand({ name: created.name });
