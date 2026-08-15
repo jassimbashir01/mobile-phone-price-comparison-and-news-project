@@ -13,5 +13,44 @@
     { "src": "/icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/narrow1.png",
+      "sizes": "410x870",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Browse and compare mobile phone prices in Pakistan"
+    },
+    {
+      "src": "/screenshots/narrow2.png",
+      "sizes": "410x870",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Full specifications and pricing for every phone"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search Phones",
+      "short_name": "Search",
+      "description": "Find a phone by name",
+      "url": "/search",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Deals & Offers",
+      "short_name": "Deals",
+      "description": "Current deals and local shop offers",
+      "url": "/offers",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Compare Phones",
+      "short_name": "Compare",
+      "description": "Compare two phones side by side",
+      "url": "/compare",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
