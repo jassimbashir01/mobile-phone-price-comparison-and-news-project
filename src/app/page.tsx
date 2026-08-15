@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { HomeSection } from "@/components/home/HomeSection";
 import { HomepageBanner } from "@/components/home/HomepageBanner";
-import { FeaturedSlider } from "@/components/phone/FeaturedSlider";
+import { FeaturedGrid } from "@/components/phone/FeaturedGrid";
 import { NewsCard } from "@/components/news/NewsCard";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -60,7 +60,7 @@ export default async function HomePage() {
         <h1 className="mb-3 text-xl font-bold">
           {featured?.title ?? "Featured Phones"}
         </h1>
-        <FeaturedSlider phones={featured?.phones ?? []} />
+        <FeaturedGrid phones={featured?.phones ?? []} />
       </section>
 
       <HomeSection
