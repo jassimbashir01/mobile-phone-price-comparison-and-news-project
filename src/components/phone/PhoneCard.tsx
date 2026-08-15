@@ -13,6 +13,9 @@ export function PhoneCard({
 }) {
   const showExpectedTag =
     phone.status === "coming_soon" && phone.expected_price_pkr != null;
+  // Only tag a discontinued phone that has a price — one without a price
+  // shows "Discontinued" in the price slot itself, so a tag above it would
+  // just repeat the word.
   const showDiscontinuedTag =
     phone.status === "discontinued" && phone.price_pkr != null;
 
@@ -22,6 +25,20 @@ export function PhoneCard({
         height: 310,
       })
     : null;
+
+  function priceLabel() {
+    if (phone.status === "coming_soon") {
+      return phone.expected_price_pkr != null
+        ? formatPKR(phone.expected_price_pkr)
+        : "Coming Soon";
+    }
+    if (phone.status === "discontinued") {
+      return phone.price_pkr != null
+        ? formatPKR(phone.price_pkr)
+        : "Discontinued";
+    }
+    return phone.price_pkr != null ? formatPKR(phone.price_pkr) : "Price N/A";
+  }
 
   return (
     <Link
@@ -61,15 +78,7 @@ export function PhoneCard({
               Discontinued
             </span>
           )}
-          <p className="text-xs font-semibold text-primary">
-            {phone.status === "coming_soon"
-              ? phone.expected_price_pkr != null
-                ? formatPKR(phone.expected_price_pkr)
-                : "Coming Soon"
-              : phone.price_pkr != null
-                ? formatPKR(phone.price_pkr)
-                : "Price N/A"}
-          </p>
+          <p className="text-xs font-semibold text-primary">{priceLabel()}</p>
         </div>
       </div>
     </Link>
