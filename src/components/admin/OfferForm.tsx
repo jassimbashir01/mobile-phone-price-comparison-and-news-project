@@ -11,6 +11,35 @@ import { AdminSuccessScreen } from "./AdminSuccessScreen";
 import type { Offer } from "@/types/database";
 import { WordCounter } from "./WordCounter";
 
+/**
+ * Pakistan is UTC+5 year-round — no daylight saving — so a fixed offset is
+ * correct here and avoids pulling in a timezone library.
+ *
+ * <input type="datetime-local"> works in plain local time with no offset
+ * suffix (YYYY-MM-DDTHH:mm), while expires_at is a timestamptz, so Postgres
+ * hands back an absolute UTC instant. These two convert between them, so the
+ * admin always types and reads Pakistan time regardless of where they are.
+ *
+ * The previous <input type="date"> received the raw timestamptz, which it
+ * couldn't parse — the field rendered empty, so a saved date looked unset
+ * and was silently wiped on the next save.
+ */
+const PKT_OFFSET_MS = 5 * 60 * 60 * 1000;
+
+function toPakistanDateTimeInput(value: string | null | undefined): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return new Date(d.getTime() + PKT_OFFSET_MS).toISOString().slice(0, 16);
+}
+
+function fromPakistanDateTimeInput(value: string): string {
+  if (!value) return "";
+  const asUtc = new Date(`${value}:00Z`);
+  if (Number.isNaN(asUtc.getTime())) return "";
+  return new Date(asUtc.getTime() - PKT_OFFSET_MS).toISOString();
+}
+
 export function OfferForm({ offer }: { offer?: Offer }) {
   const router = useRouter();
   const [serverError, setServerError] = useState("");
@@ -41,7 +70,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           shop_location: offer.shop_location ?? "",
           is_active: offer.is_active,
           sort_order: offer.sort_order,
-          expires_at: offer.expires_at ?? "",
+          expires_at: toPakistanDateTimeInput(offer.expires_at),
         }
       : { offer_type: "affiliate", is_active: true, sort_order: 0 },
   });
@@ -51,13 +80,19 @@ export function OfferForm({ offer }: { offer?: Offer }) {
 
   async function onSubmit(values: OfferFormValues) {
     setServerError("");
+    // The input gives Pakistan local time with no offset — convert to a real
+    // UTC instant before it reaches the database.
+    const payload = {
+      ...values,
+      expires_at: fromPakistanDateTimeInput(values.expires_at ?? ""),
+    };
     try {
       if (offer) {
-        await updateOffer(offer.id, values, image);
+        await updateOffer(offer.id, payload, image);
         router.push("/admin/offers");
         router.refresh();
       } else {
-        const created = await createOffer(values, image);
+        const created = await createOffer(payload, image);
         setCreatedOffer({ title: created.title });
       }
     } catch (e) {
@@ -84,6 +119,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
       />
     );
   }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-4">
       <div>
@@ -99,6 +135,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           <option value="local_deal">Local Shop Offer</option>
         </select>
       </div>
+
       <div>
         <label htmlFor="title" className="mb-1 block text-sm font-medium">
           Title
@@ -108,6 +145,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
         )}
       </div>
+
       <div>
         <div className="mb-1 flex items-center justify-between">
           <label htmlFor="description" className="block text-sm font-medium">
@@ -122,10 +160,12 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           className={inputClass}
         />
       </div>
+
       <div>
         <label className="mb-1 block text-sm font-medium">Image</label>
         <SingleImageUploader value={image} onChange={setImage} />
       </div>
+
       <div>
         <label
           htmlFor="destination_url"
@@ -146,6 +186,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           </p>
         )}
       </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="price_pkr" className="mb-1 block text-sm font-medium">
@@ -173,6 +214,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           />
         </div>
       </div>
+
       {offerType === "local_deal" && (
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -203,6 +245,7 @@ export function OfferForm({ offer }: { offer?: Offer }) {
           </div>
         </div>
       )}
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label
@@ -223,20 +266,33 @@ export function OfferForm({ offer }: { offer?: Offer }) {
             htmlFor="expires_at"
             className="mb-1 block text-sm font-medium"
           >
-            Expires (optional)
+            Expires (optional) — Pakistan time
           </label>
           <input
             id="expires_at"
-            type="date"
+            type="datetime-local"
             {...register("expires_at")}
             className={inputClass}
           />
+          {errors.expires_at && (
+            <p className="mt-1 text-xs text-red-600">
+              {errors.expires_at.message}
+            </p>
+          )}
+          <p className="mt-1 text-[11px] text-ink/40">
+            Leave blank for no expiry. The offer hides from the public page
+            immediately once this passes, and the Active toggle switches itself
+            off within the hour.
+          </p>
         </div>
       </div>
+
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" {...register("is_active")} /> Active
       </label>
+
       {serverError && <p className="text-sm text-red-600">{serverError}</p>}
+
       <button
         type="submit"
         disabled={isSubmitting}

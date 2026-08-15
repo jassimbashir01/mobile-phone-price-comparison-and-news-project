@@ -24,7 +24,15 @@ export const offerSchema = z.object({
   shop_location: z.string().max(100).optional(),
   is_active: z.boolean().default(true),
   sort_order: z.coerce.number().int().default(0),
-  expires_at: z.string().optional(),
+  // The form's datetime-local input can't produce a malformed value, but
+  // the action is callable from anywhere — catching it here gives a clear
+  // message instead of a raw Postgres type error.
+  expires_at: z
+    .string()
+    .optional()
+    .refine((v) => !v || !Number.isNaN(Date.parse(v)), {
+      message: "Invalid expiry date",
+    }),
 });
 
 export type OfferFormValues = z.input<typeof offerSchema>;
